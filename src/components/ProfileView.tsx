@@ -38,30 +38,30 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
   return (
     <div className="max-w-4xl mx-auto px-4 py-6 space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between bg-slate-900/80 p-4 rounded-2xl border border-slate-800 backdrop-blur-sm">
+      <div className="flex items-center justify-between gap-3 bg-slate-900/90 p-4 rounded-2xl border border-slate-800 backdrop-blur-sm">
         <div className="flex items-center gap-3">
           <button
             onClick={() => {
               sound.playClick();
               onBack();
             }}
-            className="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition-colors cursor-pointer border border-slate-700"
+            className="p-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 active:bg-slate-900 text-slate-200 hover:text-white transition-colors cursor-pointer border border-slate-700 min-h-[44px] min-w-[44px] flex items-center justify-center touch-manipulation"
           >
-            <ArrowLeft className="w-5 h-5" />
+            <ArrowLeft className="w-5 h-5 stroke-[2.2]" />
           </button>
           <div>
-            <h1 className="text-xl font-black text-white flex items-center gap-2">
-              <span>👤 Player Profile & Identity</span>
+            <h1 className="text-lg sm:text-xl font-black text-white flex items-center gap-2">
+              <span>👤 Player Profile</span>
             </h1>
-            <p className="text-xs text-slate-400">Account status, streak records, and game telemetry</p>
+            <p className="text-xs text-slate-400">Account status & game telemetry</p>
           </div>
         </div>
 
         <button
           onClick={onSignOut}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-rose-950/60 hover:bg-rose-900/60 text-rose-300 border border-rose-800/60 text-xs font-bold transition-colors cursor-pointer"
+          className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-rose-950/70 hover:bg-rose-900 active:bg-rose-950 text-rose-200 border border-rose-600/50 text-xs font-black transition-all cursor-pointer min-h-[44px] touch-manipulation shadow-md"
         >
-          <LogOut className="w-3.5 h-3.5" />
+          <LogOut className="w-4 h-4 stroke-[2.2]" />
           <span>Sign Out</span>
         </button>
       </div>

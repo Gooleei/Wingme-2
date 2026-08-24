@@ -67,7 +67,7 @@ export const EndlessRunnerGame: React.FC<EndlessRunnerGameProps> = ({
   }) => {
     const totalWin = +(result.cashEarned + result.distanceBonus).toFixed(2);
     
-    // Update player stats
+    // Update player stats (level unlock & telemetry; balance is managed centrally by onWin)
     setStats((prev) => {
       const nextUnlocked = Math.max(prev.unlockedLevels, Math.min(5, activeLevel.id + 1));
       const currentBest = prev.highScores[activeLevel.id]?.bestTimeMs || Infinity;
@@ -75,11 +75,8 @@ export const EndlessRunnerGame: React.FC<EndlessRunnerGameProps> = ({
 
       return {
         ...prev,
-        balance: +(prev.balance + totalWin).toFixed(2),
         totalRuns: prev.totalRuns + 1,
-        totalWins: prev.totalWins + 1,
         totalDistanceRun: prev.totalDistanceRun + result.distance,
-        totalCashEarned: +(prev.totalCashEarned + totalWin).toFixed(2),
         unlockedLevels: nextUnlocked,
         highScores: {
           ...prev.highScores,
@@ -115,14 +112,10 @@ export const EndlessRunnerGame: React.FC<EndlessRunnerGameProps> = ({
     penalty: number;
     cashEarned: number;
   }) => {
-    const net = -(result.penalty);
     setStats((prev) => ({
       ...prev,
-      balance: Math.max(0, +(prev.balance + net).toFixed(2)),
       totalRuns: prev.totalRuns + 1,
-      totalLosses: prev.totalLosses + 1,
-      totalDistanceRun: prev.totalDistanceRun + result.distance,
-      totalPenaltyPaid: +(prev.totalPenaltyPaid + result.penalty).toFixed(2)
+      totalDistanceRun: prev.totalDistanceRun + result.distance
     }));
 
     onLossPenalty(result.penalty, `💥 Endless Runner Obstacle Hit Penalty (-$${result.penalty.toFixed(2)})`);

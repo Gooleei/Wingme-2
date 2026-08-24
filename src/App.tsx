@@ -30,6 +30,7 @@ import { WithdrawModal } from './components/WithdrawModal';
 import { RewardsHub } from './components/RewardsHub';
 import { HistoryView } from './components/HistoryView';
 import { ProfileView } from './components/ProfileView';
+import { WatchView } from './components/WatchView';
 import { AuthModal } from './components/AuthModal';
 import { sound } from './utils/audio';
 
@@ -308,7 +309,7 @@ export default function App() {
       />
 
       {/* Main App Content Router */}
-      <main className="flex-1 pb-16">
+      <main className="flex-1 pb-24 sm:pb-28">
         {currentView === 'LANDING' && (
           <LandingView
             onStartGuest={() => setCurrentView('DASHBOARD')}
@@ -438,6 +439,13 @@ export default function App() {
               onClose={() => setCurrentView('DASHBOARD')}
             />
           </div>
+        )}
+
+        {/* 📺 Watch Blank Page with Embedded Link */}
+        {currentView === 'WATCH' && (
+          <WatchView
+            onBack={() => setCurrentView('DASHBOARD')}
+          />
         )}
       </main>
 

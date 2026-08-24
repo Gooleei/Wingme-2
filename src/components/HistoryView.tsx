@@ -24,15 +24,15 @@ export const HistoryView: React.FC<HistoryViewProps> = ({
               sound.playClick();
               onBack();
             }}
-            className="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition-colors cursor-pointer border border-slate-700"
+            className="p-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 active:bg-slate-900 text-slate-200 hover:text-white transition-colors cursor-pointer border border-slate-700 min-h-[44px] min-w-[44px] flex items-center justify-center touch-manipulation"
           >
-            <ArrowLeft className="w-5 h-5" />
+            <ArrowLeft className="w-5 h-5 stroke-[2.2]" />
           </button>
           <div>
-            <h1 className="text-xl font-black text-white flex items-center gap-2">
+            <h1 className="text-lg sm:text-xl font-black text-white flex items-center gap-2">
               <span>📜 Ledger & Transactions</span>
             </h1>
-            <p className="text-xs text-slate-400">Complete audit log of gameplay earnings, penalties, and crypto payouts</p>
+            <p className="text-xs text-slate-400">Complete audit log of earnings and crypto payouts</p>
           </div>
         </div>
 

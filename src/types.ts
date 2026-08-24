@@ -2,6 +2,7 @@ export type AppView =
   | 'LANDING'
   | 'AUTH'
   | 'DASHBOARD'
+  | 'WATCH'
   | 'GAME_RUNNER'
   | 'GAME_MEMORY'
   | 'GAME_TICTACTOE'
