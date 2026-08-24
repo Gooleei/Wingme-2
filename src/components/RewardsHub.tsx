@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { PlayerStats, WalletTransaction } from '../types';
 import { sound } from '../utils/audio';
 import { Gift, Flame, Trophy, Wallet, History, Sparkles, Clock, CheckCircle2, TrendingUp, AlertTriangle } from 'lucide-react';
@@ -25,6 +25,25 @@ export const RewardsHub: React.FC<RewardsHubProps> = ({
 }) => {
   const [timeLeftStr, setTimeLeftStr] = useState<string>('00:00:00');
   const [canClaim, setCanClaim] = useState<boolean>(false);
+  const adContainerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    // Inject Onclicka ad script (data-admpid="457731")
+    const adScript = document.createElement('script');
+    adScript.src = 'https://js.onclckmn.com/static/onclicka.js';
+    adScript.async = true;
+    adScript.setAttribute('data-admpid', '457731');
+
+    if (adContainerRef.current) {
+      adContainerRef.current.appendChild(adScript);
+    }
+
+    return () => {
+      if (adScript.parentNode) {
+        adScript.parentNode.removeChild(adScript);
+      }
+    };
+  }, []);
 
   useEffect(() => {
     const updateCountdown = () => {
@@ -229,6 +248,15 @@ export const RewardsHub: React.FC<RewardsHubProps> = ({
             ))
           )}
         </div>
+      </div>
+
+      {/* Foot-Level Sponsor & Ad Zone */}
+      <div 
+        ref={adContainerRef}
+        id="daily-rewards-foot-ad-container"
+        className="w-full min-h-[60px] flex items-center justify-center overflow-hidden rounded-2xl bg-slate-950/40 border border-slate-800/60 p-2"
+      >
+        {/* Dynamic Ad container for data-admpid="457731" */}
       </div>
     </div>
   );
