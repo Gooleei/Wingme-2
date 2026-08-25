@@ -42,8 +42,8 @@ const TRANSACTIONS_KEY = 'LUCKYPLAY_TRANSACTIONS_V2';
 
 const DEFAULT_USER: UserProfile = {
   id: 'guest-runner-88',
-  username: 'LuckyRunner',
-  email: 'runner@luckyplay.io',
+  username: 'RunnerOne',
+  email: 'runner@bellmont.io',
   pin: '1234',
   isGuest: false,
   avatar: '👑',

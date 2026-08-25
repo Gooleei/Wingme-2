@@ -142,3 +142,9 @@ export interface CryptoToken {
   fee: number;
   placeholder: string;
 }
+
+// ₮ Point Conversion System ($15.00 USD = ₮1.00 Point)
+export const DOLLARS_PER_T_POINT = 15;
+export const convertDollarsToTPoints = (dollars: number): number => +(dollars / DOLLARS_PER_T_POINT).toFixed(2);
+export const convertTPointsToDollars = (tPoints: number): number => +(tPoints * DOLLARS_PER_T_POINT).toFixed(2);
+

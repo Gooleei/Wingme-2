@@ -160,88 +160,90 @@ export const LuckyWheelGame: React.FC<LuckyWheelProps> = ({
   };
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-6 space-y-6">
+    <div className="max-w-3xl mx-auto px-3 sm:px-6 py-4 sm:py-6 space-y-4 sm:space-y-5">
       {/* Header */}
-      <div className="flex flex-wrap items-center justify-between gap-4 bg-slate-900/80 p-4 rounded-2xl border border-slate-800 backdrop-blur-sm">
-        <div className="flex items-center gap-3">
+      <div className="flex flex-wrap items-center justify-between gap-3 bg-slate-900/80 p-3.5 sm:p-4 rounded-xl sm:rounded-2xl border border-slate-800 backdrop-blur-sm">
+        <div className="flex items-center gap-2.5 sm:gap-3">
           <button
             onClick={() => {
               sound.playClick();
               onBack();
             }}
-            className="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition-colors cursor-pointer border border-slate-700"
+            className="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition-colors cursor-pointer border border-slate-700 min-h-[40px] min-w-[40px] flex items-center justify-center shrink-0"
           >
-            <ArrowLeft className="w-5 h-5" />
+            <ArrowLeft className="w-4 h-4 stroke-[2.2]" />
           </button>
           <div>
-            <h1 className="text-xl font-black text-white flex items-center gap-2">
+            <h1 className="text-base sm:text-lg font-black text-white flex items-center gap-1.5 flex-wrap">
               <span>🎡 Lucky Wheel Spin</span>
-              <span className="text-xs px-2 py-0.5 rounded-full bg-cyan-500/20 text-cyan-400 border border-cyan-500/30">
+              <span className="text-[10px] sm:text-xs px-2 py-0.5 rounded-full bg-cyan-500/20 text-cyan-400 border border-cyan-500/30">
                 Win up to $25.00
               </span>
             </h1>
-            <p className="text-xs text-slate-400">Spin the daily prize wheel to claim instant cash prizes</p>
+            <p className="text-xs text-slate-400">Spin the daily prize wheel for instant cash</p>
           </div>
         </div>
 
         {/* 7-Day Jackpot Lock Status */}
-        <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-950 border border-slate-800 text-amber-400 text-xs font-bold">
+        <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-slate-950 border border-slate-800 text-amber-400 text-[11px] sm:text-xs font-bold">
           <Lock className="w-3.5 h-3.5" />
-          <span>Mega Jackpot: {jackpotLockedDays}d Lock</span>
+          <span>Jackpot: {jackpotLockedDays}d Lock</span>
         </div>
       </div>
 
       {/* Main Wheel Stage */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5 sm:gap-5">
         {/* Left Side: Stats & Spins */}
-        <div className="bg-slate-900/80 border border-slate-800 rounded-3xl p-6 space-y-5 flex flex-col justify-between">
+        <div className="bg-slate-900/80 border border-slate-800 rounded-2xl sm:rounded-3xl p-4 sm:p-5 space-y-3.5 flex flex-col justify-between">
           <div>
-            <span className="text-xs font-bold uppercase tracking-wider text-cyan-400">Daily Free Plays</span>
-            <div className="text-3xl font-black text-white mt-1">{freeSpinsLeft} Spins Left</div>
-            <p className="text-xs text-slate-400 mt-2">
-              Free spins replenish daily or unlock via Endless Runner milestone streaks.
+            <span className="text-[11px] font-bold uppercase tracking-wider text-cyan-400">Daily Free Plays</span>
+            <div className="text-2xl sm:text-3xl font-black text-white mt-0.5">{freeSpinsLeft} Spins Left</div>
+            <p className="text-xs text-slate-400 mt-1.5">
+              Free spins replenish daily or unlock via Runner milestones.
             </p>
           </div>
 
-          <div className="p-4 rounded-2xl bg-slate-950 border border-slate-800 space-y-2 text-xs">
+          <div className="p-3 rounded-xl sm:rounded-2xl bg-slate-950 border border-slate-800 space-y-1.5 text-xs">
             <div className="flex justify-between">
-              <span className="text-slate-400">Top Instant Prize</span>
+              <span className="text-slate-400">Top Prize</span>
               <span className="text-amber-400 font-black">$25.00</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-slate-400">Average Payout</span>
+              <span className="text-slate-400">Avg Payout</span>
               <span className="text-emerald-400 font-bold">$1.50</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-slate-400">Win Probability</span>
-              <span className="text-cyan-400 font-bold">100% Guaranteed</span>
+              <span className="text-slate-400">Probability</span>
+              <span className="text-cyan-400 font-bold">100% Win</span>
             </div>
           </div>
 
           <button
             onClick={spinWheel}
             disabled={isSpinning || freeSpinsLeft <= 0}
-            className="w-full py-4 rounded-2xl bg-gradient-to-r from-cyan-500 via-emerald-500 to-teal-400 hover:from-cyan-400 hover:to-teal-300 text-slate-950 font-black text-base transition-all shadow-xl shadow-cyan-500/20 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer active:scale-95"
+            className="w-full py-3 sm:py-3.5 rounded-xl sm:rounded-2xl bg-gradient-to-r from-cyan-500 via-emerald-500 to-teal-400 hover:from-cyan-400 hover:to-teal-300 text-slate-950 font-black text-xs sm:text-sm transition-all shadow-xl shadow-cyan-500/20 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer active:scale-95 min-h-[44px]"
           >
-            {isSpinning ? 'SPINNING...' : freeSpinsLeft > 0 ? 'SPIN WHEEL NOW' : 'NO SPINS LEFT TODAY'}
+            {isSpinning ? 'SPINNING...' : freeSpinsLeft > 0 ? 'SPIN WHEEL NOW' : 'NO SPINS LEFT'}
           </button>
         </div>
 
         {/* Center: Interactive Rotating Wheel Canvas */}
-        <div className="md:col-span-2 flex flex-col items-center justify-center p-6 bg-slate-950/60 rounded-3xl border border-slate-800 relative">
+        <div className="md:col-span-2 flex flex-col items-center justify-center p-4 sm:p-5 bg-slate-950/60 rounded-2xl sm:rounded-3xl border border-slate-800 relative">
           {/* Top Pointer Indicator */}
-          <div className="absolute top-4 z-20 flex flex-col items-center">
-            <div className="w-0 h-0 border-l-[14px] border-l-transparent border-r-[14px] border-r-transparent border-t-[24px] border-t-amber-400 drop-shadow-[0_4px_8px_rgba(245,158,11,0.6)]" />
+          <div className="absolute top-2.5 z-20 flex flex-col items-center">
+            <div className="w-0 h-0 border-l-[12px] border-l-transparent border-r-[12px] border-r-transparent border-t-[20px] border-t-amber-400 drop-shadow-[0_4px_8px_rgba(245,158,11,0.6)]" />
           </div>
 
           {/* Rotating Canvas Wrapper */}
-          <div className="relative p-2">
+          <div className="relative p-1 max-w-full overflow-hidden flex items-center justify-center">
             <canvas
               ref={canvasRef}
-              width={340}
-              height={340}
+              width={300}
+              height={300}
               style={{
-                transform: `rotate(${rotation}deg)`
+                transform: `rotate(${rotation}deg)`,
+                maxWidth: '100%',
+                height: 'auto'
               }}
               className="rounded-full shadow-2xl transition-transform ease-out"
             />
@@ -249,9 +251,9 @@ export const LuckyWheelGame: React.FC<LuckyWheelProps> = ({
 
           {/* Result Alert */}
           {lastWonSegment && (
-            <div className="mt-4 p-4 rounded-2xl bg-emerald-950/60 border border-emerald-500/40 text-center animate-in zoom-in-95 duration-200">
-              <span className="text-xs uppercase font-bold text-emerald-400">Prize Awarded</span>
-              <div className="text-2xl font-black text-emerald-300 mt-0.5">
+            <div className="mt-3 p-3 rounded-xl sm:rounded-2xl bg-emerald-950/60 border border-emerald-500/40 text-center animate-in zoom-in-95 duration-200">
+              <span className="text-[10px] uppercase font-bold text-emerald-400">Prize Awarded</span>
+              <div className="text-lg sm:text-xl font-black text-emerald-300 mt-0.5">
                 +{lastWonSegment.label} Credited to Balance!
               </div>
             </div>

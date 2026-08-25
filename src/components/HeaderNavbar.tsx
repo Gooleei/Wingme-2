@@ -71,13 +71,13 @@ export const HeaderNavbar: React.FC<HeaderNavbarProps> = ({
               >
                 <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-tr from-amber-500 via-emerald-500 to-cyan-400 p-0.5 shadow-lg shadow-emerald-500/20 group-hover:scale-105 transition-transform shrink-0">
                   <div className="w-full h-full bg-slate-950 rounded-[10px] flex items-center justify-center font-black text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-emerald-400 text-sm sm:text-lg">
-                    LP
+                    BM
                   </div>
                 </div>
                 <div>
                   <div className="flex items-center gap-1">
                     <span className="font-black tracking-tight text-sm sm:text-lg text-white">
-                      LuckyPlay
+                      Bellmont
                     </span>
                     <span className="text-[9px] sm:text-[10px] font-extrabold px-1.5 py-0.2 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
                       PRO
@@ -149,20 +149,36 @@ export const HeaderNavbar: React.FC<HeaderNavbarProps> = ({
               <span>{streak}d</span>
             </div>
 
-            {/* Wallet Balance Chip */}
-            <button
-              id="header-balance-chip"
-              type="button"
-              onClick={() => {
-                sound.playClick();
-                onOpenWithdraw();
-              }}
-              title="Click to Withdraw Balance"
-              className="flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl bg-gradient-to-r from-emerald-500/20 to-teal-500/20 hover:from-emerald-500/30 hover:to-teal-500/30 border border-emerald-500/40 text-emerald-300 font-extrabold text-xs sm:text-sm shadow-md transition-all cursor-pointer touch-manipulation min-h-[38px]"
-            >
-              <Wallet className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
-              <span>${balance.toFixed(2)}</span>
-            </button>
+            {/* Wallet Balance & ₮ Points Chips */}
+            <div className="flex items-center gap-1">
+              <button
+                id="header-balance-chip"
+                type="button"
+                onClick={() => {
+                  sound.playClick();
+                  onOpenWithdraw();
+                }}
+                title="Click to Withdraw Balance ($15 = ₮1)"
+                className="flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl bg-gradient-to-r from-emerald-500/20 to-teal-500/20 hover:from-emerald-500/30 hover:to-teal-500/30 border border-emerald-500/40 text-emerald-300 font-extrabold text-xs sm:text-sm shadow-md transition-all cursor-pointer touch-manipulation min-h-[38px]"
+              >
+                <Wallet className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                <span>${balance.toFixed(2)}</span>
+              </button>
+
+              <button
+                id="header-tpoints-chip"
+                type="button"
+                onClick={() => {
+                  sound.playClick();
+                  onOpenWithdraw();
+                }}
+                title={`Accumulated ₮ Points: ₮${(balance / 15).toFixed(2)} ($15 = ₮1)`}
+                className="flex items-center gap-1 px-2 sm:px-2.5 py-1.5 rounded-xl bg-gradient-to-r from-cyan-500/20 to-blue-500/20 hover:from-cyan-500/30 hover:to-blue-500/30 border border-cyan-500/40 text-cyan-300 font-extrabold text-xs sm:text-sm shadow-md transition-all cursor-pointer touch-manipulation min-h-[38px]"
+              >
+                <span className="text-cyan-400 font-black text-sm">₮</span>
+                <span>{(balance / 15).toFixed(2)}</span>
+              </button>
+            </div>
 
             {/* Sound Toggle Button */}
             <button

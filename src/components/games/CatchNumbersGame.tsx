@@ -152,33 +152,33 @@ export const CatchNumbersGame: React.FC<CatchNumbersGameProps> = ({
   };
 
   return (
-    <div className="max-w-3xl mx-auto px-4 py-6 space-y-6">
+    <div className="max-w-3xl mx-auto px-3 sm:px-6 py-4 sm:py-6 space-y-4 sm:space-y-5">
       {/* Header */}
-      <div className="flex flex-wrap items-center justify-between gap-4 bg-slate-900/80 p-4 rounded-2xl border border-slate-800 backdrop-blur-sm">
-        <div className="flex items-center gap-3">
+      <div className="flex flex-wrap items-center justify-between gap-3 bg-slate-900/80 p-3.5 sm:p-4 rounded-xl sm:rounded-2xl border border-slate-800 backdrop-blur-sm shadow-xl">
+        <div className="flex items-center gap-2.5 sm:gap-3">
           <button
             onClick={() => {
               sound.playClick();
               onBack();
             }}
-            className="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition-colors cursor-pointer border border-slate-700"
+            className="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition-colors cursor-pointer border border-slate-700 min-h-[40px] min-w-[40px] flex items-center justify-center shrink-0"
           >
-            <ArrowLeft className="w-5 h-5" />
+            <ArrowLeft className="w-4 h-4 stroke-[2.2]" />
           </button>
           <div>
-            <h1 className="text-xl font-black text-white flex items-center gap-2">
+            <h1 className="text-base sm:text-lg font-black text-white flex items-center gap-1.5 flex-wrap">
               <span>🔢 Catch Numbers (3s Reflex)</span>
-              <span className="text-xs px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+              <span className="text-[10px] sm:text-xs px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 font-bold">
                 +${rewardAmount.toFixed(2)} Win
               </span>
             </h1>
-            <p className="text-xs text-slate-400">Tap target numbers within 3 seconds before timer expires</p>
+            <p className="text-xs text-slate-400">Tap target numbers within 3s</p>
           </div>
         </div>
 
         <button
           onClick={startRound}
-          className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 text-xs font-black transition-all shadow-lg shadow-emerald-500/20 cursor-pointer"
+          className="flex items-center gap-1 px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 text-xs font-black transition-all shadow-lg shadow-emerald-500/20 cursor-pointer min-h-[36px]"
         >
           <Zap className="w-3.5 h-3.5 fill-current" />
           <span>{isPlaying ? 'Restart' : 'Start Rush'}</span>
@@ -186,25 +186,25 @@ export const CatchNumbersGame: React.FC<CatchNumbersGameProps> = ({
       </div>
 
       {/* Target & Timer Dashboard */}
-      <div className="grid grid-cols-3 gap-3">
-        <div className="bg-slate-900/80 border border-slate-800 rounded-2xl p-4 text-center relative overflow-hidden">
-          <span className="text-[11px] text-slate-400 uppercase font-bold tracking-wider">Target To Catch</span>
-          <div className="text-4xl font-black text-amber-400 mt-1 animate-bounce">
+      <div className="grid grid-cols-3 gap-2 sm:gap-3">
+        <div className="bg-slate-900/80 border border-slate-800 rounded-xl sm:rounded-2xl p-2.5 sm:p-3.5 text-center relative overflow-hidden">
+          <span className="text-[10px] sm:text-[11px] text-slate-400 uppercase font-bold tracking-wider">Target</span>
+          <div className="text-2xl sm:text-3xl font-black text-amber-400 mt-0.5 animate-bounce">
             #{targetNumber}
           </div>
         </div>
 
-        <div className="bg-slate-900/80 border border-slate-800 rounded-2xl p-4 text-center">
-          <span className="text-[11px] text-slate-400 uppercase font-bold tracking-wider">Time Remaining</span>
+        <div className="bg-slate-900/80 border border-slate-800 rounded-xl sm:rounded-2xl p-2.5 sm:p-3.5 text-center">
+          <span className="text-[10px] sm:text-[11px] text-slate-400 uppercase font-bold tracking-wider">Time Left</span>
           <div
-            className={`text-3xl font-black mt-1 flex items-center justify-center gap-1.5 ${
+            className={`text-xl sm:text-2xl font-black mt-0.5 flex items-center justify-center gap-1 ${
               timeLeftMs < 1000 ? 'text-rose-500 animate-pulse' : 'text-cyan-400'
             }`}
           >
-            <Timer className="w-5 h-5" />
+            <Timer className="w-4 h-4" />
             <span>{(timeLeftMs / 1000).toFixed(2)}s</span>
           </div>
-          <div className="w-full bg-slate-800 h-1.5 rounded-full mt-2 overflow-hidden">
+          <div className="w-full bg-slate-800 h-1.5 rounded-full mt-1.5 overflow-hidden">
             <div
               className={`h-full transition-all duration-75 ${
                 timeLeftMs < 1000 ? 'bg-rose-500' : 'bg-cyan-500'
@@ -214,30 +214,30 @@ export const CatchNumbersGame: React.FC<CatchNumbersGameProps> = ({
           </div>
         </div>
 
-        <div className="bg-slate-900/80 border border-slate-800 rounded-2xl p-4 text-center">
-          <span className="text-[11px] text-slate-400 uppercase font-bold tracking-wider">Catches Needed</span>
-          <div className="text-3xl font-black text-emerald-400 mt-1">
+        <div className="bg-slate-900/80 border border-slate-800 rounded-xl sm:rounded-2xl p-2.5 sm:p-3.5 text-center">
+          <span className="text-[10px] sm:text-[11px] text-slate-400 uppercase font-bold tracking-wider">Catches</span>
+          <div className="text-xl sm:text-2xl font-black text-emerald-400 mt-0.5">
             {catches} / {targetCatchesNeeded}
           </div>
         </div>
       </div>
 
       {/* Fall Zone Arena */}
-      <div className="relative w-full h-96 bg-slate-950/80 rounded-2xl border-2 border-slate-800 overflow-hidden shadow-2xl flex items-center justify-center select-none">
+      <div className="relative w-full h-80 sm:h-96 bg-slate-950/80 rounded-2xl border-2 border-slate-800 overflow-hidden shadow-2xl flex items-center justify-center select-none">
         {!isPlaying && !gameResult && (
-          <div className="text-center space-y-4 z-10">
-            <div className="w-16 h-16 rounded-2xl bg-cyan-500/20 text-cyan-400 mx-auto flex items-center justify-center text-3xl border border-cyan-500/40">
+          <div className="text-center space-y-3 z-10 px-4">
+            <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-cyan-500/20 text-cyan-400 mx-auto flex items-center justify-center text-2xl border border-cyan-500/40">
               ⚡
             </div>
             <div>
-              <h3 className="text-xl font-black text-white">Ready for 3-Second Rush?</h3>
-              <p className="text-xs text-slate-400 mt-1 max-w-xs mx-auto">
-                Catch <strong className="text-amber-400">{targetCatchesNeeded}x</strong> target numbers before the clock runs out!
+              <h3 className="text-base sm:text-lg font-black text-white">Ready for 3-Second Rush?</h3>
+              <p className="text-xs text-slate-400 mt-0.5 max-w-xs mx-auto">
+                Catch <strong className="text-amber-400">{targetCatchesNeeded}x</strong> target numbers before the clock expires!
               </p>
             </div>
             <button
               onClick={startRound}
-              className="px-6 py-2.5 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-black text-sm transition-all shadow-lg shadow-cyan-500/30 cursor-pointer"
+              className="px-5 py-2 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-black text-xs transition-all shadow-lg shadow-cyan-500/30 cursor-pointer min-h-[38px]"
             >
               Start Game Now
             </button>
@@ -254,7 +254,7 @@ export const CatchNumbersGame: React.FC<CatchNumbersGameProps> = ({
                 left: `${num.x}%`,
                 top: `${num.y}%`
               }}
-              className={`absolute w-14 h-14 rounded-2xl font-black text-2xl flex items-center justify-center transition-transform active:scale-75 cursor-pointer shadow-lg select-none border-2 ${
+              className={`absolute w-11 h-11 sm:w-13 sm:h-13 rounded-xl sm:rounded-2xl font-black text-lg sm:text-xl flex items-center justify-center transition-transform active:scale-75 cursor-pointer shadow-lg select-none border-2 ${
                 num.val === targetNumber
                   ? 'bg-amber-500 text-slate-950 border-amber-300 shadow-amber-500/40 scale-110 hover:scale-125 ring-4 ring-amber-400/30'
                   : 'bg-slate-800/90 text-slate-400 border-slate-700 hover:border-slate-500'
@@ -267,41 +267,41 @@ export const CatchNumbersGame: React.FC<CatchNumbersGameProps> = ({
         {/* Win / Loss Modal */}
         {gameResult && (
           <div className="absolute inset-0 bg-slate-950/90 backdrop-blur-sm z-20 flex items-center justify-center p-4">
-            <div className="bg-slate-900 border-2 border-slate-700 rounded-3xl p-6 text-center space-y-4 max-w-sm w-full shadow-2xl">
+            <div className="bg-slate-900 border-2 border-slate-700 rounded-3xl p-5 text-center space-y-3.5 max-w-xs w-full shadow-2xl">
               {gameResult === 'WIN' ? (
                 <>
-                  <div className="w-14 h-14 rounded-2xl bg-emerald-500/20 text-emerald-400 mx-auto flex items-center justify-center text-2xl border border-emerald-500/40">
+                  <div className="w-12 h-12 rounded-2xl bg-emerald-500/20 text-emerald-400 mx-auto flex items-center justify-center text-2xl border border-emerald-500/40">
                     🏆
                   </div>
                   <div>
-                    <h3 className="text-xl font-black text-white">Reflex Master!</h3>
-                    <p className="text-xs text-slate-300 mt-1">
+                    <h3 className="text-lg font-black text-white">Reflex Master!</h3>
+                    <p className="text-xs text-slate-300 mt-0.5">
                       Caught all targets with <strong className="text-cyan-400">{(timeLeftMs / 1000).toFixed(2)}s</strong> to spare!
                     </p>
                   </div>
-                  <div className="p-3 rounded-xl bg-emerald-950/40 border border-emerald-500/30 text-emerald-400">
+                  <div className="p-2.5 rounded-xl bg-emerald-950/40 border border-emerald-500/30 text-emerald-400">
                     <span className="text-[10px] uppercase font-bold tracking-wider">Reward Earned</span>
-                    <div className="text-2xl font-black text-emerald-300">+${rewardAmount.toFixed(2)}</div>
+                    <div className="text-xl font-black text-emerald-300">+${rewardAmount.toFixed(2)}</div>
                   </div>
                 </>
               ) : (
                 <>
-                  <div className="w-14 h-14 rounded-2xl bg-rose-500/20 text-rose-400 mx-auto flex items-center justify-center text-2xl border border-rose-500/40">
+                  <div className="w-12 h-12 rounded-2xl bg-rose-500/20 text-rose-400 mx-auto flex items-center justify-center text-2xl border border-rose-500/40">
                     ⌛
                   </div>
                   <div>
-                    <h3 className="text-xl font-black text-white">Time's Up!</h3>
-                    <p className="text-xs text-slate-400 mt-1">
+                    <h3 className="text-lg font-black text-white">Time's Up!</h3>
+                    <p className="text-xs text-slate-400 mt-0.5">
                       You caught {catches}/{targetCatchesNeeded} targets. Try again for instant cash!
                     </p>
                   </div>
                 </>
               )}
 
-              <div className="flex items-center gap-2 pt-2">
+              <div className="flex items-center gap-2 pt-1">
                 <button
                   onClick={startRound}
-                  className="flex-1 py-2.5 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-black text-xs transition-all shadow-md shadow-cyan-500/20 cursor-pointer"
+                  className="flex-1 py-2 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-black text-xs transition-all shadow-md shadow-cyan-500/20 cursor-pointer min-h-[36px]"
                 >
                   Play Again
                 </button>
@@ -310,7 +310,7 @@ export const CatchNumbersGame: React.FC<CatchNumbersGameProps> = ({
                     sound.playClick();
                     onBack();
                   }}
-                  className="flex-1 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs transition-all border border-slate-700 cursor-pointer"
+                  className="flex-1 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs transition-all border border-slate-700 cursor-pointer min-h-[36px]"
                 >
                   Back to Hub
                 </button>

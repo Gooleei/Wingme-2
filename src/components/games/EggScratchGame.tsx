@@ -135,77 +135,77 @@ export const EggScratchGame: React.FC<EggScratchGameProps> = ({
   };
 
   return (
-    <div className="max-w-5xl mx-auto px-4 py-6 space-y-6">
+    <div className="max-w-3xl mx-auto px-3 sm:px-6 py-4 sm:py-6 space-y-4 sm:space-y-5">
       {/* Header */}
-      <div className="flex flex-wrap items-center justify-between gap-4 bg-slate-900/80 p-4 rounded-2xl border border-slate-800 backdrop-blur-sm">
-        <div className="flex items-center gap-3">
+      <div className="flex flex-wrap items-center justify-between gap-3 bg-slate-900/80 p-3.5 sm:p-4 rounded-xl sm:rounded-2xl border border-slate-800 backdrop-blur-sm">
+        <div className="flex items-center gap-2.5 sm:gap-3">
           <button
             onClick={() => {
               sound.playClick();
               onBack();
             }}
-            className="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition-colors cursor-pointer border border-slate-700"
+            className="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition-colors cursor-pointer border border-slate-700 min-h-[40px] min-w-[40px] flex items-center justify-center shrink-0"
           >
-            <ArrowLeft className="w-5 h-5" />
+            <ArrowLeft className="w-4 h-4 stroke-[2.2]" />
           </button>
           <div>
-            <h1 className="text-xl font-black text-white flex items-center gap-2">
-              <span>🥚 Egg Scratch Matrix (1-Hour Marathon)</span>
-              <span className="text-xs px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-400 border border-amber-500/30">
-                10 Levels • $100 Jackpot
+            <h1 className="text-base sm:text-lg font-black text-white flex items-center gap-1.5 flex-wrap">
+              <span>🥚 Egg Scratch Matrix</span>
+              <span className="text-[10px] sm:text-xs px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-400 border border-amber-500/30 font-bold">
+                10 Lvl • $100 Jackpot
               </span>
             </h1>
-            <p className="text-xs text-slate-400">Scratch matrix eggs to find hidden cash and unlock level bonuses</p>
+            <p className="text-xs text-slate-400">Scratch matrix eggs to find hidden cash</p>
           </div>
         </div>
 
         {/* 1-Hour Timer Widget */}
-        <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-950 border border-slate-800 text-cyan-400 font-mono font-bold text-sm">
-          <Timer className="w-4 h-4 animate-pulse" />
-          <span>{formatTimer(secondsRemaining)} remaining</span>
+        <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-950 border border-slate-800 text-cyan-400 font-mono font-bold text-xs sm:text-sm">
+          <Timer className="w-3.5 h-3.5 animate-pulse" />
+          <span>{formatTimer(secondsRemaining)} left</span>
         </div>
       </div>
 
       {/* Level Banner & Stats */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        <div className="bg-slate-900/80 border border-slate-800 rounded-xl p-3 text-center">
-          <span className="text-[11px] text-slate-400 font-bold">Current Level</span>
-          <div className="text-lg font-black text-amber-400 mt-0.5">
-            Lvl {currentLevel}/10 ({activeLevel.name})
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3">
+        <div className="bg-slate-900/80 border border-slate-800 rounded-xl p-2.5 text-center">
+          <span className="text-[10px] sm:text-[11px] text-slate-400 font-bold">Current Level</span>
+          <div className="text-sm sm:text-base font-black text-amber-400 mt-0.5 truncate">
+            Lvl {currentLevel}/10
           </div>
         </div>
 
-        <div className="bg-slate-900/80 border border-slate-800 rounded-xl p-3 text-center">
-          <span className="text-[11px] text-slate-400 font-bold">Eggs Scratched</span>
-          <div className="text-lg font-black text-white mt-0.5">
+        <div className="bg-slate-900/80 border border-slate-800 rounded-xl p-2.5 text-center">
+          <span className="text-[10px] sm:text-[11px] text-slate-400 font-bold">Eggs Scratched</span>
+          <div className="text-sm sm:text-base font-black text-white mt-0.5">
             {scratchedCount} / {activeLevel.eggsNeeded}
           </div>
         </div>
 
-        <div className="bg-slate-900/80 border border-slate-800 rounded-xl p-3 text-center">
-          <span className="text-[11px] text-slate-400 font-bold">Level Clear Bonus</span>
-          <div className="text-lg font-black text-emerald-400 mt-0.5">
+        <div className="bg-slate-900/80 border border-slate-800 rounded-xl p-2.5 text-center">
+          <span className="text-[10px] sm:text-[11px] text-slate-400 font-bold">Clear Bonus</span>
+          <div className="text-sm sm:text-base font-black text-emerald-400 mt-0.5">
             +${activeLevel.baseRewardPool.toFixed(2)}
           </div>
         </div>
 
-        <div className="bg-slate-900/80 border border-slate-800 rounded-xl p-3 text-center">
-          <span className="text-[11px] text-slate-400 font-bold">Total Run Earned</span>
-          <div className="text-lg font-black text-cyan-300 mt-0.5">
+        <div className="bg-slate-900/80 border border-slate-800 rounded-xl p-2.5 text-center">
+          <span className="text-[10px] sm:text-[11px] text-slate-400 font-bold">Total Earned</span>
+          <div className="text-sm sm:text-base font-black text-cyan-300 mt-0.5">
             ${totalChallengeEarned.toFixed(2)}
           </div>
         </div>
       </div>
 
       {/* 10x10 Matrix Grid */}
-      <div className="bg-slate-950/80 border border-slate-800 rounded-3xl p-4 sm:p-6 shadow-2xl">
-        <div className="grid grid-cols-10 gap-1.5 sm:gap-2 max-w-2xl mx-auto">
+      <div className="bg-slate-950/80 border border-slate-800 rounded-2xl sm:rounded-3xl p-3 sm:p-5 shadow-2xl overflow-hidden">
+        <div className="grid grid-cols-10 gap-1 sm:gap-1.5 max-w-xl mx-auto">
           {eggs.map((egg, idx) => (
             <button
               key={egg.id}
               onClick={() => handleEggScratch(idx)}
               disabled={egg.isScratched || isLevelCleared}
-              className={`aspect-square rounded-lg flex items-center justify-center font-bold text-xs sm:text-sm transition-all duration-200 cursor-pointer select-none ${
+              className={`aspect-square rounded-md sm:rounded-lg flex items-center justify-center font-bold text-[10px] sm:text-xs transition-all duration-200 cursor-pointer select-none ${
                 egg.isScratched
                   ? egg.reward > 0
                     ? 'bg-amber-500/20 border border-amber-400/50 text-amber-300 scale-95 shadow-inner'
@@ -215,14 +215,14 @@ export const EggScratchGame: React.FC<EggScratchGameProps> = ({
             >
               {egg.isScratched ? (
                 egg.reward > 0 ? (
-                  <span className="font-extrabold text-[10px] sm:text-xs text-emerald-400">
+                  <span className="font-extrabold text-[8px] sm:text-[10px] text-emerald-400">
                     +${egg.reward.toFixed(2)}
                   </span>
                 ) : (
-                  <span className="text-[9px] text-slate-600">✕</span>
+                  <span className="text-[8px] text-slate-600">✕</span>
                 )
               ) : (
-                <Egg className="w-4 h-4 sm:w-5 sm:h-5 text-amber-400/80" />
+                <Egg className="w-3 h-3 sm:w-4 sm:h-4 text-amber-400/80" />
               )}
             </button>
           ))}
@@ -231,15 +231,15 @@ export const EggScratchGame: React.FC<EggScratchGameProps> = ({
 
       {/* Level Completion Bar */}
       {isLevelCleared && (
-        <div className="p-5 rounded-2xl bg-gradient-to-r from-amber-950/80 via-emerald-950/80 to-slate-900 border border-amber-500/40 flex flex-wrap items-center justify-between gap-4">
+        <div className="p-3.5 sm:p-4 rounded-xl sm:rounded-2xl bg-gradient-to-r from-amber-950/80 via-emerald-950/80 to-slate-900 border border-amber-500/40 flex flex-wrap items-center justify-between gap-3">
           <div>
-            <h3 className="text-lg font-black text-white flex items-center gap-2">
+            <h3 className="text-base sm:text-lg font-black text-white flex items-center gap-2">
               <span>🎉 Level {currentLevel} Cleared!</span>
-              <span className="text-xs px-2 py-0.5 rounded bg-emerald-500/30 text-emerald-300 font-bold">
+              <span className="text-[10px] sm:text-xs px-2 py-0.5 rounded bg-emerald-500/30 text-emerald-300 font-bold">
                 +${activeLevel.baseRewardPool.toFixed(2)} Bonus Added
               </span>
             </h3>
-            <p className="text-xs text-slate-300 mt-1">
+            <p className="text-xs text-slate-300 mt-0.5">
               {currentLevel < 10
                 ? `Proceed to Level ${currentLevel + 1} (${LEVEL_CONFIGS[currentLevel].name}) for bigger drops!`
                 : '🏆 You completed all 10 Levels and claimed the $100 Grand Jackpot!'}
@@ -251,10 +251,10 @@ export const EggScratchGame: React.FC<EggScratchGameProps> = ({
               onClick={() => {
                 setCurrentLevel((l) => l + 1);
               }}
-              className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-emerald-500 hover:from-amber-400 hover:to-emerald-400 text-slate-950 font-black text-xs flex items-center gap-1.5 shadow-lg shadow-emerald-500/20 cursor-pointer"
+              className="px-4 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-emerald-500 hover:from-amber-400 hover:to-emerald-400 text-slate-950 font-black text-xs flex items-center gap-1 shadow-lg shadow-emerald-500/20 cursor-pointer min-h-[36px]"
             >
               <span>Next Level</span>
-              <ChevronRight className="w-4 h-4" />
+              <ChevronRight className="w-3.5 h-3.5" />
             </button>
           ) : (
             <button
@@ -262,7 +262,7 @@ export const EggScratchGame: React.FC<EggScratchGameProps> = ({
                 sound.playClick();
                 onBack();
               }}
-              className="px-5 py-2.5 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-black text-xs cursor-pointer"
+              className="px-4 py-2 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-black text-xs cursor-pointer min-h-[36px]"
             >
               Back to Hub
             </button>

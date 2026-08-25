@@ -80,7 +80,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onLogin, onClose }) => {
     const newUser: UserProfile = {
       id: `user-${cleanUser}-${Date.now().toString().slice(-4)}`,
       username: username.trim(),
-      email: email.trim() || `${cleanUser}@luckyplay.io`,
+      email: email.trim() || `${cleanUser}@bellmont.io`,
       pin: cleanPin,
       isGuest: false,
       avatar: selectedAvatar,
@@ -112,12 +112,12 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onLogin, onClose }) => {
         {/* Modal Title */}
         <div className="text-center space-y-1">
           <h2 className="text-2xl font-black text-white flex items-center justify-center gap-2">
-            <span>LuckyPlay</span>
+            <span>Bellmont</span>
             <span className="text-xs px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
               Account
             </span>
           </h2>
-          <p className="text-xs text-slate-400">Save your cash balance, streaks, and hero unlocks</p>
+          <p className="text-xs text-slate-400">Save your cash balance, ₮ points, streaks, and hero unlocks</p>
         </div>
 
         {/* Tab Toggle */}

@@ -1,6 +1,6 @@
 {
-  "name": "LuckyPlay Rewards & Endless Runner",
-  "description": "An arcade gaming and rewards platform featuring the high-stakes 5-world Endless Runner Challenge alongside Memory Match, Tic Tac Toe, Egg Scratch Matrix, Lucky Wheel, and real-time cashout rewards.",
+  "name": "Bellmont Rewards & Endless Runner",
+  "description": "An arcade gaming and rewards platform featuring the high-stakes 5-world Endless Runner Challenge alongside Memory Match, Tic Tac Toe, Egg Scratch Matrix, Lucky Wheel, ₮ points balancing, and real-time cashout rewards.",
   "requestFramePermissions": [],
   "majorCapabilities": [
     "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"

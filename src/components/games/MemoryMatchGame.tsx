@@ -150,32 +150,32 @@ export const MemoryMatchGame: React.FC<MemoryMatchGameProps> = ({
   };
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-6 space-y-6">
+    <div className="max-w-3xl mx-auto px-3 sm:px-6 py-4 sm:py-6 space-y-4 sm:space-y-5">
       {/* Game Header */}
-      <div className="flex flex-wrap items-center justify-between gap-4 bg-slate-900/80 p-4 rounded-2xl border border-slate-800 backdrop-blur-sm">
-        <div className="flex items-center gap-3">
+      <div className="flex flex-wrap items-center justify-between gap-3 bg-slate-900/80 p-3.5 sm:p-4 rounded-xl sm:rounded-2xl border border-slate-800 backdrop-blur-sm">
+        <div className="flex items-center gap-2.5 sm:gap-3">
           <button
             onClick={() => {
               sound.playClick();
               onBack();
             }}
-            className="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition-colors cursor-pointer border border-slate-700"
+            className="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition-colors cursor-pointer border border-slate-700 min-h-[40px] min-w-[40px] flex items-center justify-center shrink-0"
           >
-            <ArrowLeft className="w-5 h-5" />
+            <ArrowLeft className="w-4 h-4 stroke-[2.2]" />
           </button>
           <div>
-            <h1 className="text-xl font-black text-white flex items-center gap-2">
-              <span>🧠 Memory Match Challenge</span>
-              <span className="text-xs px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+            <h1 className="text-base sm:text-lg font-black text-white flex items-center gap-1.5 flex-wrap">
+              <span>🧠 Memory Matrix Match</span>
+              <span className="text-[10px] sm:text-xs px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 font-bold">
                 +${rewardAmount.toFixed(2)} Win
               </span>
             </h1>
-            <p className="text-xs text-slate-400">Match all card pairs to claim instant cash credit</p>
+            <p className="text-xs text-slate-400">Match all card pairs to claim cash</p>
           </div>
         </div>
 
         {/* Action Controls */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5 flex-wrap">
           {/* Difficulty Toggle */}
           <div className="bg-slate-950 p-1 rounded-xl border border-slate-800 flex items-center gap-1">
             <button
@@ -183,9 +183,9 @@ export const MemoryMatchGame: React.FC<MemoryMatchGameProps> = ({
                 setDifficulty('standard');
                 sound.playClick();
               }}
-              className={`px-3 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+              className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${
                 difficulty === 'standard'
-                  ? 'bg-emerald-500 text-slate-950 shadow-md shadow-emerald-500/20'
+                  ? 'bg-emerald-500 text-slate-950 shadow-md shadow-emerald-500/20 font-black'
                   : 'text-slate-400 hover:text-white'
               }`}
             >
@@ -196,9 +196,9 @@ export const MemoryMatchGame: React.FC<MemoryMatchGameProps> = ({
                 setDifficulty('expert');
                 sound.playClick();
               }}
-              className={`px-3 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+              className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${
                 difficulty === 'expert'
-                  ? 'bg-purple-500 text-white shadow-md shadow-purple-500/20'
+                  ? 'bg-purple-500 text-white shadow-md shadow-purple-500/20 font-black'
                   : 'text-slate-400 hover:text-white'
               }`}
             >
@@ -208,7 +208,7 @@ export const MemoryMatchGame: React.FC<MemoryMatchGameProps> = ({
 
           <button
             onClick={startNewGame}
-            className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold border border-slate-700 cursor-pointer shadow-sm"
+            className="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold border border-slate-700 cursor-pointer shadow-sm min-h-[36px]"
           >
             <RotateCcw className="w-3.5 h-3.5" />
             <span>Reset</span>
@@ -217,39 +217,39 @@ export const MemoryMatchGame: React.FC<MemoryMatchGameProps> = ({
       </div>
 
       {/* Stats Bar */}
-      <div className="grid grid-cols-4 gap-3">
-        <div className="bg-slate-900/60 border border-slate-800 rounded-xl p-3 text-center">
-          <span className="text-[11px] text-slate-400 font-medium">Time Elapsed</span>
-          <div className="text-lg font-black text-white flex items-center justify-center gap-1 mt-0.5">
-            <Timer className="w-4 h-4 text-cyan-400" />
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3">
+        <div className="bg-slate-900/60 border border-slate-800 rounded-xl p-2.5 text-center">
+          <span className="text-[10px] sm:text-[11px] text-slate-400 font-medium">Time Elapsed</span>
+          <div className="text-sm sm:text-base font-black text-white flex items-center justify-center gap-1 mt-0.5">
+            <Timer className="w-3.5 h-3.5 text-cyan-400" />
             <span>{seconds}s</span>
           </div>
         </div>
 
-        <div className="bg-slate-900/60 border border-slate-800 rounded-xl p-3 text-center">
-          <span className="text-[11px] text-slate-400 font-medium">Turns Made</span>
-          <div className="text-lg font-black text-amber-400 mt-0.5">{moves}</div>
+        <div className="bg-slate-900/60 border border-slate-800 rounded-xl p-2.5 text-center">
+          <span className="text-[10px] sm:text-[11px] text-slate-400 font-medium">Turns Made</span>
+          <div className="text-sm sm:text-base font-black text-amber-400 mt-0.5">{moves}</div>
         </div>
 
-        <div className="bg-slate-900/60 border border-slate-800 rounded-xl p-3 text-center">
-          <span className="text-[11px] text-slate-400 font-medium">Pairs Matched</span>
-          <div className="text-lg font-black text-emerald-400 mt-0.5">
+        <div className="bg-slate-900/60 border border-slate-800 rounded-xl p-2.5 text-center">
+          <span className="text-[10px] sm:text-[11px] text-slate-400 font-medium">Pairs Matched</span>
+          <div className="text-sm sm:text-base font-black text-emerald-400 mt-0.5">
             {matchedPairs} / {pairCount}
           </div>
         </div>
 
-        <div className="bg-slate-900/60 border border-slate-800 rounded-xl p-3 text-center">
-          <span className="text-[11px] text-slate-400 font-medium">Reward Pool</span>
-          <div className="text-lg font-black text-emerald-400 mt-0.5">+${rewardAmount.toFixed(2)}</div>
+        <div className="bg-slate-900/60 border border-slate-800 rounded-xl p-2.5 text-center">
+          <span className="text-[10px] sm:text-[11px] text-slate-400 font-medium">Reward Pool</span>
+          <div className="text-sm sm:text-base font-black text-emerald-400 mt-0.5">+${rewardAmount.toFixed(2)}</div>
         </div>
       </div>
 
       {/* Cards Board Grid */}
       <div
-        className={`grid gap-3 p-4 bg-slate-950/60 rounded-2xl border border-slate-800/80 shadow-2xl ${
+        className={`grid gap-2 sm:gap-3 p-3 sm:p-4 bg-slate-950/60 rounded-2xl border border-slate-800/80 shadow-2xl ${
           difficulty === 'standard'
-            ? 'grid-cols-4 max-w-xl mx-auto'
-            : 'grid-cols-4 sm:grid-cols-6 max-w-3xl mx-auto'
+            ? 'grid-cols-4 max-w-md mx-auto'
+            : 'grid-cols-4 sm:grid-cols-6 max-w-xl mx-auto'
         }`}
       >
         {cards.map((card, idx) => (
@@ -257,7 +257,7 @@ export const MemoryMatchGame: React.FC<MemoryMatchGameProps> = ({
             key={card.id}
             onClick={() => handleCardClick(idx)}
             disabled={card.isMatched || card.isFlipped}
-            className={`aspect-square rounded-xl text-3xl sm:text-4xl flex items-center justify-center font-bold transition-all duration-300 transform active:scale-95 cursor-pointer shadow-md select-none ${
+            className={`aspect-square rounded-xl text-2xl sm:text-3xl flex items-center justify-center font-bold transition-all duration-300 transform active:scale-95 cursor-pointer shadow-md select-none ${
               card.isMatched
                 ? 'bg-emerald-950/60 border-2 border-emerald-500/50 text-emerald-300 opacity-90 scale-95'
                 : card.isFlipped
@@ -268,7 +268,7 @@ export const MemoryMatchGame: React.FC<MemoryMatchGameProps> = ({
             {card.isFlipped || card.isMatched ? (
               <span className="animate-in fade-in zoom-in-75 duration-200">{card.icon}</span>
             ) : (
-              <span className="text-slate-600 font-extrabold text-sm opacity-40">LP</span>
+              <span className="text-slate-600 font-extrabold text-xs opacity-40">BM</span>
             )}
           </button>
         ))}
@@ -277,28 +277,28 @@ export const MemoryMatchGame: React.FC<MemoryMatchGameProps> = ({
       {/* Victory Modal */}
       {hasWon && (
         <div className="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4">
-          <div className="bg-slate-900 border-2 border-emerald-500/60 rounded-3xl p-6 sm:p-8 max-w-md w-full text-center space-y-5 shadow-2xl shadow-emerald-500/20 animate-in zoom-in-95 duration-200">
-            <div className="w-16 h-16 rounded-2xl bg-emerald-500/20 text-emerald-400 mx-auto flex items-center justify-center text-3xl border border-emerald-500/40">
+          <div className="bg-slate-900 border-2 border-emerald-500/60 rounded-3xl p-5 sm:p-6 max-w-sm w-full text-center space-y-4 shadow-2xl shadow-emerald-500/20 animate-in zoom-in-95 duration-200">
+            <div className="w-14 h-14 rounded-2xl bg-emerald-500/20 text-emerald-400 mx-auto flex items-center justify-center text-2xl border border-emerald-500/40">
               🏆
             </div>
 
             <div>
-              <h2 className="text-2xl font-black text-white">Board Cleared!</h2>
-              <p className="text-sm text-slate-300 mt-1">
+              <h2 className="text-xl sm:text-2xl font-black text-white">Board Cleared!</h2>
+              <p className="text-xs text-slate-300 mt-1">
                 Completed in <strong className="text-white">{moves} moves</strong> and{' '}
                 <strong className="text-white">{seconds} seconds</strong>.
               </p>
             </div>
 
-            <div className="p-4 rounded-2xl bg-emerald-950/40 border border-emerald-500/30 text-emerald-400">
-              <span className="text-xs uppercase font-bold tracking-wider text-emerald-500">Reward Credited</span>
-              <div className="text-3xl font-black text-emerald-300 mt-0.5">+${earnedCash.toFixed(2)}</div>
+            <div className="p-3 rounded-2xl bg-emerald-950/40 border border-emerald-500/30 text-emerald-400">
+              <span className="text-[10px] uppercase font-bold tracking-wider text-emerald-500">Reward Credited</span>
+              <div className="text-2xl font-black text-emerald-300 mt-0.5">+${earnedCash.toFixed(2)}</div>
             </div>
 
-            <div className="flex items-center gap-3 pt-2">
+            <div className="flex items-center gap-2.5 pt-1">
               <button
                 onClick={startNewGame}
-                className="flex-1 py-3 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 font-black text-sm transition-all shadow-lg shadow-emerald-500/20 cursor-pointer"
+                className="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 font-black text-xs transition-all shadow-lg shadow-emerald-500/20 cursor-pointer min-h-[38px]"
               >
                 Play Again
               </button>
@@ -307,7 +307,7 @@ export const MemoryMatchGame: React.FC<MemoryMatchGameProps> = ({
                   sound.playClick();
                   onBack();
                 }}
-                className="flex-1 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-sm transition-all border border-slate-700 cursor-pointer"
+                className="flex-1 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs transition-all border border-slate-700 cursor-pointer min-h-[38px]"
               >
                 Back to Hub
               </button>

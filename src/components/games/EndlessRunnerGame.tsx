@@ -152,43 +152,43 @@ export const EndlessRunnerGame: React.FC<EndlessRunnerGameProps> = ({
           />
         </div>
       ) : (
-        <div className="space-y-6">
+        <div className="space-y-4 sm:space-y-6">
           {/* Main Title & Action Bar */}
-          <div className="flex flex-wrap items-center justify-between gap-4 bg-slate-900/90 p-5 rounded-3xl border border-slate-800 backdrop-blur-md shadow-xl">
-            <div className="flex items-center gap-3">
+          <div className="flex flex-wrap items-center justify-between gap-3 bg-slate-900/90 p-3.5 sm:p-5 rounded-2xl sm:rounded-3xl border border-slate-800 backdrop-blur-md shadow-xl">
+            <div className="flex items-center gap-2.5 sm:gap-3">
               <button
                 onClick={() => {
                   sound.playClick();
                   onBack();
                 }}
-                className="p-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition-colors cursor-pointer border border-slate-700"
+                className="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition-colors cursor-pointer border border-slate-700 min-h-[40px] min-w-[40px] flex items-center justify-center shrink-0"
               >
-                <ArrowLeft className="w-5 h-5" />
+                <ArrowLeft className="w-4 h-4 stroke-[2.2]" />
               </button>
               <div>
-                <h1 className="text-2xl font-black text-white flex items-center gap-2.5">
+                <h1 className="text-base sm:text-xl font-black text-white flex items-center gap-2 flex-wrap">
                   <span>🏃 Endless Runner Arena</span>
-                  <span className="text-xs px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30 font-extrabold uppercase">
-                    5 Hard Worlds
+                  <span className="text-[10px] sm:text-xs px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30 font-extrabold uppercase">
+                    5 Worlds
                   </span>
                 </h1>
                 <p className="text-xs text-slate-400 mt-0.5">
-                  Dodge lasers & spikes, collect $30 cash + $3 distance bonus. Obstacle hit penalty: -$0.80.
+                  Dodge lasers & spikes, collect cash + distance bonus.
                 </p>
               </div>
             </div>
 
             {/* Quick Action Buttons */}
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
               <button
                 onClick={() => {
                   sound.playClick();
                   setShowShop(true);
                 }}
-                className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-bold transition-all cursor-pointer shadow-sm hover:scale-105"
+                className="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-bold transition-all cursor-pointer shadow-sm min-h-[36px]"
               >
-                <span className="text-base">{selectedCharacter.avatar}</span>
-                <span>Heroes & Suits</span>
+                <span className="text-sm">{selectedCharacter.avatar}</span>
+                <span>Suits</span>
               </button>
 
               <button
@@ -196,15 +196,15 @@ export const EndlessRunnerGame: React.FC<EndlessRunnerGameProps> = ({
                   sound.playClick();
                   setShowLeaderboard(true);
                 }}
-                className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-300 border border-cyan-500/40 text-xs font-bold transition-all cursor-pointer shadow-sm hover:scale-105"
+                className="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-300 border border-cyan-500/40 text-xs font-bold transition-all cursor-pointer shadow-sm min-h-[36px]"
               >
                 <Trophy className="w-3.5 h-3.5 text-cyan-400" />
-                <span>Speedrun Ranks</span>
+                <span>Ranks</span>
               </button>
 
               <button
                 onClick={() => startLevel(GAME_LEVELS[0], true)}
-                className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white text-xs font-black transition-all shadow-lg shadow-purple-600/30 cursor-pointer hover:scale-105"
+                className="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white text-xs font-black transition-all shadow-lg shadow-purple-600/30 cursor-pointer min-h-[36px]"
               >
                 <Flame className="w-3.5 h-3.5 text-amber-300 animate-pulse" />
                 <span>Endless Mode</span>
@@ -213,42 +213,42 @@ export const EndlessRunnerGame: React.FC<EndlessRunnerGameProps> = ({
           </div>
 
           {/* Active Hero Profile Bar */}
-          <div className="bg-slate-900/60 border border-slate-800 rounded-2xl p-4 flex flex-wrap items-center justify-between gap-4">
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-xl bg-slate-800 flex items-center justify-center text-3xl border border-slate-700">
+          <div className="bg-slate-900/60 border border-slate-800 rounded-xl sm:rounded-2xl p-3 sm:p-4 flex flex-wrap items-center justify-between gap-3">
+            <div className="flex items-center gap-2.5">
+              <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-slate-800 flex items-center justify-center text-2xl border border-slate-700 shrink-0">
                 {selectedCharacter.avatar}
               </div>
               <div>
-                <div className="flex items-center gap-2">
-                  <span className="font-extrabold text-white text-sm">{selectedCharacter.name}</span>
-                  <span className="text-[10px] px-2 py-0.5 rounded bg-slate-800 text-slate-400 border border-slate-700">
+                <div className="flex items-center gap-1.5">
+                  <span className="font-extrabold text-white text-xs sm:text-sm">{selectedCharacter.name}</span>
+                  <span className="text-[9px] sm:text-[10px] px-1.5 py-0.5 rounded bg-slate-800 text-slate-400 border border-slate-700">
                     {selectedCharacter.title}
                   </span>
                 </div>
-                <p className="text-xs text-amber-400 font-medium mt-0.5">
-                  Ability: {selectedCharacter.abilityName} — {selectedCharacter.abilityDescription}
+                <p className="text-[11px] sm:text-xs text-amber-400 font-medium mt-0.5">
+                  {selectedCharacter.abilityName}: {selectedCharacter.abilityDescription}
                 </p>
               </div>
             </div>
 
-            <div className="flex items-center gap-4 text-xs">
+            <div className="flex items-center gap-3 sm:gap-4 text-xs">
               <div className="text-right">
-                <span className="text-slate-400 block text-[10px]">Total Runs</span>
-                <strong className="text-white text-sm">{stats.totalRuns}</strong>
+                <span className="text-slate-400 block text-[9px] sm:text-[10px]">Runs</span>
+                <strong className="text-white text-xs sm:text-sm">{stats.totalRuns}</strong>
               </div>
               <div className="text-right">
-                <span className="text-slate-400 block text-[10px]">Total Wins</span>
-                <strong className="text-emerald-400 text-sm">{stats.totalWins}</strong>
+                <span className="text-slate-400 block text-[9px] sm:text-[10px]">Wins</span>
+                <strong className="text-emerald-400 text-xs sm:text-sm">{stats.totalWins}</strong>
               </div>
               <div className="text-right">
-                <span className="text-slate-400 block text-[10px]">Runner Cash</span>
-                <strong className="text-cyan-300 text-sm">${stats.totalCashEarned.toFixed(2)}</strong>
+                <span className="text-slate-400 block text-[9px] sm:text-[10px]">Runner Cash</span>
+                <strong className="text-cyan-300 text-xs sm:text-sm">${stats.totalCashEarned.toFixed(2)}</strong>
               </div>
             </div>
           </div>
 
           {/* 5 Distinct World Levels Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
             {GAME_LEVELS.map((lvl) => {
               const isUnlocked = lvl.id <= stats.unlockedLevels;
               const bestScore = stats.highScores[lvl.id];

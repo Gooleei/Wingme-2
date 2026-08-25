@@ -227,42 +227,42 @@ export const TicTacToeGame: React.FC<TicTacToeGameProps> = ({
   };
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-6 space-y-6">
+    <div className="max-w-3xl mx-auto px-3 sm:px-6 py-4 sm:py-6 space-y-4 sm:space-y-5">
       {/* Header */}
-      <div className="flex flex-wrap items-center justify-between gap-4 bg-slate-900/80 p-4 rounded-2xl border border-slate-800 backdrop-blur-sm shadow-xl">
-        <div className="flex items-center gap-3">
+      <div className="flex flex-wrap items-center justify-between gap-3 bg-slate-900/80 p-3.5 sm:p-4 rounded-xl sm:rounded-2xl border border-slate-800 backdrop-blur-sm shadow-xl">
+        <div className="flex items-center gap-2.5 sm:gap-3">
           <button
             onClick={() => {
               sound.playClick();
               onBack();
             }}
-            className="p-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition-colors cursor-pointer border border-slate-700 min-h-[44px] min-w-[44px] flex items-center justify-center"
+            className="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition-colors cursor-pointer border border-slate-700 min-h-[40px] min-w-[40px] flex items-center justify-center shrink-0"
           >
-            <ArrowLeft className="w-5 h-5 stroke-[2.2]" />
+            <ArrowLeft className="w-4 h-4 stroke-[2.2]" />
           </button>
           <div>
-            <h1 className="text-lg sm:text-xl font-black text-white flex items-center gap-2">
-              <span>❌⭕ Tic Tac Toe Arena</span>
-              <span className="text-xs px-2.5 py-0.5 rounded-full bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 font-black flex items-center gap-1">
-                <Brain className="w-3.5 h-3.5 text-cyan-400" />
-                100% Intelligence
+            <h1 className="text-base sm:text-lg font-black text-white flex items-center gap-2 flex-wrap">
+              <span>❌⭕ Tic Tac Toe</span>
+              <span className="text-[10px] sm:text-xs px-2 py-0.5 rounded-full bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 font-black flex items-center gap-1">
+                <Brain className="w-3 h-3 text-cyan-400" />
+                100% Smart
               </span>
             </h1>
-            <p className="text-xs text-slate-400">Master Minimax counter-tactics to claim escalating cash rewards</p>
+            <p className="text-xs text-slate-400">Master Minimax counter-tactics for rewards</p>
           </div>
         </div>
 
         <button
           onClick={startRound}
-          className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold border border-slate-700 cursor-pointer shadow-sm min-h-[40px]"
+          className="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold border border-slate-700 cursor-pointer shadow-sm min-h-[36px]"
         >
-          <RotateCcw className="w-4 h-4" />
+          <RotateCcw className="w-3.5 h-3.5" />
           <span>New Game</span>
         </button>
       </div>
 
       {/* Level Select Scrollbar */}
-      <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-thin">
+      <div className="flex items-center gap-1.5 overflow-x-auto pb-1.5 scrollbar-thin">
         {TTT_LEVELS.map((lvl) => {
           const isUnlocked = lvl.level <= maxUnlockedLevel;
           const isSelected = lvl.level === currentLevel;
@@ -277,7 +277,7 @@ export const TicTacToeGame: React.FC<TicTacToeGameProps> = ({
                   startRound();
                 }
               }}
-              className={`flex-shrink-0 px-3 py-2 rounded-xl border text-xs font-bold flex flex-col items-center gap-0.5 transition-all cursor-pointer min-h-[50px] ${
+              className={`flex-shrink-0 px-2.5 py-1.5 rounded-xl border text-xs font-bold flex flex-col items-center gap-0.5 transition-all cursor-pointer min-h-[44px] ${
                 isSelected
                   ? 'bg-cyan-500 text-slate-950 border-cyan-400 shadow-md shadow-cyan-500/20 font-black'
                   : isUnlocked
@@ -285,7 +285,7 @@ export const TicTacToeGame: React.FC<TicTacToeGameProps> = ({
                   : 'bg-slate-950/60 text-slate-600 border-slate-900 cursor-not-allowed opacity-50'
               }`}
             >
-              <span>Lvl {lvl.level}</span>
+              <span className="text-[11px]">Lvl {lvl.level}</span>
               <span className={`text-[10px] ${isSelected ? 'text-slate-950 font-black' : 'text-emerald-400 font-extrabold'}`}>
                 ${lvl.reward.toFixed(2)}
               </span>
@@ -295,67 +295,67 @@ export const TicTacToeGame: React.FC<TicTacToeGameProps> = ({
       </div>
 
       {/* Arena Card */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5 sm:gap-5">
         {/* Opponent Info */}
-        <div className="bg-slate-900/80 border border-slate-800 rounded-3xl p-5 space-y-4 flex flex-col justify-between shadow-xl">
+        <div className="bg-slate-900/80 border border-slate-800 rounded-2xl sm:rounded-3xl p-4 space-y-3 flex flex-col justify-between shadow-xl">
           <div>
-            <div className="flex items-center gap-2 text-xs font-bold text-cyan-400 uppercase tracking-wider">
-              <Bot className="w-4 h-4" /> Grandmaster AI Opponent
+            <div className="flex items-center gap-1.5 text-[11px] font-bold text-cyan-400 uppercase tracking-wider">
+              <Bot className="w-3.5 h-3.5" /> Grandmaster AI
             </div>
-            <h3 className="text-xl font-black text-white mt-1.5">{activeLevelConfig.name}</h3>
+            <h3 className="text-base sm:text-lg font-black text-white mt-1">{activeLevelConfig.name}</h3>
             
             {/* 100% Intelligence Gauge */}
-            <div className="mt-3 space-y-1.5 p-3 rounded-2xl bg-slate-950/80 border border-cyan-500/30">
-              <div className="flex justify-between items-center text-xs">
-                <span className="text-slate-400 flex items-center gap-1.5 font-bold">
-                  <Brain className="w-3.5 h-3.5 text-cyan-400" />
+            <div className="mt-2.5 space-y-1 p-2.5 rounded-xl bg-slate-950/80 border border-cyan-500/30">
+              <div className="flex justify-between items-center text-[11px]">
+                <span className="text-slate-400 flex items-center gap-1 font-bold">
+                  <Brain className="w-3 h-3 text-cyan-400" />
                   AI Intelligence
                 </span>
-                <span className="text-cyan-400 font-black text-sm">100% (Unbeatable)</span>
+                <span className="text-cyan-400 font-black text-xs">100% (Unbeatable)</span>
               </div>
-              <div className="w-full h-2.5 bg-slate-800 rounded-full overflow-hidden">
+              <div className="w-full h-2 bg-slate-800 rounded-full overflow-hidden">
                 <div className="h-full bg-gradient-to-r from-cyan-500 via-teal-400 to-emerald-400 rounded-full w-full shadow-sm" />
               </div>
-              <p className="text-[10px] text-slate-400 italic">
+              <p className="text-[9px] text-slate-400 italic">
                 Predicts and counters all forks, corners, and diagonal traps.
               </p>
             </div>
           </div>
 
-          <div className="space-y-2 p-3 rounded-2xl bg-slate-950/90 border border-slate-800/80">
-            <div className="flex justify-between text-xs">
+          <div className="space-y-1.5 p-2.5 rounded-xl bg-slate-950/90 border border-slate-800/80 text-xs">
+            <div className="flex justify-between">
               <span className="text-slate-400">Match Prize</span>
               <span className="text-emerald-400 font-black">+${activeLevelConfig.reward.toFixed(2)}</span>
             </div>
-            <div className="flex justify-between text-xs">
+            <div className="flex justify-between">
               <span className="text-slate-400">Win Streak</span>
               <span className="text-amber-400 font-black">{playerStreak} Wins</span>
             </div>
-            <div className="flex justify-between text-xs">
-              <span className="text-slate-400">Max Jackpot</span>
+            <div className="flex justify-between">
+              <span className="text-slate-400">Jackpot</span>
               <span className="text-purple-400 font-black">$50.00 (Lvl 15)</span>
             </div>
           </div>
 
-          <div className="p-3 rounded-2xl bg-slate-800/50 border border-slate-700/60 text-xs text-slate-300">
+          <div className="p-2.5 rounded-xl bg-slate-800/50 border border-slate-700/60 text-xs text-slate-300">
             <span className="font-bold text-white">Status: </span>
             {winner === 'X' ? (
               <span className="text-emerald-400 font-black">🎉 VICTORY! Level Cleared</span>
             ) : winner === 'O' ? (
               <span className="text-rose-400 font-black">💀 Defeated by AI Counter</span>
             ) : winner === 'TIE' ? (
-              <span className="text-amber-400 font-black">🤝 Stalemate Tie! Try to outplay</span>
+              <span className="text-amber-400 font-black">🤝 Stalemate Tie! Try again</span>
             ) : isPlayerTurn ? (
               <span className="text-cyan-400 font-black animate-pulse">Your Move (X)</span>
             ) : (
-              <span className="text-amber-400 font-black">AI Calculating Optimal Move... (O)</span>
+              <span className="text-amber-400 font-black">AI Calculating... (O)</span>
             )}
           </div>
         </div>
 
         {/* 3x3 Board */}
-        <div className="md:col-span-2 flex items-center justify-center p-6 bg-slate-900/90 rounded-3xl border border-slate-800 shadow-2xl">
-          <div className="grid grid-cols-3 gap-3.5 w-full max-w-sm aspect-square">
+        <div className="md:col-span-2 flex items-center justify-center p-4 sm:p-5 bg-slate-900/90 rounded-2xl sm:rounded-3xl border border-slate-800 shadow-2xl">
+          <div className="grid grid-cols-3 gap-2.5 sm:gap-3 w-full max-w-[280px] sm:max-w-xs aspect-square">
             {board.map((cell, idx) => {
               const isWinCell = winningLine?.includes(idx);
               return (
@@ -363,7 +363,7 @@ export const TicTacToeGame: React.FC<TicTacToeGameProps> = ({
                   key={idx}
                   onClick={() => handleCellClick(idx)}
                   disabled={!isPlayerTurn || winner !== null || cell !== null || aiThinking}
-                  className={`aspect-square rounded-2xl text-4xl sm:text-5xl font-black flex items-center justify-center transition-all transform active:scale-95 cursor-pointer shadow-lg select-none ${
+                  className={`aspect-square rounded-xl sm:rounded-2xl text-3xl sm:text-4xl font-black flex items-center justify-center transition-all transform active:scale-95 cursor-pointer shadow-lg select-none ${
                     isWinCell
                       ? cell === 'X'
                         ? 'bg-emerald-500 text-slate-950 scale-105 shadow-emerald-500/50 border-2 border-emerald-300'
@@ -387,11 +387,11 @@ export const TicTacToeGame: React.FC<TicTacToeGameProps> = ({
 
       {/* Victory Prompt */}
       {winner === 'X' && currentLevel < 15 && (
-        <div className="p-4 rounded-2xl bg-gradient-to-r from-emerald-950/80 to-cyan-950/80 border border-emerald-500/40 flex flex-wrap items-center justify-between gap-3 shadow-xl">
+        <div className="p-3.5 rounded-xl sm:rounded-2xl bg-gradient-to-r from-emerald-950/80 to-cyan-950/80 border border-emerald-500/40 flex flex-wrap items-center justify-between gap-2.5 shadow-xl">
           <div>
-            <h4 className="font-extrabold text-white text-base">Level {currentLevel} Mastered!</h4>
+            <h4 className="font-extrabold text-white text-sm sm:text-base">Level {currentLevel} Mastered!</h4>
             <p className="text-xs text-slate-300">
-              You earned <strong className="text-emerald-400">+${activeLevelConfig.reward.toFixed(2)}</strong>. Ready for Level {currentLevel + 1} (${TTT_LEVELS[currentLevel].reward.toFixed(2)} prize)?
+              You earned <strong className="text-emerald-400">+${activeLevelConfig.reward.toFixed(2)}</strong>. Next: Level {currentLevel + 1} (${TTT_LEVELS[currentLevel].reward.toFixed(2)} prize).
             </p>
           </div>
           <button
@@ -399,10 +399,10 @@ export const TicTacToeGame: React.FC<TicTacToeGameProps> = ({
               setCurrentLevel((l) => l + 1);
               startRound();
             }}
-            className="px-4 py-2 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-black text-xs flex items-center gap-1 shadow-lg shadow-cyan-500/20 cursor-pointer min-h-[38px]"
+            className="px-3.5 py-1.5 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-black text-xs flex items-center gap-1 shadow-lg shadow-cyan-500/20 cursor-pointer min-h-[36px]"
           >
             <span>Next Level</span>
-            <ChevronRight className="w-4 h-4" />
+            <ChevronRight className="w-3.5 h-3.5" />
           </button>
         </div>
       )}

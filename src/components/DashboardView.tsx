@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { AppView, PlayerStats, UserProfile } from '../types';
+import React, { useState, useEffect, useRef } from 'react';
+import { AppView, PlayerStats, UserProfile, DOLLARS_PER_T_POINT, convertDollarsToTPoints } from '../types';
 import { sound } from '../utils/audio';
 import confetti from 'canvas-confetti';
 import { 
@@ -12,13 +12,18 @@ import {
   Timer, 
   CheckCircle2, 
   ChevronRight, 
+  ChevronLeft,
   Zap, 
   Gamepad2, 
   Lock, 
   RotateCw,
   Coins,
   Shield,
-  Award
+  Award,
+  TrendingUp,
+  Info,
+  Layers,
+  ArrowRight
 } from 'lucide-react';
 
 interface DashboardViewProps {
@@ -41,8 +46,34 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
   // Carousel State
   const [carouselIndex, setCarouselIndex] = useState<number>(0);
 
+  // Bars Carousel Ref for horizontal side-scrolling
+  const barsCarouselRef = useRef<HTMLDivElement>(null);
+
   // Daily Claim Countdown
   const [timeUntilDailyClaim, setTimeUntilDailyClaim] = useState<number>(0);
+
+  // Calculated ₮ Points: $15.00 = ₮1.00
+  const accumulatedTPoints = convertDollarsToTPoints(stats.balance);
+  const dollarsIntoCurrentT = stats.balance % DOLLARS_PER_T_POINT;
+  const progressToNextTPoint = Math.min(100, Math.round((dollarsIntoCurrentT / DOLLARS_PER_T_POINT) * 100));
+  const dollarsNeededForNextT = (DOLLARS_PER_T_POINT - dollarsIntoCurrentT).toFixed(2);
+  
+  // Progress toward minimum withdrawal (₮40.00 / $600.00)
+  const MIN_WITHDRAW_USD = 600;
+  const MIN_WITHDRAW_T = 40; // 600 / 15
+  const MAX_WITHDRAW_T = 66.67; // 1000 / 15
+  const withdrawProgress = Math.min(100, Math.round((stats.balance / MIN_WITHDRAW_USD) * 100));
+
+  const scrollBarsCarousel = (direction: 'left' | 'right') => {
+    sound.playClick();
+    if (barsCarouselRef.current) {
+      const scrollAmount = barsCarouselRef.current.clientWidth * 0.8;
+      barsCarouselRef.current.scrollBy({
+        left: direction === 'left' ? -scrollAmount : scrollAmount,
+        behavior: 'smooth'
+      });
+    }
+  };
 
   useEffect(() => {
     const updateCountdown = () => {
@@ -91,7 +122,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
     },
     {
       title: '❌⭕ Tic Tac Toe Neural AI',
-      badge: '15 LEVELS',
+      badge: '100% INTELLIGENCE',
       badgeColor: 'bg-cyan-500 text-slate-950',
       description: 'Face off against 15 escalating minimax neural AI opponents. Doubling rewards from $0.20 up to $50.00 cash per victory!',
       buttonText: 'Play Tic Tac Toe ($50 Payout)',
@@ -108,7 +139,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
       icon: '🏃',
       tag: 'HOT',
       tagColor: 'bg-amber-500 text-slate-950',
-      reward: 'Up to $33.00',
+      reward: 'Up to $33.00 (₮2.20)',
       description: '5 Themed Worlds, $30 collect + $3 bonus, -$0.80 penalty, Hero skins & speedrun leaderboard.',
       action: () => setCurrentView('GAME_RUNNER')
     },
@@ -126,9 +157,9 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
       id: 'tictactoe',
       title: 'Tic Tac Toe AI Arena',
       icon: '❌⭕',
-      tag: '15 LEVELS',
+      tag: '100% SMART',
       tagColor: 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/30',
-      reward: 'Up to $50.00',
+      reward: 'Up to $50.00 (₮3.33)',
       description: 'Progressive AI challenge. Beat 15 smart bot masters to claim escalating cash multipliers.',
       action: () => setCurrentView('GAME_TICTACTOE')
     },
@@ -158,7 +189,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
       icon: '🥚',
       tag: '$100 JACKPOT',
       tagColor: 'bg-amber-500/20 text-amber-300 border border-amber-500/30',
-      reward: '+$0.50 to $100.00',
+      reward: '+$0.50 to $100.00 (₮6.67)',
       description: '1-Hour Marathon with 10 Levels x 100 Eggs. Uncover hidden cash and golden egg rewards.',
       action: () => setCurrentView('GAME_SCRATCH')
     },
@@ -168,84 +199,234 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
       icon: '🎡',
       tag: 'DAILY PLAY',
       tagColor: 'bg-teal-500/20 text-teal-300 border border-teal-500/30',
-      reward: 'Up to $25.00',
+      reward: 'Up to $25.00 (₮1.67)',
       description: 'Spin the dynamic prize wheel daily for guaranteed instant cash prizes.',
       action: () => setCurrentView('GAME_SPIN')
     }
   ];
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 space-y-8">
-      {/* Top Player Overview Card */}
-      <div className="bg-slate-900/90 border border-slate-800 rounded-3xl p-6 shadow-2xl backdrop-blur-md relative overflow-hidden">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 relative z-10">
-          {/* User Info */}
-          <div className="flex items-center gap-4">
-            <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-amber-500/30 via-emerald-500/30 to-cyan-500/30 border-2 border-emerald-500/40 flex items-center justify-center text-3xl shadow-lg shadow-emerald-500/10">
-              {user.avatar}
-            </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <h2 className="text-2xl font-black text-white">{user.username}</h2>
-                <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
-                  LVL {user.level}
-                </span>
-                {user.isGuest && (
-                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-800 text-slate-400 border border-slate-700">
-                    Guest Account
-                  </span>
-                )}
-              </div>
-              <p className="text-xs text-slate-400 mt-1">
-                Streak: <strong className="text-amber-400">{stats.streak} Days Active</strong> • {user.gamesPlayedToday} Games Today
-              </p>
-            </div>
+    <div className="max-w-6xl mx-auto px-3 sm:px-6 py-4 sm:py-6 space-y-4 sm:space-y-6">
+      {/* CAROUSEL SIDE SCROLL: CASH BALANCE & ACCUMULATED ₮ POINTS BARS IN SAME LINE */}
+      <div className="space-y-2.5">
+        {/* Carousel Header with Navigation Controls */}
+        <div className="flex items-center justify-between px-1">
+          <div className="flex items-center gap-2">
+            <h3 className="text-xs sm:text-sm font-black text-slate-200 uppercase tracking-wider flex items-center gap-1.5">
+              <Layers className="w-3.5 h-3.5 text-cyan-400" />
+              <span>Balance & Point Trackers</span>
+            </h3>
+            <span className="text-[10px] px-2 py-0.2 rounded-full bg-slate-800 text-slate-400 border border-slate-700 hidden xs:inline-flex items-center gap-1">
+              <span>⇄</span> Carousel Side Scroll
+            </span>
           </div>
 
-          {/* Balance & Quick Actions */}
-          <div className="flex flex-wrap items-center gap-3">
-            <div className="bg-slate-950/80 px-5 py-3 rounded-2xl border border-slate-800">
-              <span className="text-[10px] text-slate-400 block font-bold uppercase tracking-wider">
-                Total Cash Balance
-              </span>
-              <div className="text-2xl sm:text-3xl font-black text-emerald-400 flex items-center gap-1 mt-0.5">
-                <span>${stats.balance.toFixed(2)}</span>
-              </div>
-            </div>
-
+          <div className="flex items-center gap-1.5">
             <button
-              id="dash-withdraw-btn"
-              onClick={() => {
-                sound.playClick();
-                onOpenWithdraw();
-              }}
-              className="px-5 py-3.5 rounded-2xl bg-gradient-to-r from-emerald-500 via-teal-400 to-cyan-400 hover:from-emerald-400 hover:to-cyan-300 text-slate-950 font-black text-sm flex items-center gap-2 transition-all shadow-lg shadow-emerald-500/25 hover:scale-105 active:scale-95 cursor-pointer"
+              onClick={() => scrollBarsCarousel('left')}
+              title="Scroll Left"
+              className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition-colors border border-slate-700 cursor-pointer min-h-[30px] min-w-[30px] flex items-center justify-center shadow-sm active:scale-95"
             >
-              <Wallet className="w-4 h-4" />
-              <span>Withdraw Crypto</span>
+              <ChevronLeft className="w-3.5 h-3.5" />
+            </button>
+            <button
+              onClick={() => scrollBarsCarousel('right')}
+              title="Scroll Right"
+              className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition-colors border border-slate-700 cursor-pointer min-h-[30px] min-w-[30px] flex items-center justify-center shadow-sm active:scale-95"
+            >
+              <ChevronRight className="w-3.5 h-3.5" />
             </button>
           </div>
         </div>
 
-        {/* Ambient Glow */}
-        <div className="absolute top-0 right-0 w-80 h-40 bg-emerald-500/10 blur-3xl pointer-events-none rounded-full" />
+        {/* Carousel Track: Both Bars in the Same Line Separated by Space */}
+        <div 
+          ref={barsCarouselRef}
+          className="flex items-stretch gap-3.5 sm:gap-4 overflow-x-auto pb-2 snap-x snap-mandatory scroll-smooth scrollbar-thin"
+        >
+          {/* BAR 1: CASH BALANCE & PAYOUT PROGRESS BAR */}
+          <div 
+            id="cash-balance-bar-card"
+            className="flex-1 min-w-[300px] sm:min-w-[420px] md:min-w-[460px] shrink-0 snap-start bg-gradient-to-br from-emerald-950/60 via-slate-900 to-slate-950 border border-emerald-500/30 rounded-2xl sm:rounded-3xl p-4 sm:p-5 shadow-xl space-y-3 sm:space-y-3.5 relative overflow-hidden flex flex-col justify-between"
+          >
+            <div className="space-y-3">
+              {/* Header */}
+              <div className="flex items-center justify-between gap-2">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-emerald-400 shrink-0 shadow-inner">
+                    <Wallet className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h4 className="text-sm sm:text-base font-black text-white flex items-center gap-1.5 flex-wrap">
+                      <span>Cash Balance Bar</span>
+                      <span className="text-[10px] px-2 py-0.2 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-bold">
+                        USD Wallet
+                      </span>
+                    </h4>
+                    <p className="text-[11px] sm:text-xs text-slate-400">Withdrawal qualification threshold ($600 Min)</p>
+                  </div>
+                </div>
+
+                <div className="text-right shrink-0">
+                  <span className="text-[9px] sm:text-[10px] text-slate-400 uppercase font-bold block">Available</span>
+                  <span className="text-lg sm:text-xl font-black text-emerald-400 font-mono">
+                    ${stats.balance.toFixed(2)}
+                  </span>
+                </div>
+              </div>
+
+              {/* Progress to $600 Payout Bar */}
+              <div className="space-y-1.5 p-3 rounded-xl sm:rounded-2xl bg-slate-950/80 border border-slate-800">
+                <div className="flex justify-between items-center text-xs">
+                  <span className="text-slate-300 font-bold flex items-center gap-1">
+                    <TrendingUp className="w-3.5 h-3.5 text-emerald-400" />
+                    <span>Payout Threshold Progress</span>
+                  </span>
+                  <span className="text-emerald-300 font-black font-mono">
+                    {withdrawProgress}% (${stats.balance.toFixed(2)} / $600.00)
+                  </span>
+                </div>
+
+                {/* Visual Bar Track */}
+                <div className="w-full h-2.5 sm:h-3 bg-slate-900 rounded-full border border-slate-800 overflow-hidden p-0.5">
+                  <div 
+                    className="h-full bg-gradient-to-r from-emerald-500 via-teal-400 to-cyan-400 rounded-full transition-all duration-500 shadow-sm shadow-emerald-500/50"
+                    style={{ width: `${withdrawProgress}%` }}
+                  />
+                </div>
+
+                <div className="flex justify-between items-center text-[10px] text-slate-400">
+                  <span>Min Floor: $600.00</span>
+                  <span>
+                    {stats.balance >= MIN_WITHDRAW_USD ? (
+                      <strong className="text-emerald-400">✓ Ready to Cash Out</strong>
+                    ) : (
+                      `$${(MIN_WITHDRAW_USD - stats.balance).toFixed(2)} more to unlock`
+                    )}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Bottom Actions & Policy */}
+            <div className="pt-2 border-t border-slate-800/80 flex items-center justify-between gap-2">
+              <div className="text-[10px] text-slate-400">
+                <span>Fee: <strong className="text-amber-400">0.50%</strong> · Max: <strong className="text-slate-300">$1,000/tx</strong></span>
+              </div>
+              <button
+                onClick={() => {
+                  sound.playClick();
+                  onOpenWithdraw();
+                }}
+                className="px-3.5 py-1.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-xs transition-all shadow-md shadow-emerald-500/20 cursor-pointer flex items-center gap-1 shrink-0"
+              >
+                <span>Request Payout</span>
+                <ArrowRight className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          </div>
+
+          {/* BAR 2: ACCUMULATED ₮ POINTS & CONVERSION BAR */}
+          <div 
+            id="accumulated-points-bar-card"
+            className="flex-1 min-w-[300px] sm:min-w-[420px] md:min-w-[460px] shrink-0 snap-start bg-gradient-to-br from-cyan-950/60 via-slate-900 to-slate-950 border border-cyan-500/30 rounded-2xl sm:rounded-3xl p-4 sm:p-5 shadow-xl space-y-3 sm:space-y-3.5 relative overflow-hidden flex flex-col justify-between"
+          >
+            <div className="space-y-3">
+              {/* Header */}
+              <div className="flex items-center justify-between gap-2">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-cyan-500/20 border border-cyan-500/40 flex items-center justify-center text-cyan-300 font-black text-lg shrink-0 shadow-inner">
+                    ₮
+                  </div>
+                  <div>
+                    <h4 className="text-sm sm:text-base font-black text-white flex items-center gap-1.5 flex-wrap">
+                      <span>Accumulated ₮ Points Bar</span>
+                      <span className="text-[10px] px-2 py-0.2 rounded-full bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 font-bold">
+                        $15.00 = ₮1.00
+                      </span>
+                    </h4>
+                    <p className="text-[11px] sm:text-xs text-slate-400">Real-time reward points calculated from games</p>
+                  </div>
+                </div>
+
+                <div className="text-right shrink-0">
+                  <span className="text-[9px] sm:text-[10px] text-slate-400 uppercase font-bold block">Points Balance</span>
+                  <span className="text-lg sm:text-xl font-black text-cyan-400 font-mono">
+                    ₮{accumulatedTPoints.toFixed(2)}
+                  </span>
+                </div>
+              </div>
+
+              {/* Progress to Next ₮1.00 Bar */}
+              <div className="space-y-1.5 p-3 rounded-xl sm:rounded-2xl bg-slate-950/80 border border-slate-800">
+                <div className="flex justify-between items-center text-xs">
+                  <span className="text-slate-300 font-bold flex items-center gap-1">
+                    <Sparkles className="w-3.5 h-3.5 text-cyan-400" />
+                    <span>Progress to Next ₮1.00 Point</span>
+                  </span>
+                  <span className="text-cyan-300 font-black font-mono">
+                    {progressToNextTPoint}% (${dollarsIntoCurrentT.toFixed(2)} / $15.00)
+                  </span>
+                </div>
+
+                {/* Visual Bar Track */}
+                <div className="w-full h-2.5 sm:h-3 bg-slate-900 rounded-full border border-slate-800 overflow-hidden p-0.5">
+                  <div 
+                    className="h-full bg-gradient-to-r from-cyan-500 via-teal-400 to-emerald-400 rounded-full transition-all duration-500 shadow-sm shadow-cyan-500/50"
+                    style={{ width: `${progressToNextTPoint}%` }}
+                  />
+                </div>
+
+                <div className="flex justify-between items-center text-[10px] text-slate-400">
+                  <span>Current: ₮{Math.floor(accumulatedTPoints)}</span>
+                  <span>+${dollarsNeededForNextT} for ₮{(Math.floor(accumulatedTPoints) + 1).toFixed(2)}</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Milestones Track in the card */}
+            <div className="pt-2 border-t border-slate-800/80 flex items-center justify-between gap-1 text-center">
+              {[
+                { label: '₮1.00', usd: '$15', target: 1 },
+                { label: '₮10.00', usd: '$150', target: 10 },
+                { label: '₮25.00', usd: '$375', target: 25 },
+                { label: '₮40.00', usd: '$600', target: 40 }
+              ].map((m, idx) => {
+                const reached = accumulatedTPoints >= m.target;
+                return (
+                  <div 
+                    key={idx}
+                    className={`flex-1 px-1 py-1 rounded-lg border text-[9px] ${
+                      reached 
+                        ? 'bg-cyan-500/15 border-cyan-500/40 text-cyan-300 font-bold' 
+                        : 'bg-slate-950/60 border-slate-800 text-slate-500'
+                    }`}
+                  >
+                    <div className="font-bold truncate">{m.label}</div>
+                    <div className="text-[8px] text-slate-400">{m.usd}</div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* Daily $1.00 Claim Card */}
-      <div className="p-5 rounded-3xl bg-gradient-to-r from-purple-950/70 via-slate-900 to-slate-950 border border-purple-500/40 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-xl">
-        <div className="flex items-center gap-4 text-center sm:text-left">
-          <div className="w-14 h-14 rounded-2xl bg-purple-500/20 text-purple-300 flex items-center justify-center text-2xl border border-purple-500/40 shadow-inner">
+      <div className="p-3.5 sm:p-4 rounded-2xl sm:rounded-3xl bg-gradient-to-r from-purple-950/70 via-slate-900 to-slate-950 border border-purple-500/40 flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-4 shadow-lg">
+        <div className="flex items-center gap-3 text-center sm:text-left">
+          <div className="w-11 h-11 rounded-xl bg-purple-500/20 text-purple-300 flex items-center justify-center text-xl border border-purple-500/40 shadow-inner shrink-0">
             🎁
           </div>
           <div>
             <div className="flex items-center justify-center sm:justify-start gap-2">
-              <h3 className="text-lg font-black text-white">Daily $1.00 Cash Bonus</h3>
-              <span className="text-[10px] font-black px-2 py-0.5 rounded bg-purple-500/30 text-purple-300">
+              <h3 className="text-base sm:text-lg font-black text-white">Daily $1.00 Cash Bonus (₮0.07)</h3>
+              <span className="text-[9px] font-black px-1.5 py-0.5 rounded bg-purple-500/30 text-purple-300">
                 24H STREAK
               </span>
             </div>
             <p className="text-xs text-slate-300 mt-0.5">
-              Claim $1.00 every 24 hours to boost your balance and increase streak multipliers.
+              Claim $1.00 every 24 hours to automatically boost your cash balance and ₮ points.
             </p>
           </div>
         </div>
@@ -254,9 +435,9 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
           {timeUntilDailyClaim > 0 ? (
             <button
               disabled
-              className="px-6 py-3 rounded-2xl bg-slate-800 text-slate-400 text-xs font-bold flex items-center gap-2 border border-slate-700 cursor-not-allowed opacity-80"
+              className="px-4 py-2.5 rounded-xl bg-slate-800 text-slate-400 text-xs font-bold flex items-center gap-1.5 border border-slate-700 cursor-not-allowed opacity-80 whitespace-nowrap"
             >
-              <Timer className="w-4 h-4 text-purple-400 animate-pulse" />
+              <Timer className="w-3.5 h-3.5 text-purple-400 animate-pulse" />
               <span>Next Claim: {formatCountdown(timeUntilDailyClaim)}</span>
             </button>
           ) : (
@@ -267,7 +448,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                 confetti({ particleCount: 70, spread: 70, origin: { y: 0.6 } });
                 onClaimDaily();
               }}
-              className="px-6 py-3 rounded-2xl bg-gradient-to-r from-purple-500 to-indigo-500 hover:from-purple-400 hover:to-indigo-400 text-white font-black text-sm flex items-center gap-2 shadow-lg shadow-purple-500/30 hover:scale-105 active:scale-95 cursor-pointer"
+              className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-purple-500 to-indigo-500 hover:from-purple-400 hover:to-indigo-400 text-white font-black text-xs sm:text-sm flex items-center gap-2 shadow-lg shadow-purple-500/30 hover:scale-105 active:scale-95 cursor-pointer whitespace-nowrap"
             >
               <Gift className="w-4 h-4" />
               <span>Claim Daily $1.00 Now</span>
@@ -277,9 +458,9 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
       </div>
 
       {/* Featured Carousel */}
-      <div className="space-y-3">
+      <div className="space-y-2.5">
         <div className="flex items-center justify-between">
-          <h3 className="text-lg font-black text-white flex items-center gap-2">
+          <h3 className="text-base sm:text-lg font-black text-white flex items-center gap-2">
             <Sparkles className="w-4 h-4 text-amber-400" />
             <span>Featured Tournaments & Events</span>
           </h3>
@@ -288,8 +469,8 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
               <button
                 key={idx}
                 onClick={() => setCarouselIndex(idx)}
-                className={`h-2 rounded-full transition-all ${
-                  carouselIndex === idx ? 'w-6 bg-emerald-400' : 'w-2 bg-slate-700'
+                className={`h-1.5 rounded-full transition-all ${
+                  carouselIndex === idx ? 'w-5 bg-emerald-400' : 'w-1.5 bg-slate-700'
                 }`}
               />
             ))}
@@ -298,15 +479,15 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
 
         {/* Slide Card */}
         <div
-          className={`p-6 sm:p-8 rounded-3xl border ${featuredSlides[carouselIndex].borderColor} bg-gradient-to-r ${featuredSlides[carouselIndex].bgGradient} shadow-2xl transition-all duration-300 relative overflow-hidden flex flex-col md:flex-row items-start md:items-center justify-between gap-6`}
+          className={`p-4 sm:p-6 rounded-2xl sm:rounded-3xl border ${featuredSlides[carouselIndex].borderColor} bg-gradient-to-r ${featuredSlides[carouselIndex].bgGradient} shadow-xl transition-all duration-300 relative overflow-hidden flex flex-col md:flex-row items-start md:items-center justify-between gap-4`}
         >
-          <div className="space-y-3 max-w-2xl">
+          <div className="space-y-2 max-w-2xl">
             <div className="inline-flex items-center gap-2">
-              <span className={`text-[10px] font-black px-2.5 py-1 rounded-md ${featuredSlides[carouselIndex].badgeColor}`}>
+              <span className={`text-[10px] font-black px-2 py-0.5 rounded-md ${featuredSlides[carouselIndex].badgeColor}`}>
                 {featuredSlides[carouselIndex].badge}
               </span>
             </div>
-            <h2 className="text-2xl sm:text-3xl font-black text-white">
+            <h2 className="text-xl sm:text-2xl font-black text-white">
               {featuredSlides[carouselIndex].title}
             </h2>
             <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
@@ -319,28 +500,28 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
               sound.playClick();
               featuredSlides[carouselIndex].action();
             }}
-            className="px-6 py-4 rounded-2xl bg-white text-slate-950 hover:bg-slate-100 font-black text-sm flex items-center gap-2 transition-all shadow-xl hover:scale-105 active:scale-95 cursor-pointer whitespace-nowrap"
+            className="px-5 py-3 rounded-xl bg-white text-slate-950 hover:bg-slate-100 font-black text-xs sm:text-sm flex items-center gap-2 transition-all shadow-xl hover:scale-105 active:scale-95 cursor-pointer whitespace-nowrap shrink-0"
           >
-            <Play className="w-4 h-4 fill-current" />
+            <Play className="w-3.5 h-3.5 fill-current" />
             <span>{featuredSlides[carouselIndex].buttonText}</span>
           </button>
         </div>
       </div>
 
       {/* Grid of All Games */}
-      <div className="space-y-4">
+      <div className="space-y-3">
         <div className="flex items-center justify-between">
           <div>
-            <h3 className="text-xl font-black text-white flex items-center gap-2">
-              <Gamepad2 className="w-5 h-5 text-emerald-400" />
+            <h3 className="text-lg sm:text-xl font-black text-white flex items-center gap-2">
+              <Gamepad2 className="w-4.5 h-4.5 text-emerald-400" />
               <span>All Arcade Mini-Games</span>
             </h3>
-            <p className="text-xs text-slate-400">Select any game to play and earn instant balance credit</p>
+            <p className="text-xs text-slate-400">Play any minigame to automatically accrue cash and ₮ points ($15 = ₮1)</p>
           </div>
           <span className="text-xs font-bold text-slate-400">7 Games Ready</span>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5 sm:gap-4">
           {allGames.map((game) => (
             <div
               key={game.id}
@@ -348,11 +529,11 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                 sound.playClick();
                 game.action();
               }}
-              className="group bg-slate-900/80 hover:bg-slate-900 border border-slate-800 hover:border-slate-700 rounded-3xl p-5 transition-all duration-200 hover:shadow-2xl hover:scale-[1.02] cursor-pointer flex flex-col justify-between space-y-4 relative overflow-hidden"
+              className="group bg-slate-900/80 hover:bg-slate-900 border border-slate-800 hover:border-slate-700 rounded-2xl p-4 transition-all duration-200 hover:shadow-xl hover:scale-[1.01] cursor-pointer flex flex-col justify-between space-y-3 relative overflow-hidden"
             >
               <div>
                 <div className="flex items-center justify-between">
-                  <div className="w-12 h-12 rounded-2xl bg-slate-800 group-hover:bg-slate-700 flex items-center justify-center text-2xl border border-slate-700 transition-colors shadow-md">
+                  <div className="w-10 h-10 rounded-xl bg-slate-800 group-hover:bg-slate-700 flex items-center justify-center text-xl border border-slate-700 transition-colors shadow-md">
                     {game.icon}
                   </div>
                   <span className={`text-[10px] font-black px-2 py-0.5 rounded ${game.tagColor}`}>
@@ -360,7 +541,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                   </span>
                 </div>
 
-                <h4 className="text-lg font-black text-white mt-3 group-hover:text-emerald-300 transition-colors">
+                <h4 className="text-base font-black text-white mt-2.5 group-hover:text-emerald-300 transition-colors">
                   {game.title}
                 </h4>
                 <p className="text-xs text-slate-400 mt-1 line-clamp-2 leading-relaxed">
@@ -370,12 +551,12 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
 
               <div className="pt-2 flex items-center justify-between border-t border-slate-800/80">
                 <div>
-                  <span className="text-[10px] text-slate-500 uppercase font-bold block">Reward Pool</span>
+                  <span className="text-[9px] text-slate-500 uppercase font-bold block">Reward Pool</span>
                   <strong className="text-emerald-400 font-extrabold text-xs">{game.reward}</strong>
                 </div>
 
-                <div className="w-8 h-8 rounded-xl bg-slate-800 group-hover:bg-emerald-500 group-hover:text-slate-950 text-slate-400 flex items-center justify-center transition-all">
-                  <ChevronRight className="w-4 h-4" />
+                <div className="w-7 h-7 rounded-lg bg-slate-800 group-hover:bg-emerald-500 group-hover:text-slate-950 text-slate-400 flex items-center justify-center transition-all">
+                  <ChevronRight className="w-3.5 h-3.5" />
                 </div>
               </div>
             </div>
