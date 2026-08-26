@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { PlayerStats } from '../../types';
 import { sound } from '../../utils/audio';
 import confetti from 'canvas-confetti';
 import { ArrowLeft, RotateCcw, Trophy, Sparkles, Bot, User, Flame, Award, ChevronRight, Brain, Zap, ShieldAlert } from 'lucide-react';
@@ -7,6 +8,7 @@ interface TicTacToeGameProps {
   onWin: (amount: number, description: string) => void;
   onBack: () => void;
   userBalance?: number;
+  stats?: PlayerStats;
 }
 
 type CellValue = 'X' | 'O' | null;
@@ -39,7 +41,8 @@ const TTT_LEVELS: LevelInfo[] = [
 export const TicTacToeGame: React.FC<TicTacToeGameProps> = ({
   onWin,
   onBack,
-  userBalance
+  userBalance,
+  stats
 }) => {
   const [currentLevel, setCurrentLevel] = useState<number>(1);
   const [maxUnlockedLevel, setMaxUnlockedLevel] = useState<number>(() => {

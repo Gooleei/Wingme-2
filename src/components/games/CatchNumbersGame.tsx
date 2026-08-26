@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { PlayerStats } from '../../types';
 import { sound } from '../../utils/audio';
 import confetti from 'canvas-confetti';
 import { ArrowLeft, RotateCcw, Timer, Zap, Trophy, Flame } from 'lucide-react';
@@ -7,6 +8,7 @@ interface CatchNumbersGameProps {
   onWin: (amount: number, description: string) => void;
   onBack: () => void;
   userBalance: number;
+  stats?: PlayerStats;
 }
 
 interface FallingNumber {
@@ -20,7 +22,8 @@ interface FallingNumber {
 export const CatchNumbersGame: React.FC<CatchNumbersGameProps> = ({
   onWin,
   onBack,
-  userBalance
+  userBalance,
+  stats
 }) => {
   const [targetNumber, setTargetNumber] = useState<number>(7);
   const [isPlaying, setIsPlaying] = useState<boolean>(false);

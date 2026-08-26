@@ -3,6 +3,7 @@ export type AppView =
   | 'AUTH'
   | 'DASHBOARD'
   | 'WATCH'
+  | 'MINE'
   | 'GAME_RUNNER'
   | 'GAME_MEMORY'
   | 'GAME_TICTACTOE'
@@ -53,6 +54,27 @@ export interface PlayerStats {
     doubleJumpUnlocked: boolean;
     speedBoostLevel: number;
   };
+  mineProgress?: {
+    currentLevel: number; // 1 to 15
+    tapsInLevel: number;
+    totalTaps: number;
+    totalEarnedCash: number;
+    highestLevelUnlocked: number;
+  };
+}
+
+export interface MineLevelConfig {
+  level: number;
+  name: string;
+  requiredTaps: number;
+  tapReward: number; // Cash earned per single tap (scales +20% per level)
+  bonusReward: number;
+  gemSizeClass: string;
+  gemVisualTheme: string;
+  glowColor: string;
+  accentColor: string;
+  appraisalShout: string;
+  statusTitle: string;
 }
 
 export interface LevelConfig {

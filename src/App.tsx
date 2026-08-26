@@ -31,6 +31,7 @@ import { RewardsHub } from './components/RewardsHub';
 import { HistoryView } from './components/HistoryView';
 import { ProfileView } from './components/ProfileView';
 import { WatchView } from './components/WatchView';
+import { MineView } from './components/MineView';
 import { AuthModal } from './components/AuthModal';
 import { sound } from './utils/audio';
 
@@ -345,6 +346,7 @@ export default function App() {
         {/* 🧠 Memory Match Challenge */}
         {currentView === 'GAME_MEMORY' && (
           <MemoryMatchGame
+            stats={stats}
             onWin={handleGameWin}
             onBack={() => setCurrentView('DASHBOARD')}
             userBalance={stats.balance}
@@ -354,6 +356,7 @@ export default function App() {
         {/* ❌⭕ Tic Tac Toe AI Arena */}
         {currentView === 'GAME_TICTACTOE' && (
           <TicTacToeGame
+            stats={stats}
             onWin={handleGameWin}
             onBack={() => setCurrentView('DASHBOARD')}
             userBalance={stats.balance}
@@ -363,6 +366,7 @@ export default function App() {
         {/* 🔢 Catch Numbers (3s Reflex) */}
         {currentView === 'GAME_NUMBERS' && (
           <CatchNumbersGame
+            stats={stats}
             onWin={handleGameWin}
             onBack={() => setCurrentView('DASHBOARD')}
             userBalance={stats.balance}
@@ -372,6 +376,7 @@ export default function App() {
         {/* 🔤 Spelling Challenge (3s Rush) */}
         {currentView === 'GAME_SPELLING' && (
           <SpellingChallengeGame
+            stats={stats}
             onWin={handleGameWin}
             onBack={() => setCurrentView('DASHBOARD')}
             userBalance={stats.balance}
@@ -381,6 +386,7 @@ export default function App() {
         {/* 🥚 Egg Scratch Matrix (1-Hour Marathon) */}
         {currentView === 'GAME_SCRATCH' && (
           <EggScratchGame
+            stats={stats}
             onWin={handleGameWin}
             onBack={() => setCurrentView('DASHBOARD')}
             userBalance={stats.balance}
@@ -390,9 +396,23 @@ export default function App() {
         {/* 🎡 Lucky Wheel Spin */}
         {currentView === 'GAME_SPIN' && (
           <LuckyWheelGame
+            stats={stats}
             onWin={handleGameWin}
             onBack={() => setCurrentView('DASHBOARD')}
             userBalance={stats.balance}
+          />
+        )}
+
+        {/* 💎 Mine: Tap-to-Win Diamond Syndicate (15 Levels to GodFather) */}
+        {currentView === 'MINE' && (
+          <MineView
+            stats={stats}
+            setStats={setStats}
+            user={user}
+            onBack={() => setCurrentView('DASHBOARD')}
+            soundOn={soundOn}
+            setSoundOn={setSoundOn}
+            onOpenWithdraw={() => setShowWithdrawModal(true)}
           />
         )}
 
@@ -413,6 +433,7 @@ export default function App() {
         {/* 📜 Ledger & Transaction History */}
         {currentView === 'HISTORY' && (
           <HistoryView
+            stats={stats}
             transactions={transactions}
             onBack={() => setCurrentView('DASHBOARD')}
             userBalance={stats.balance}
@@ -444,6 +465,7 @@ export default function App() {
         {/* 📺 Watch Blank Page with Embedded Link */}
         {currentView === 'WATCH' && (
           <WatchView
+            stats={stats}
             onBack={() => setCurrentView('DASHBOARD')}
           />
         )}

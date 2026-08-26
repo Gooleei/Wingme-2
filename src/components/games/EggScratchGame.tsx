@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { PlayerStats } from '../../types';
 import { sound } from '../../utils/audio';
 import confetti from 'canvas-confetti';
 import { 
@@ -18,11 +19,13 @@ interface EggScratchGameProps {
   onWin: (amount: number, description: string) => void;
   onBack: () => void;
   userBalance: number;
+  stats?: PlayerStats;
 }
 
 interface EggTile {
   id: number;
-  isScratched: boolean;
+  taps: number; // 0 = uncracked, 1 = cracked (1 tap), 2 = fully opened (double tapped)
+  isScratched: boolean; // true when taps >= 2
   reward: number; // 0 for empty, >0 for cash
   isGolden: boolean;
 }
@@ -43,7 +46,8 @@ const LEVEL_CONFIGS = [
 export const EggScratchGame: React.FC<EggScratchGameProps> = ({
   onWin,
   onBack,
-  userBalance
+  userBalance,
+  stats
 }) => {
   const [currentLevel, setCurrentLevel] = useState<number>(1);
   const [eggs, setEggs] = useState<EggTile[]>([]);
@@ -72,6 +76,7 @@ export const EggScratchGame: React.FC<EggScratchGameProps> = ({
 
       newEggs.push({
         id: i,
+        taps: 0,
         isScratched: false,
         reward,
         isGolden
@@ -96,24 +101,37 @@ export const EggScratchGame: React.FC<EggScratchGameProps> = ({
     return () => clearInterval(timer);
   }, []);
 
-  const handleEggScratch = (index: number) => {
+  // DOUBLE-TAP EGG CRACK MECHANIC
+  const handleEggTap = (index: number) => {
     if (eggs[index].isScratched || isLevelCleared) return;
 
+    const currentEgg = eggs[index];
+    const newTaps = currentEgg.taps + 1;
+
+    // First Tap: Fractures egg shell
+    if (newTaps === 1) {
+      sound.playClick();
+      const updated = [...eggs];
+      updated[index] = { ...currentEgg, taps: 1 };
+      setEggs(updated);
+      return;
+    }
+
+    // Second Tap (Double Tap completed): Breaks egg open and reveals cash prize!
     sound.playEggCrack();
     const updated = [...eggs];
-    updated[index].isScratched = true;
+    updated[index] = { ...currentEgg, taps: 2, isScratched: true };
     setEggs(updated);
 
-    const egg = updated[index];
     const newScratchedCount = scratchedCount + 1;
     setScratchedCount(newScratchedCount);
 
-    let addCash = egg.reward;
+    const addCash = currentEgg.reward;
     if (addCash > 0) {
       sound.playCoin();
       setLevelEarnedCash((c) => +(c + addCash).toFixed(2));
       setTotalChallengeEarned((t) => +(t + addCash).toFixed(2));
-      onWin(addCash, `🥚 Egg Scratch (${activeLevel.name}) Drop +$${addCash.toFixed(2)}`);
+      onWin(addCash, `🥚 Egg Crack (${activeLevel.name}) Drop +$${addCash.toFixed(2)}`);
     }
 
     // Check if level quota reached
@@ -123,7 +141,7 @@ export const EggScratchGame: React.FC<EggScratchGameProps> = ({
       const levelBonus = activeLevel.baseRewardPool;
       sound.playWin();
       confetti({ particleCount: 80, spread: 70, origin: { y: 0.6 } });
-      onWin(levelBonus, `🏆 Egg Scratch Level ${currentLevel} (${activeLevel.name}) Bonus!`);
+      onWin(levelBonus, `🏆 Egg Crack Level ${currentLevel} (${activeLevel.name}) Bonus!`);
       setTotalChallengeEarned((t) => +(t + levelBonus).toFixed(2));
     }
   };
@@ -150,12 +168,12 @@ export const EggScratchGame: React.FC<EggScratchGameProps> = ({
           </button>
           <div>
             <h1 className="text-base sm:text-lg font-black text-white flex items-center gap-1.5 flex-wrap">
-              <span>🥚 Egg Scratch Matrix</span>
+              <span>🥚 Crack Egg Matrix</span>
               <span className="text-[10px] sm:text-xs px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-400 border border-amber-500/30 font-bold">
                 10 Lvl • $100 Jackpot
               </span>
             </h1>
-            <p className="text-xs text-slate-400">Scratch matrix eggs to find hidden cash</p>
+            <p className="text-xs text-slate-400">Double-tap each egg to crack it and win cash</p>
           </div>
         </div>
 
@@ -176,7 +194,7 @@ export const EggScratchGame: React.FC<EggScratchGameProps> = ({
         </div>
 
         <div className="bg-slate-900/80 border border-slate-800 rounded-xl p-2.5 text-center">
-          <span className="text-[10px] sm:text-[11px] text-slate-400 font-bold">Eggs Scratched</span>
+          <span className="text-[10px] sm:text-[11px] text-slate-400 font-bold">Eggs Cracked</span>
           <div className="text-sm sm:text-base font-black text-white mt-0.5">
             {scratchedCount} / {activeLevel.eggsNeeded}
           </div>
@@ -197,32 +215,48 @@ export const EggScratchGame: React.FC<EggScratchGameProps> = ({
         </div>
       </div>
 
+      {/* Double Tap Instruction Hint */}
+      <div className="flex items-center justify-center gap-2 py-1.5 px-3 rounded-xl bg-amber-500/10 border border-amber-500/25 text-amber-300 text-xs font-semibold text-center">
+        <Sparkles className="w-3.5 h-3.5 text-amber-400 animate-spin" />
+        <span>⚡ <strong>Double-tap</strong> on each egg to crack it open and reveal cash rewards!</span>
+      </div>
+
       {/* 10x10 Matrix Grid */}
       <div className="bg-slate-950/80 border border-slate-800 rounded-2xl sm:rounded-3xl p-3 sm:p-5 shadow-2xl overflow-hidden">
         <div className="grid grid-cols-10 gap-1 sm:gap-1.5 max-w-xl mx-auto">
           {eggs.map((egg, idx) => (
             <button
               key={egg.id}
-              onClick={() => handleEggScratch(idx)}
+              onClick={() => handleEggTap(idx)}
               disabled={egg.isScratched || isLevelCleared}
-              className={`aspect-square rounded-md sm:rounded-lg flex items-center justify-center font-bold text-[10px] sm:text-xs transition-all duration-200 cursor-pointer select-none ${
+              title={egg.isScratched ? (egg.reward > 0 ? `+$${egg.reward.toFixed(2)}` : 'Empty') : egg.taps === 1 ? 'Tap once more to open!' : 'Double-tap to crack'}
+              className={`aspect-square rounded-md sm:rounded-lg flex flex-col items-center justify-center font-bold text-[10px] sm:text-xs transition-all duration-150 cursor-pointer select-none relative ${
                 egg.isScratched
                   ? egg.reward > 0
                     ? 'bg-amber-500/20 border border-amber-400/50 text-amber-300 scale-95 shadow-inner'
                     : 'bg-slate-900/60 border border-slate-800/80 text-slate-600 scale-90'
-                  : 'bg-gradient-to-b from-slate-800 to-slate-900 hover:from-slate-700 hover:to-slate-800 border border-slate-700 hover:border-amber-400/50 text-amber-400 hover:scale-105 active:scale-95 shadow-sm'
+                  : egg.taps === 1
+                    ? 'bg-amber-950/80 border-2 border-amber-400 text-amber-300 scale-100 animate-pulse shadow-lg shadow-amber-500/30'
+                    : 'bg-gradient-to-b from-slate-800 to-slate-900 hover:from-slate-700 hover:to-slate-800 border border-slate-700 hover:border-amber-400/50 text-amber-400 hover:scale-105 active:scale-95 shadow-sm'
               }`}
             >
               {egg.isScratched ? (
                 egg.reward > 0 ? (
-                  <span className="font-extrabold text-[8px] sm:text-[10px] text-emerald-400">
+                  <span className="font-extrabold text-[8px] sm:text-[10px] text-emerald-400 leading-none">
                     +${egg.reward.toFixed(2)}
                   </span>
                 ) : (
                   <span className="text-[8px] text-slate-600">✕</span>
                 )
+              ) : egg.taps === 1 ? (
+                <div className="flex flex-col items-center justify-center">
+                  <span className="text-[10px] leading-none select-none">💥</span>
+                  <span className="text-[7px] font-black text-amber-300 uppercase leading-none mt-0.5">
+                    1 TAP
+                  </span>
+                </div>
               ) : (
-                <Egg className="w-3 h-3 sm:w-4 sm:h-4 text-amber-400/80" />
+                <Egg className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-amber-400/90 drop-shadow" />
               )}
             </button>
           ))}

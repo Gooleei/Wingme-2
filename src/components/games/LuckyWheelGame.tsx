@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { PlayerStats } from '../../types';
 import { sound } from '../../utils/audio';
 import confetti from 'canvas-confetti';
 import { ArrowLeft, RotateCcw, Sparkles, Lock, Timer, Trophy, Flame } from 'lucide-react';
@@ -7,6 +8,7 @@ interface LuckyWheelProps {
   onWin: (amount: number, description: string) => void;
   onBack: () => void;
   userBalance: number;
+  stats?: PlayerStats;
 }
 
 interface Segment {
@@ -30,7 +32,8 @@ const SEGMENTS: Segment[] = [
 export const LuckyWheelGame: React.FC<LuckyWheelProps> = ({
   onWin,
   onBack,
-  userBalance
+  userBalance,
+  stats
 }) => {
   const [isSpinning, setIsSpinning] = useState<boolean>(false);
   const [rotation, setRotation] = useState<number>(0);
@@ -115,30 +118,38 @@ export const LuckyWheelGame: React.FC<LuckyWheelProps> = ({
     setLastWonSegment(null);
     setFreeSpinsLeft((s) => s - 1);
 
-    // Generate random rotations: 5 to 8 full spins + random offset
-    const fullSpins = 5 + Math.floor(Math.random() * 4);
+    // Pick target segment index (0 to 7)
     const targetSegmentIndex = Math.floor(Math.random() * SEGMENTS.length);
-    const arcDegrees = 360 / SEGMENTS.length;
-    // Align with top pointer (270 degrees)
-    const targetAngle = 360 * fullSpins + (360 - targetSegmentIndex * arcDegrees - arcDegrees / 2);
+    const arcDegrees = 360 / SEGMENTS.length; // 45 degrees
+    const segmentCenterAngle = (targetSegmentIndex + 0.5) * arcDegrees;
+
+    // Top Red Spin Tick is at 270 degrees (12 o'clock in canvas standard coordinates)
+    // We want (segmentCenterAngle + targetRotation) % 360 === 270
+    const desiredOffset = (270 - segmentCenterAngle + 360) % 360;
+    
+    // 5 to 8 full spins
+    const fullSpins = 5 + Math.floor(Math.random() * 4);
+    const currentRotMod = (rotation % 360 + 360) % 360;
+    const additionalDegrees = ((desiredOffset - currentRotMod + 360) % 360);
+    const totalSpinDegrees = 360 * fullSpins + additionalDegrees;
 
     const startRot = rotation;
-    const finalRot = startRot + targetAngle;
+    const finalRot = startRot + totalSpinDegrees;
     const duration = 4000;
     const startTime = performance.now();
 
     // Audio ticks during spin
-    let lastTickAngle = 0;
+    let lastTickAngle = startRot;
 
     const animateSpin = (time: number) => {
       const elapsed = time - startTime;
       const progress = Math.min(1, elapsed / duration);
-      // Ease-out cubic
+      // Smooth Ease-out cubic
       const ease = 1 - Math.pow(1 - progress, 3);
       const currentAngle = startRot + (finalRot - startRot) * ease;
       setRotation(currentAngle);
 
-      if (Math.abs(currentAngle - lastTickAngle) > 20) {
+      if (Math.abs(currentAngle - lastTickAngle) >= 22.5) {
         sound.playWheelTick();
         lastTickAngle = currentAngle;
       }
@@ -146,13 +157,18 @@ export const LuckyWheelGame: React.FC<LuckyWheelProps> = ({
       if (progress < 1) {
         requestAnimationFrame(animateSpin);
       } else {
-        // Complete
+        // Complete - Physically verify exact segment under the Red Spin Tick (270 degrees)
         setIsSpinning(false);
-        const won = SEGMENTS[targetSegmentIndex];
+        const finalNormalizedAngle = (270 - (finalRot % 360) + 360) % 360;
+        const actualSegmentIndex = Math.floor(finalNormalizedAngle / arcDegrees) % SEGMENTS.length;
+        const won = SEGMENTS[actualSegmentIndex];
+        
         setLastWonSegment(won);
         sound.playWin();
         confetti({ particleCount: 70, spread: 70, origin: { y: 0.6 } });
-        onWin(won.amount, `🎡 Lucky Wheel Cash Prize +$${won.amount.toFixed(2)}`);
+        
+        // Strictly credit the exact amount won at the red tick
+        onWin(won.amount, `🎡 Lucky Wheel (${won.label}) Won at Red Tick +$${won.amount.toFixed(2)}`);
       }
     };
 
@@ -229,9 +245,13 @@ export const LuckyWheelGame: React.FC<LuckyWheelProps> = ({
 
         {/* Center: Interactive Rotating Wheel Canvas */}
         <div className="md:col-span-2 flex flex-col items-center justify-center p-4 sm:p-5 bg-slate-950/60 rounded-2xl sm:rounded-3xl border border-slate-800 relative">
-          {/* Top Pointer Indicator */}
-          <div className="absolute top-2.5 z-20 flex flex-col items-center">
-            <div className="w-0 h-0 border-l-[12px] border-l-transparent border-r-[12px] border-r-transparent border-t-[20px] border-t-amber-400 drop-shadow-[0_4px_8px_rgba(245,158,11,0.6)]" />
+          {/* Top Red Pointer / Spin Tick */}
+          <div className="absolute top-1.5 z-30 flex flex-col items-center pointer-events-none">
+            <div className="w-0 h-0 border-l-[14px] border-l-transparent border-r-[14px] border-r-transparent border-t-[22px] border-t-red-500 drop-shadow-[0_4px_12px_rgba(239,68,68,0.9)]" />
+            <div className="w-3 h-3 bg-red-600 rounded-full -mt-1.5 shadow-md border-2 border-white" />
+            <span className="text-[9px] font-black uppercase tracking-wider text-red-300 bg-red-950/90 px-2 py-0.5 rounded-full border border-red-500/50 mt-0.5 shadow">
+              RED SPIN TICK
+            </span>
           </div>
 
           {/* Rotating Canvas Wrapper */}

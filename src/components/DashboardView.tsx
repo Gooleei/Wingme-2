@@ -60,8 +60,6 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
   
   // Progress toward minimum withdrawal (₮40.00 / $600.00)
   const MIN_WITHDRAW_USD = 600;
-  const MIN_WITHDRAW_T = 40; // 600 / 15
-  const MAX_WITHDRAW_T = 66.67; // 1000 / 15
   const withdrawProgress = Math.min(100, Math.round((stats.balance / MIN_WITHDRAW_USD) * 100));
 
   const scrollBarsCarousel = (direction: 'left' | 'right') => {
@@ -111,11 +109,11 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
       action: () => setCurrentView('GAME_RUNNER')
     },
     {
-      title: '🥚 Egg Scratch Matrix (1-Hour Challenge)',
-      badge: 'MARATHON EVENT',
+      title: '🥚 Crack Egg Matrix (1-Hour Challenge)',
+      badge: 'DOUBLE-TAP CRACK',
       badgeColor: 'bg-emerald-500 text-slate-950',
-      description: 'Scratch 10 progressive levels with 100 eggs per level. Uncover hidden cash drops and win the $100 Grand Celestial Jackpot!',
-      buttonText: 'Start Egg Scratch ($100 Jackpot)',
+      description: 'Double-tap matrix eggs across 10 progressive levels (100 eggs/lvl) to crack them open and claim the $100 Grand Celestial Jackpot!',
+      buttonText: 'Start Crack Egg ($100 Jackpot)',
       bgGradient: 'from-emerald-600/30 via-slate-900 to-slate-950',
       borderColor: 'border-emerald-500/40',
       action: () => setCurrentView('GAME_SCRATCH')
@@ -133,6 +131,16 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
   ];
 
   const allGames = [
+    {
+      id: 'mine',
+      title: 'Diamond Mine (Tap to Win)',
+      icon: '💎',
+      tag: '$0.3 PER TAP',
+      tagColor: 'bg-cyan-500 text-slate-950 font-black',
+      reward: '+$0.30 Cash per Tap • 15 Levels',
+      description: 'Tap the glittering diamond to mine $0.30 USD (₮0.02) per tap. Progress across 15 levels up to GodFather!',
+      action: () => setCurrentView('MINE')
+    },
     {
       id: 'runner',
       title: 'Endless Runner Challenge',
@@ -185,12 +193,12 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
     },
     {
       id: 'scratch',
-      title: 'Egg Scratch Matrix',
+      title: 'Crack Egg Matrix',
       icon: '🥚',
       tag: '$100 JACKPOT',
       tagColor: 'bg-amber-500/20 text-amber-300 border border-amber-500/30',
       reward: '+$0.50 to $100.00 (₮6.67)',
-      description: '1-Hour Marathon with 10 Levels x 100 Eggs. Uncover hidden cash and golden egg rewards.',
+      description: '1-Hour Marathon: Double-tap 10 Levels x 100 Eggs. Crack open shells to find cash and golden egg rewards.',
       action: () => setCurrentView('GAME_SCRATCH')
     },
     {

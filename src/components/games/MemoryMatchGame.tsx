@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { PlayerStats } from '../../types';
 import { sound } from '../../utils/audio';
 import confetti from 'canvas-confetti';
 import { 
@@ -16,6 +17,7 @@ interface MemoryMatchGameProps {
   onWin: (amount: number, description: string) => void;
   onBack: () => void;
   userBalance: number;
+  stats?: PlayerStats;
 }
 
 interface Card {
@@ -34,7 +36,8 @@ const EMOJI_SETS = {
 export const MemoryMatchGame: React.FC<MemoryMatchGameProps> = ({
   onWin,
   onBack,
-  userBalance
+  userBalance,
+  stats
 }) => {
   const [difficulty, setDifficulty] = useState<'standard' | 'expert'>('standard');
   const [theme, setTheme] = useState<keyof typeof EMOJI_SETS>('crypto');

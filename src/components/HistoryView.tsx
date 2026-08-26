@@ -1,5 +1,5 @@
 import React from 'react';
-import { WalletTransaction } from '../types';
+import { PlayerStats, WalletTransaction } from '../types';
 import { sound } from '../utils/audio';
 import { ArrowLeft, Wallet, ArrowDownRight, ArrowUpRight, Plus, Minus, ExternalLink, ShieldCheck } from 'lucide-react';
 
@@ -7,12 +7,14 @@ interface HistoryViewProps {
   transactions: WalletTransaction[];
   onBack: () => void;
   userBalance: number;
+  stats?: PlayerStats;
 }
 
 export const HistoryView: React.FC<HistoryViewProps> = ({
   transactions,
   onBack,
-  userBalance
+  userBalance,
+  stats
 }) => {
   return (
     <div className="max-w-3xl mx-auto px-3 sm:px-6 py-4 sm:py-6 space-y-4 sm:space-y-5">

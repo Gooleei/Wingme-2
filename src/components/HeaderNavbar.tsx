@@ -6,15 +6,10 @@ import {
   Volume2, 
   VolumeX, 
   ArrowLeft, 
-  Trophy, 
-  History, 
   User, 
-  LogOut, 
   Gift, 
   Gamepad2, 
-  Tv, 
-  Sparkles,
-  Zap
+  Tv 
 } from 'lucide-react';
 import { sound } from '../utils/audio';
 
@@ -45,12 +40,12 @@ export const HeaderNavbar: React.FC<HeaderNavbarProps> = ({
 
   return (
     <>
-      {/* TOP HEADER BAR */}
-      <header className="sticky top-0 z-40 bg-slate-950/90 backdrop-blur-md border-b border-slate-800 text-white">
-        <div className="max-w-7xl mx-auto px-2.5 sm:px-6 h-14 sm:h-16 flex items-center justify-between gap-1.5 sm:gap-3">
+      {/* TOP HEADER BAR: CAROUSEL SIDE SCROLL */}
+      <header className="sticky top-0 z-40 bg-slate-950/95 backdrop-blur-md border-b border-slate-800 text-white shadow-lg">
+        <div className="max-w-7xl mx-auto px-2.5 sm:px-4 h-14 sm:h-16 flex items-center justify-between gap-2 overflow-x-auto scrollbar-none no-scrollbar snap-x touch-pan-x scroll-smooth">
           
-          {/* Left Side: Prominent Back Button or Brand Logo */}
-          <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
+          {/* Left Item: App Name "Bellmont" or Back Button */}
+          <div className="flex items-center gap-2 shrink-0 snap-start">
             {isSecondaryView ? (
               <button
                 id="nav-back-button"
@@ -59,126 +54,65 @@ export const HeaderNavbar: React.FC<HeaderNavbarProps> = ({
                   sound.playClick();
                   setCurrentView('DASHBOARD');
                 }}
-                className="flex items-center gap-1.5 px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded-xl bg-slate-800 hover:bg-slate-700 active:bg-slate-900 text-emerald-400 hover:text-emerald-300 font-bold text-xs sm:text-sm transition-all cursor-pointer border border-emerald-500/30 shadow-md shadow-emerald-950/40 min-h-[38px] touch-manipulation"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 active:bg-slate-900 text-emerald-400 hover:text-emerald-300 font-bold text-xs sm:text-sm transition-all cursor-pointer border border-emerald-500/30 shadow-md shadow-emerald-950/40 min-h-[38px] touch-manipulation shrink-0"
               >
-                <ArrowLeft className="w-4 h-4 sm:w-4.5 sm:h-4.5 stroke-[2.5]" />
-                <span className="inline">Back</span>
+                <ArrowLeft className="w-4 h-4 stroke-[2.5]" />
+                <span>Back</span>
               </button>
             ) : (
               <div 
                 onClick={() => setCurrentView('DASHBOARD')}
-                className="flex items-center gap-2 cursor-pointer group select-none"
+                className="flex items-center gap-2 cursor-pointer group select-none shrink-0"
               >
-                <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-tr from-amber-500 via-emerald-500 to-cyan-400 p-0.5 shadow-lg shadow-emerald-500/20 group-hover:scale-105 transition-transform shrink-0">
-                  <div className="w-full h-full bg-slate-950 rounded-[10px] flex items-center justify-center font-black text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-emerald-400 text-sm sm:text-lg">
+                <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-gradient-to-tr from-amber-500 via-emerald-500 to-cyan-400 p-0.5 shadow-lg shadow-emerald-500/20 group-hover:scale-105 transition-transform shrink-0">
+                  <div className="w-full h-full bg-slate-950 rounded-[10px] flex items-center justify-center font-black text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-emerald-400 text-xs sm:text-sm">
                     BM
                   </div>
                 </div>
-                <div>
-                  <div className="flex items-center gap-1">
-                    <span className="font-black tracking-tight text-sm sm:text-lg text-white">
-                      Bellmont
-                    </span>
-                    <span className="text-[9px] sm:text-[10px] font-extrabold px-1.5 py-0.2 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
-                      PRO
-                    </span>
-                  </div>
+                <div className="flex items-center gap-1">
+                  <span className="font-black tracking-tight text-sm sm:text-base text-white whitespace-nowrap">
+                    Bellmont
+                  </span>
+                  <span className="text-[9px] font-extrabold px-1.5 py-0.2 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+                    PRO
+                  </span>
                 </div>
               </div>
             )}
           </div>
 
-          {/* Desktop Top Shortcuts */}
-          <nav className="hidden md:flex items-center gap-1.5">
+          {/* Right Carousel Slide Items: Balance, ₮ Points, Sound, Streak */}
+          <div className="flex items-center gap-1.5 sm:gap-2 shrink-0 snap-end">
+            
+            {/* Wallet Balance Pill */}
             <button
-              id="top-nav-games"
+              id="header-balance-chip"
               type="button"
               onClick={() => {
                 sound.playClick();
-                setCurrentView('DASHBOARD');
+                onOpenWithdraw();
               }}
-              className={`px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer ${
-                currentView === 'DASHBOARD'
-                  ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30'
-                  : 'text-slate-400 hover:text-white hover:bg-slate-800/60'
-              }`}
+              title="Click to Withdraw Balance ($15 = ₮1)"
+              className="flex items-center gap-1.5 px-2.5 sm:px-3.5 py-1.5 rounded-xl bg-emerald-950/70 hover:bg-emerald-900/80 border border-emerald-500/40 text-emerald-400 font-black text-xs sm:text-sm shadow-md transition-all cursor-pointer touch-manipulation min-h-[38px] shrink-0 active:scale-95"
             >
-              <Gamepad2 className="w-3.5 h-3.5" />
-              Games
+              <Wallet className="w-4 h-4 text-emerald-400 shrink-0" />
+              <span className="font-mono font-black">${balance.toFixed(2)}</span>
             </button>
+
+            {/* ₮ Points Pill */}
             <button
-              id="top-nav-watch"
+              id="header-tpoints-chip"
               type="button"
               onClick={() => {
                 sound.playClick();
-                setCurrentView('WATCH');
+                onOpenWithdraw();
               }}
-              className={`px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer ${
-                currentView === 'WATCH'
-                  ? 'bg-cyan-500/15 text-cyan-400 border border-cyan-500/30 font-bold'
-                  : 'text-slate-400 hover:text-white hover:bg-slate-800/60'
-              }`}
+              title={`Accumulated ₮ Points: ₮${(balance / 15).toFixed(2)} ($15 = ₮1)`}
+              className="flex items-center gap-1 px-2.5 sm:px-3 py-1.5 rounded-xl bg-cyan-950/70 hover:bg-cyan-900/80 border border-cyan-500/40 text-cyan-300 font-black text-xs sm:text-sm shadow-md transition-all cursor-pointer touch-manipulation min-h-[38px] shrink-0 active:scale-95"
             >
-              <Tv className="w-3.5 h-3.5 text-cyan-400" />
-              Watch
+              <span className="text-cyan-400 font-black text-sm">₮</span>
+              <span className="font-mono font-black">{(balance / 15).toFixed(2)}</span>
             </button>
-            <button
-              id="top-nav-runner"
-              type="button"
-              onClick={() => {
-                sound.playClick();
-                setCurrentView('GAME_RUNNER');
-              }}
-              className={`px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer ${
-                currentView === 'GAME_RUNNER'
-                  ? 'bg-amber-500/15 text-amber-400 border border-amber-500/30 font-bold'
-                  : 'text-slate-400 hover:text-white hover:bg-slate-800/60'
-              }`}
-            >
-              <span>🏃</span>
-              Runner
-              <span className="text-[9px] px-1 rounded bg-amber-500/30 text-amber-300 font-bold">$33</span>
-            </button>
-          </nav>
-
-          {/* Right Side: Streak, Balance, Sound, Profile & Sign Out Buttons */}
-          <div className="flex items-center gap-1 sm:gap-2 shrink-0">
-            {/* Streak Counter */}
-            <div className="hidden xs:flex items-center gap-1 px-2 py-1 rounded-lg bg-amber-500/10 border border-amber-500/30 text-amber-400 text-[11px] sm:text-xs font-bold shrink-0">
-              <Flame className="w-3 h-3 sm:w-3.5 sm:h-3.5 fill-amber-400 text-amber-500" />
-              <span>{streak}d</span>
-            </div>
-
-            {/* Wallet Balance & ₮ Points Chips */}
-            <div className="flex items-center gap-1">
-              <button
-                id="header-balance-chip"
-                type="button"
-                onClick={() => {
-                  sound.playClick();
-                  onOpenWithdraw();
-                }}
-                title="Click to Withdraw Balance ($15 = ₮1)"
-                className="flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl bg-gradient-to-r from-emerald-500/20 to-teal-500/20 hover:from-emerald-500/30 hover:to-teal-500/30 border border-emerald-500/40 text-emerald-300 font-extrabold text-xs sm:text-sm shadow-md transition-all cursor-pointer touch-manipulation min-h-[38px]"
-              >
-                <Wallet className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
-                <span>${balance.toFixed(2)}</span>
-              </button>
-
-              <button
-                id="header-tpoints-chip"
-                type="button"
-                onClick={() => {
-                  sound.playClick();
-                  onOpenWithdraw();
-                }}
-                title={`Accumulated ₮ Points: ₮${(balance / 15).toFixed(2)} ($15 = ₮1)`}
-                className="flex items-center gap-1 px-2 sm:px-2.5 py-1.5 rounded-xl bg-gradient-to-r from-cyan-500/20 to-blue-500/20 hover:from-cyan-500/30 hover:to-blue-500/30 border border-cyan-500/40 text-cyan-300 font-extrabold text-xs sm:text-sm shadow-md transition-all cursor-pointer touch-manipulation min-h-[38px]"
-              >
-                <span className="text-cyan-400 font-black text-sm">₮</span>
-                <span>{(balance / 15).toFixed(2)}</span>
-              </button>
-            </div>
 
             {/* Sound Toggle Button */}
             <button
@@ -191,7 +125,7 @@ export const HeaderNavbar: React.FC<HeaderNavbarProps> = ({
                 if (next) sound.playClick();
               }}
               title={soundOn ? 'Mute Sound' : 'Enable Sound'}
-              className="w-9 h-9 sm:w-9.5 sm:h-9.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-white flex items-center justify-center transition-colors border border-slate-700 cursor-pointer touch-manipulation shrink-0"
+              className="w-9 h-9 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-white flex items-center justify-center transition-colors border border-slate-700 cursor-pointer touch-manipulation shrink-0"
             >
               {soundOn ? (
                 <Volume2 className="w-4 h-4 text-emerald-400" />
@@ -200,35 +134,12 @@ export const HeaderNavbar: React.FC<HeaderNavbarProps> = ({
               )}
             </button>
 
-            {/* Profile Avatar Button */}
-            <button
-              id="header-profile-btn"
-              type="button"
-              onClick={() => {
-                sound.playClick();
-                setCurrentView('PROFILE');
-              }}
-              title={`Profile: ${user.username}`}
-              className="flex items-center gap-1 px-2 py-1 sm:py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-200 border border-slate-700 text-xs font-semibold cursor-pointer touch-manipulation min-h-[38px] shrink-0"
-            >
-              <span className="text-base sm:text-lg leading-none">{user.avatar || '👤'}</span>
-              <span className="hidden sm:inline max-w-[65px] truncate text-[11px]">{user.username}</span>
-            </button>
+            {/* Streak Counter */}
+            <div className="flex items-center gap-1 px-2 py-1.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-400 text-xs font-bold shrink-0">
+              <Flame className="w-3.5 h-3.5 fill-amber-400 text-amber-500" />
+              <span>{streak}d</span>
+            </div>
 
-            {/* Sign Out Button */}
-            <button
-              id="header-signout-btn"
-              type="button"
-              onClick={() => {
-                sound.playClick();
-                onSignOut();
-              }}
-              title="Sign Out of Account"
-              className="flex items-center justify-center gap-1 px-2.5 py-1.5 rounded-xl bg-rose-950/40 hover:bg-rose-900/80 active:bg-rose-950 text-rose-300 hover:text-rose-100 border border-rose-500/40 text-xs font-bold transition-all cursor-pointer touch-manipulation min-h-[38px] shadow-sm shrink-0"
-            >
-              <LogOut className="w-4 h-4 stroke-[2.2]" />
-              <span className="hidden xs:inline text-[11px]">Logout</span>
-            </button>
           </div>
 
         </div>
@@ -313,22 +224,22 @@ export const HeaderNavbar: React.FC<HeaderNavbarProps> = ({
             <span className="text-[10px] sm:text-xs font-bold truncate">Daily $1</span>
           </button>
 
-          {/* 5. Leaderboard button */}
+          {/* 5. Mine (Tap to Win) button */}
           <button
-            id="footer-nav-ranks"
+            id="footer-nav-mine"
             type="button"
             onClick={() => {
               sound.playClick();
-              setCurrentView('LEADERBOARD');
+              setCurrentView('MINE');
             }}
             className={`flex-1 min-w-0 py-1.5 sm:py-2 px-1 sm:px-2 rounded-xl transition-all cursor-pointer flex flex-col items-center justify-center min-h-[46px] sm:min-h-[50px] touch-manipulation border ${
-              currentView === 'LEADERBOARD'
-                ? 'text-cyan-400 font-black bg-cyan-500/15 border-cyan-500/30 shadow-md shadow-cyan-950/50'
+              currentView === 'MINE'
+                ? 'text-cyan-300 font-black bg-cyan-500/20 border-cyan-400/50 shadow-md shadow-cyan-950/50'
                 : 'text-slate-400 hover:text-cyan-300 border-transparent hover:bg-slate-800/40'
             }`}
           >
-            <Trophy className="w-4.5 h-4.5 sm:w-5 sm:h-5 mb-0.5" />
-            <span className="text-[10px] sm:text-xs font-bold truncate">Ranks</span>
+            <span className="text-lg sm:text-xl mb-0.5 leading-none">💎</span>
+            <span className="text-[10px] sm:text-xs font-bold truncate">Mine</span>
           </button>
 
           {/* 6. Profile button */}

@@ -1,4 +1,4 @@
-import { LevelConfig, Character, CharacterSkin, LeaderboardEntry, PlayerStats } from '../types';
+import { LevelConfig, Character, CharacterSkin, LeaderboardEntry, PlayerStats, MineLevelConfig } from '../types';
 
 export const GAME_LEVELS: LevelConfig[] = [
   {
@@ -231,6 +231,204 @@ export const SEED_LEADERBOARDS: LeaderboardEntry[] = [
   { id: 'l5_2', playerName: 'ChronosSpeed', characterId: 'ninja', levelId: 5, timeMs: 97100, distance: 2000, cashCollected: 30, timestamp: Date.now() - 1800000, avatar: '🥷', badge: '🥈 Master' }
 ];
 
+export const MINE_LEVELS: MineLevelConfig[] = [
+  {
+    level: 1,
+    name: 'Novice Prospector',
+    requiredTaps: 2000,
+    tapReward: 0.30,
+    bonusReward: 25.00,
+    gemSizeClass: 'w-32 h-32 sm:w-36 sm:h-36',
+    gemVisualTheme: 'from-cyan-400 via-teal-300 to-emerald-400',
+    glowColor: 'rgba(6, 182, 212, 0.4)',
+    accentColor: '#22d3ee',
+    appraisalShout: '🌟 UNBELIEVABLE HUSTLE! Level 1 Novice Prospector conquered! The diamond begins to expand in radiance!',
+    statusTitle: 'Rookie Excavator'
+  },
+  {
+    level: 2,
+    name: 'Ruby Quarryman',
+    requiredTaps: 5000,
+    tapReward: 0.36,
+    bonusReward: 50.00,
+    gemSizeClass: 'w-36 h-36 sm:w-40 sm:h-40',
+    gemVisualTheme: 'from-rose-500 via-red-400 to-amber-400',
+    glowColor: 'rgba(244, 63, 94, 0.45)',
+    accentColor: '#f43f5e',
+    appraisalShout: '🔥 BLAZING TENACITY! Level 2 Ruby Quarryman cleared! Your mining speed is ferocious!',
+    statusTitle: 'Ruby Master'
+  },
+  {
+    level: 3,
+    name: 'Emerald Miner',
+    requiredTaps: 8000,
+    tapReward: 0.43,
+    bonusReward: 75.00,
+    gemSizeClass: 'w-40 h-40 sm:w-44 sm:h-44',
+    gemVisualTheme: 'from-emerald-400 via-teal-300 to-cyan-400',
+    glowColor: 'rgba(16, 185, 129, 0.45)',
+    accentColor: '#10b981',
+    appraisalShout: '💎 DIAMOND HANDS! Level 3 Emerald Miner mastered! The gemstone pulses with high-voltage power!',
+    statusTitle: 'Emerald Artisan'
+  },
+  {
+    level: 4,
+    name: 'Sapphire Excavator',
+    requiredTaps: 12000,
+    tapReward: 0.52,
+    bonusReward: 100.00,
+    gemSizeClass: 'w-44 h-44 sm:w-48 sm:h-48',
+    gemVisualTheme: 'from-blue-500 via-indigo-400 to-cyan-300',
+    glowColor: 'rgba(59, 130, 246, 0.5)',
+    accentColor: '#3b82f6',
+    appraisalShout: '⚡ ELECTRIC PRECISION! Level 4 Sapphire Excavator crushed! High-yield crystal veins unlocked!',
+    statusTitle: 'Sapphire King'
+  },
+  {
+    level: 5,
+    name: 'Diamond Driller',
+    requiredTaps: 20000,
+    tapReward: 0.62,
+    bonusReward: 150.00,
+    gemSizeClass: 'w-48 h-48 sm:w-52 sm:h-52',
+    gemVisualTheme: 'from-cyan-300 via-sky-200 to-blue-400',
+    glowColor: 'rgba(56, 189, 248, 0.55)',
+    accentColor: '#38bdf8',
+    appraisalShout: '🏆 MASTERWORK DRILLING! Level 5 Diamond Driller achieved! The syndicate stands in awe of your grind!',
+    statusTitle: 'Diamond Vanguard'
+  },
+  {
+    level: 6,
+    name: 'Crystal Baron',
+    requiredTaps: 30000,
+    tapReward: 0.75,
+    bonusReward: 200.00,
+    gemSizeClass: 'w-52 h-52 sm:w-56 sm:h-56',
+    gemVisualTheme: 'from-purple-500 via-fuchsia-400 to-pink-400',
+    glowColor: 'rgba(168, 85, 247, 0.55)',
+    accentColor: '#a855f7',
+    appraisalShout: '👑 BARON OF WEALTH! Level 6 Crystal Baron unlocked! Massive wealth flows straight into your vaults!',
+    statusTitle: 'Crystal Royalty'
+  },
+  {
+    level: 7,
+    name: 'Mythic Gem Collector',
+    requiredTaps: 45000,
+    tapReward: 0.90,
+    bonusReward: 250.00,
+    gemSizeClass: 'w-56 h-56 sm:w-60 sm:h-60',
+    gemVisualTheme: 'from-amber-400 via-rose-400 to-purple-400',
+    glowColor: 'rgba(251, 191, 36, 0.55)',
+    accentColor: '#fbbf24',
+    appraisalShout: '✨ MYTHIC GLORY! Level 7 Mythic Gem Collector completed! Your diamond shines with legendary luster!',
+    statusTitle: 'Mythic Sovereign'
+  },
+  {
+    level: 8,
+    name: 'Obsidian Master',
+    requiredTaps: 65000,
+    tapReward: 1.07,
+    bonusReward: 300.00,
+    gemSizeClass: 'w-60 h-60 sm:w-64 sm:h-64',
+    gemVisualTheme: 'from-violet-600 via-indigo-500 to-slate-900',
+    glowColor: 'rgba(124, 58, 237, 0.6)',
+    accentColor: '#7c3aed',
+    appraisalShout: '🌑 OBSIDIAN TITAN! Level 8 Obsidian Master conquered! Unbreakable resolve and relentless momentum!',
+    statusTitle: 'Obsidian Overlord'
+  },
+  {
+    level: 9,
+    name: 'Titanium Tycoon',
+    requiredTaps: 90000,
+    tapReward: 1.29,
+    bonusReward: 350.00,
+    gemSizeClass: 'w-64 h-64 sm:w-68 sm:h-68',
+    gemVisualTheme: 'from-slate-200 via-teal-300 to-amber-300',
+    glowColor: 'rgba(148, 163, 184, 0.6)',
+    accentColor: '#94a3b8',
+    appraisalShout: '🚀 INDUSTRIAL PHENOMENON! Level 9 Titanium Tycoon unlocked! You dominate the Bellmont mines!',
+    statusTitle: 'Titanium Tycoon'
+  },
+  {
+    level: 10,
+    name: 'Void Shard Sovereign',
+    requiredTaps: 125000,
+    tapReward: 1.55,
+    bonusReward: 400.00,
+    gemSizeClass: 'w-68 h-68 sm:w-72 sm:h-72',
+    gemVisualTheme: 'from-cyan-400 via-indigo-500 to-purple-600',
+    glowColor: 'rgba(6, 182, 212, 0.65)',
+    accentColor: '#06b6d4',
+    appraisalShout: '🌌 REALM CONQUEROR! Level 10 Void Shard Sovereign mastered! Reality itself bends around your fortune!',
+    statusTitle: 'Void Sovereign'
+  },
+  {
+    level: 11,
+    name: 'Celestial Overlord',
+    requiredTaps: 170000,
+    tapReward: 1.86,
+    bonusReward: 450.00,
+    gemSizeClass: 'w-72 h-72 sm:w-76 sm:h-76',
+    gemVisualTheme: 'from-yellow-300 via-amber-400 to-orange-500',
+    glowColor: 'rgba(245, 158, 11, 0.65)',
+    accentColor: '#f59e0b',
+    appraisalShout: '☀️ CELESTIAL SPLENDOR! Level 11 Celestial Overlord achieved! Radiating pure cosmic energy!',
+    statusTitle: 'Celestial Ruler'
+  },
+  {
+    level: 12,
+    name: 'Astral Kingpin',
+    requiredTaps: 225000,
+    tapReward: 2.23,
+    bonusReward: 500.00,
+    gemSizeClass: 'w-76 h-76 sm:w-80 sm:h-80',
+    gemVisualTheme: 'from-fuchsia-500 via-violet-500 to-cyan-400',
+    glowColor: 'rgba(217, 70, 239, 0.7)',
+    accentColor: '#d946ef',
+    appraisalShout: '💫 ASTRAL SUPREMACY! Level 12 Astral Kingpin unlocked! Unrivaled empire building!',
+    statusTitle: 'Astral Kingpin'
+  },
+  {
+    level: 13,
+    name: 'Cosmic Oligarch',
+    requiredTaps: 300000,
+    tapReward: 2.67,
+    bonusReward: 600.00,
+    gemSizeClass: 'w-80 h-80 sm:w-84 sm:h-84',
+    gemVisualTheme: 'from-emerald-300 via-cyan-400 to-indigo-500',
+    glowColor: 'rgba(52, 211, 153, 0.7)',
+    accentColor: '#34d399',
+    appraisalShout: '🪐 COSMIC DYNASTY! Level 13 Cosmic Oligarch conquered! The Godfather throne is within reach!',
+    statusTitle: 'Cosmic Oligarch'
+  },
+  {
+    level: 14,
+    name: 'Syndicate Emperor',
+    requiredTaps: 400000,
+    tapReward: 3.21,
+    bonusReward: 750.00,
+    gemSizeClass: 'w-84 h-84 sm:w-88 sm:h-88',
+    gemVisualTheme: 'from-amber-300 via-yellow-400 to-rose-600',
+    glowColor: 'rgba(251, 191, 36, 0.75)',
+    accentColor: '#fbbf24',
+    appraisalShout: '🏛️ IMPERIAL MAJESTY! Level 14 Syndicate Emperor ascended! ONE STEP AWAY FROM ULTIMATE GODFATHER STATUS!',
+    statusTitle: 'Syndicate Emperor'
+  },
+  {
+    level: 15,
+    name: 'The GodFather',
+    requiredTaps: 550000,
+    tapReward: 3.85,
+    bonusReward: 1000.00,
+    gemSizeClass: 'w-88 h-88 sm:w-96 sm:h-96',
+    gemVisualTheme: 'from-amber-300 via-yellow-200 to-white',
+    glowColor: 'rgba(255, 215, 0, 0.85)',
+    accentColor: '#ffd700',
+    appraisalShout: '👑 ALL HAIL THE GODFATHER! Level 15 Masterwork Crown Unlocked! You reign supreme at the highest summit of Bellmont!',
+    statusTitle: 'The GodFather Supreme'
+  }
+];
+
 export const INITIAL_PLAYER_STATS: PlayerStats = {
   balance: 10.00, // Initial bonus
   totalRuns: 0,
@@ -254,5 +452,12 @@ export const INITIAL_PLAYER_STATS: PlayerStats = {
     shieldDuration: 0,
     doubleJumpUnlocked: false,
     speedBoostLevel: 0
+  },
+  mineProgress: {
+    currentLevel: 1,
+    tapsInLevel: 0,
+    totalTaps: 0,
+    totalEarnedCash: 0,
+    highestLevelUnlocked: 1
   }
 };

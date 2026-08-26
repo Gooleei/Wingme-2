@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { PlayerStats } from '../../types';
 import { sound } from '../../utils/audio';
 import confetti from 'canvas-confetti';
 import { ArrowLeft, RotateCcw, Timer, Sparkles, Keyboard, CheckCircle2, Zap } from 'lucide-react';
@@ -7,6 +8,7 @@ interface SpellingChallengeProps {
   onWin: (amount: number, description: string) => void;
   onBack: () => void;
   userBalance: number;
+  stats?: PlayerStats;
 }
 
 const WORDS = [
@@ -18,7 +20,8 @@ const WORDS = [
 export const SpellingChallengeGame: React.FC<SpellingChallengeProps> = ({
   onWin,
   onBack,
-  userBalance
+  userBalance,
+  stats
 }) => {
   const [targetWord, setTargetWord] = useState<string>('CRYPTO');
   const [inputWord, setInputWord] = useState<string>('');
