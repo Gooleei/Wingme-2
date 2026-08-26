@@ -33,9 +33,24 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
   const [showPin, setShowPin] = useState(false);
   const [selectedAvatar, setSelectedAvatar] = useState(AVATARS[0]);
   const [promoCode, setPromoCode] = useState('');
+  const [referrerDetected, setReferrerDetected] = useState<string | null>(null);
   const [agreeTerms, setAgreeTerms] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
+
+  // Detect referral query params on load (e.g. ?ref=runner_alex or ?referrer=runner_alex)
+  React.useEffect(() => {
+    if (typeof window !== 'undefined' && window.location.search) {
+      const params = new URLSearchParams(window.location.search);
+      const ref = params.get('ref') || params.get('referrer') || params.get('code');
+      if (ref && ref.trim()) {
+        const cleanRef = ref.trim();
+        setPromoCode(cleanRef);
+        setReferrerDetected(cleanRef);
+        setTab('REGISTER');
+      }
+    }
+  }, []);
 
   // Load existing accounts from local storage
   const getSavedAccounts = (): UserProfile[] => {
@@ -143,11 +158,15 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
       return;
     }
 
-    // Check optional promo code
+    // Check optional promo code or referral code
     let bonus = 0;
-    const promo = promoCode.trim().toUpperCase();
-    if (promo === 'LUCKY2026' || promo === 'RUNNER' || promo === 'BONUS5') {
+    const promo = promoCode.trim();
+    const promoUpper = promo.toUpperCase();
+    if (promoUpper === 'LUCKY2026' || promoUpper === 'RUNNER' || promoUpper === 'BONUS5') {
       bonus = 5.00;
+    } else if (promo.length > 0) {
+      // Any valid referral code earns extra $1.00 welcome booster
+      bonus = 1.00;
     }
 
     const newUser: UserProfile = {
@@ -167,7 +186,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
     saveAccount(newUser);
     sound.playWin();
     confetti({ particleCount: 90, spread: 80, origin: { y: 0.6 } });
-    setSuccessMsg(bonus > 0 ? `🎉 Account created! Claimed +$${bonus.toFixed(2)} Promo Bonus!` : '🎉 Account created successfully! Logging you in...');
+    setSuccessMsg(bonus > 0 ? `🎉 Account created! Claimed +$${bonus.toFixed(2)} Referral/Promo Bonus!` : '🎉 Account created successfully! Logging you in...');
 
     setTimeout(() => {
       onLogin(newUser, bonus);
@@ -319,6 +338,19 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
             {/* REGISTER FORM */}
             {tab === 'REGISTER' && (
               <form onSubmit={handleSignUp} className="space-y-3">
+                {referrerDetected && (
+                  <div className="p-2.5 rounded-xl bg-gradient-to-r from-emerald-500/20 via-teal-500/15 to-slate-900 border border-emerald-500/40 text-emerald-300 text-xs font-bold flex items-center justify-between gap-2 shadow-sm">
+                    <div className="flex items-center gap-2">
+                      <Gift className="w-4 h-4 text-emerald-400 shrink-0" />
+                      <span>
+                        Invited by <strong className="text-white">@{referrerDetected}</strong>! (+$1.00 Extra Bonus Active)
+                      </span>
+                    </div>
+                    <span className="text-[10px] bg-emerald-500/30 text-emerald-300 px-2 py-0.5 rounded-full uppercase tracking-wider font-black shrink-0">
+                      Applied
+                    </span>
+                  </div>
+                )}
                 <div>
                   <label className="text-[10px] font-bold text-slate-300 uppercase tracking-wider block mb-1">
                     Select Avatar

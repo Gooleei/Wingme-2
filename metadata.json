@@ -1,6 +1,6 @@
 {
   "name": "Bellmont Rewards & Endless Runner",
-  "description": "An arcade gaming and rewards platform featuring Diamond Mine (Tap-to-Win with 15 progressive levels to GodFather), the high-stakes 5-world Endless Runner Challenge, Memory Match, Tic Tac Toe, Egg Scratch Matrix, Lucky Wheel, ₮ points balancing, and real-time cashout rewards.",
+  "description": "An arcade gaming and rewards platform featuring WhatsApp referral network with tiered multiplier bonuses (Refer 1 for $0.80, 5 for X5, 10 for X10, 20 for X30, 100 for X150), Diamond Mine (Tap-to-Win with 15 progressive levels to GodFather), the high-stakes 5-world Endless Runner Challenge, Memory Match, Tic Tac Toe, Egg Scratch Matrix, Lucky Wheel, ₮ points balancing, and real-time cashout rewards.",
   "requestFramePermissions": [],
   "majorCapabilities": [
     "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"

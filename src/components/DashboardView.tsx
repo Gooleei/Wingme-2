@@ -99,6 +99,16 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
 
   const featuredSlides = [
     {
+      title: '🤝 WhatsApp Referral Network',
+      badge: 'EARN UP TO X150 MULTIPLIER',
+      badgeColor: 'bg-emerald-400 text-slate-950',
+      description: 'Share via WhatsApp! Earn $0.80 for 1st referral, X5 for 5, X10 for 10, X30 for 20, X150 for 100+ referrals. See and grow your live network.',
+      buttonText: 'Open Referral Network ($800+ Rewards)',
+      bgGradient: 'from-emerald-600/35 via-slate-900 to-slate-950',
+      borderColor: 'border-emerald-400/50',
+      action: () => setCurrentView('PROFILE')
+    },
+    {
       title: '🏃 Endless Runner Challenge',
       badge: 'HOT • NEW RELEASE',
       badgeColor: 'bg-amber-500 text-slate-950',

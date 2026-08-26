@@ -170,3 +170,30 @@ export const DOLLARS_PER_T_POINT = 15;
 export const convertDollarsToTPoints = (dollars: number): number => +(dollars / DOLLARS_PER_T_POINT).toFixed(2);
 export const convertTPointsToDollars = (tPoints: number): number => +(tPoints * DOLLARS_PER_T_POINT).toFixed(2);
 
+export interface ReferralTier {
+  referralsRequired: number;
+  multiplierText: string;
+  multiplierValue: number;
+  rewardAmount: number;
+  title: string;
+  badge: string;
+}
+
+export interface ReferralMember {
+  id: string;
+  username: string;
+  avatar: string;
+  joinedDate: string;
+  status: 'Active' | 'VIP Bronze' | 'VIP Silver' | 'VIP Gold' | 'Mining Pro' | 'Runner Master';
+  earnedForYou: number;
+  activityCount: number;
+}
+
+export interface ReferralNetworkState {
+  referralCode: string;
+  totalReferrals: number;
+  totalEarnings: number;
+  claimedTiers: number[];
+  networkMembers: ReferralMember[];
+}
+

@@ -448,6 +448,16 @@ export default function App() {
             setStats={setStats}
             onBack={() => setCurrentView('DASHBOARD')}
             onSignOut={handleSignOut}
+            onRewardClaimed={(amount, description) => {
+              const newTx: WalletTransaction = {
+                id: Date.now(),
+                description,
+                amount,
+                type: 'bonus',
+                date: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+              };
+              setTransactions((prev) => [newTx, ...prev]);
+            }}
           />
         )}
 
