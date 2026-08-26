@@ -127,6 +127,7 @@ export const EndlessRunnerCanvas: React.FC<EndlessRunnerCanvasProps> = ({
     totalCashSpawned: 0,
     maxCashToSpawn: level.cashDropGoal,
     screenShake: 0,
+    revivesRemaining: stats.upgrades.reviveKitCount || 0,
 
     animationFrameId: 0
   });
@@ -261,6 +262,11 @@ export const EndlessRunnerCanvas: React.FC<EndlessRunnerCanvasProps> = ({
     internal.totalCashSpawned = 0;
     internal.screenShake = 0;
 
+    const startShield = character.id === 'valkyrie' || character.id === 'chrono' || (stats.upgrades.shieldDuration || 0) > 0;
+    const headStartDist = (stats.upgrades.headStartLevel || 0) * 60;
+    internal.distance = headStartDist;
+    internal.revivesRemaining = stats.upgrades.reviveKitCount || 0;
+
     const groundY = 380;
     internal.player = {
       x: 100,
@@ -276,17 +282,29 @@ export const EndlessRunnerCanvas: React.FC<EndlessRunnerCanvasProps> = ({
       canDoubleJump: character.hasDoubleJump || stats.upgrades.doubleJumpUnlocked,
       isSliding: false,
       slideTimer: 0,
-      invincibleTimer: 0,
-      hasShield: character.id === 'valkyrie',
+      invincibleTimer: headStartDist > 0 ? 2.5 : 0,
+      hasShield: startShield,
       magnetTimer: 0,
       animFrame: 0,
       animTick: 0
     };
 
+    if (headStartDist > 0) {
+      internal.floatingTexts.push({
+        id: Date.now(),
+        x: 150,
+        y: 260,
+        text: `🚀 HEAD START LAUNCH (+${headStartDist}m)!`,
+        color: '#38BDF8',
+        alpha: 1,
+        vy: -1.0
+      });
+    }
+
     setGameState('PLAYING');
-    setDistance(0);
+    setDistance(headStartDist);
     setCashCollected(0);
-    setHasShield(character.id === 'valkyrie');
+    setHasShield(startShield);
     setMagnetTimer(0);
     setSpeed(level.baseSpeed);
     setElapsedTimeMs(0);
@@ -541,7 +559,8 @@ export const EndlessRunnerCanvas: React.FC<EndlessRunnerCanvasProps> = ({
             if (p.hasShield) {
               // Shield absorbs the blow!
               p.hasShield = false;
-              p.invincibleTimer = 1.2; // 1.2s invulnerability
+              const bonusInvincible = (stats.upgrades.shieldDuration || 0) * 0.4;
+              p.invincibleTimer = 1.2 + bonusInvincible;
               setHasShield(false);
               sound.playShieldBreak();
               internal.screenShake = 12;
@@ -550,7 +569,7 @@ export const EndlessRunnerCanvas: React.FC<EndlessRunnerCanvasProps> = ({
                 id: Date.now(),
                 x: p.x + 20,
                 y: p.y - 10,
-                text: '🛡️ SHIELD SAVED -$0.80!',
+                text: '🛡️ SHIELD SAVED RUN!',
                 color: '#38BDF8',
                 alpha: 1,
                 vy: -1.2
@@ -568,6 +587,40 @@ export const EndlessRunnerCanvas: React.FC<EndlessRunnerCanvasProps> = ({
                   color: '#38BDF8',
                   alpha: 1,
                   decay: 0.04
+                });
+              }
+            } else if (internal.revivesRemaining > 0) {
+              // SECOND WIND EMERGENCY REVIVE DEFIBRILLATOR!
+              internal.revivesRemaining -= 1;
+              p.invincibleTimer = 3.2; // 3.2s invulnerability
+              sound.playWin();
+              internal.screenShake = 18;
+
+              // Clear all nearby obstacles with EMP shockwave
+              internal.obstacles = internal.obstacles.filter(o => Math.abs(o.x - p.x) > 350);
+
+              internal.floatingTexts.push({
+                id: Date.now(),
+                x: p.x + 10,
+                y: p.y - 20,
+                text: `⚡ SECOND WIND REVIVED! (${internal.revivesRemaining} Left)`,
+                color: '#F43F5E',
+                alpha: 1,
+                vy: -1.4
+              });
+
+              // EMP shockwave particles
+              for (let k = 0; k < 30; k++) {
+                const angle = (k / 30) * Math.PI * 2;
+                internal.particles.push({
+                  x: p.x + p.width / 2,
+                  y: p.y + p.height / 2,
+                  vx: Math.cos(angle) * 7,
+                  vy: Math.sin(angle) * 7,
+                  size: 4,
+                  color: '#FB7185',
+                  alpha: 1,
+                  decay: 0.03
                 });
               }
             } else {
@@ -608,8 +661,11 @@ export const EndlessRunnerCanvas: React.FC<EndlessRunnerCanvasProps> = ({
           }
         }
 
-        // Move & Collect Items
-        const magnetRange = p.magnetTimer > 0 ? (180 * character.magnetRadiusMultiplier) : 0;
+        // Move & Collect Items (Passive + Active Magnet Core Upgrades)
+        const basePassiveRange = (stats.upgrades.magnetLevel || 0) * 35;
+        const activeMagnetRange = (180 * (character.magnetRadiusMultiplier || 1.0) * (1 + (stats.upgrades.magnetLevel || 0) * 0.35));
+        const magnetRange = p.magnetTimer > 0 ? activeMagnetRange : basePassiveRange;
+
         for (let i = internal.collectibles.length - 1; i >= 0; i--) {
           const item = internal.collectibles[i];
           item.x -= scrollSpeed;
@@ -635,9 +691,9 @@ export const EndlessRunnerCanvas: React.FC<EndlessRunnerCanvasProps> = ({
             item.collected = true;
 
             if (item.type === 'cash') {
-              const multi = character.cashBonusMultiplier || 1.0;
-              const earned = item.value * multi;
-              internal.cashCollected = Math.min(30.0, internal.cashCollected + earned);
+              const multi = (character.cashBonusMultiplier || 1.0) * (1 + ((stats.upgrades.cashMultiplierLevel || 0) * 0.10)) * (1 + ((stats.upgrades.speedBoostLevel || 0) * 0.05));
+              const earned = +(item.value * multi).toFixed(2);
+              internal.cashCollected = Math.min(30.0, +(internal.cashCollected + earned).toFixed(2));
               setCashCollected(internal.cashCollected);
               sound.playCoin();
 
@@ -1139,7 +1195,14 @@ export const EndlessRunnerCanvas: React.FC<EndlessRunnerCanvasProps> = ({
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5 flex-wrap justify-end">
+          {/* Active Double Jump Indicator */}
+          {(character.hasDoubleJump || stats.upgrades.doubleJumpUnlocked) && (
+            <span className="px-1.5 py-0.5 rounded bg-yellow-500/20 text-yellow-300 border border-yellow-500/30 text-[10px] font-bold" title="Double Jump Active">
+              🦘 2x Jump
+            </span>
+          )}
+
           {/* Active Shield Indicator */}
           {hasShield && (
             <span className="px-2 py-0.5 rounded-full bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 text-[11px] font-bold flex items-center gap-1 animate-pulse">
@@ -1148,9 +1211,34 @@ export const EndlessRunnerCanvas: React.FC<EndlessRunnerCanvasProps> = ({
           )}
 
           {/* Active Magnet Indicator */}
-          {magnetTimer > 0 && (
+          {magnetTimer > 0 ? (
             <span className="px-2 py-0.5 rounded-full bg-purple-500/20 text-purple-300 border border-purple-500/40 text-[11px] font-bold flex items-center gap-1">
               <Magnet className="w-3 h-3 text-purple-400" /> {magnetTimer}s
+            </span>
+          ) : (stats.upgrades.magnetLevel || 0) > 0 ? (
+            <span className="px-1.5 py-0.5 rounded bg-purple-500/20 text-purple-300 border border-purple-500/30 text-[10px] font-bold" title="Passive Magnet Core Active">
+              🧲 Lvl {stats.upgrades.magnetLevel}
+            </span>
+          ) : null}
+
+          {/* Active Speed Boost Indicator */}
+          {(stats.upgrades.speedBoostLevel || 0) > 0 && (
+            <span className="px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-[10px] font-bold" title="Speed Overdrive Active">
+              ⚡ +{((stats.upgrades.speedBoostLevel || 0) * 6)}%
+            </span>
+          )}
+
+          {/* Active Revives Indicator */}
+          {(stats.upgrades.reviveKitCount || 0) > 0 && (
+            <span className="px-1.5 py-0.5 rounded bg-rose-500/20 text-rose-300 border border-rose-500/30 text-[10px] font-bold" title="Second Wind Defibrillators">
+              ❤️ {internalRef.current.revivesRemaining || 0}
+            </span>
+          )}
+
+          {/* Active Cash Multiplier Indicator */}
+          {((stats.upgrades.cashMultiplierLevel || 0) > 0 || (character.cashBonusMultiplier || 1.0) > 1.0) && (
+            <span className="px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/30 text-[10px] font-bold" title="Cash Multiplier Active">
+              💰 x{((character.cashBonusMultiplier || 1.0) * (1 + ((stats.upgrades.cashMultiplierLevel || 0) * 0.10))).toFixed(2)}
             </span>
           )}
 

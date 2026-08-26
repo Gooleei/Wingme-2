@@ -193,6 +193,40 @@ export const CHARACTERS: Character[] = [
     description: 'The ultimate runner! Max jump power, permanent super magnet, and +25% Cash earnings.',
     abilityName: 'Quantum Surge',
     abilityDescription: 'Double jump + Super Magnet + 1.25x Cash collection multiplier!'
+  },
+  {
+    id: 'sonic',
+    name: 'Sonic Overdrive',
+    title: 'Kinetic Jetpack',
+    avatar: '🚀',
+    color: '#06B6D4',
+    trailColor: 'rgba(6, 182, 212, 0.5)',
+    price: 85.0,
+    jumpPower: 14.2,
+    speedBonus: 1.22,
+    hasDoubleJump: true,
+    magnetRadiusMultiplier: 2.2,
+    cashBonusMultiplier: 1.35,
+    description: 'Hyper-sonic booster thrusters! Extreme agility with +35% Track Cash collection.',
+    abilityName: 'Kinetic Overdrive',
+    abilityDescription: 'Ultra-speed rocket boost, double jump, and 1.35x Cash multiplier!'
+  },
+  {
+    id: 'chrono',
+    name: 'Chrono God',
+    title: 'Apex Sovereign',
+    avatar: '👑',
+    color: '#EAB308',
+    trailColor: 'rgba(234, 179, 8, 0.6)',
+    price: 120.0,
+    jumpPower: 14.8,
+    speedBonus: 1.28,
+    hasDoubleJump: true,
+    magnetRadiusMultiplier: 2.8,
+    cashBonusMultiplier: 1.5,
+    description: 'The supreme time god! Starts with dual Energy Shields, maximum leap velocity, and +50% Cash yield.',
+    abilityName: 'Temporal Singularity',
+    abilityDescription: 'Dual Energy Shield Barrier + Universal 2.8x Magnet + 1.50x Cash multiplier!'
   }
 ];
 
@@ -202,7 +236,10 @@ export const SKINS: CharacterSkin[] = [
   { id: 'skin_volt_dark', characterId: 'volt', name: 'Stealth Matte', price: 6.0, glowColor: '#64748B', bodyColor: '#1E293B', pattern: 'stealth' },
   { id: 'skin_ninja_crimson', characterId: 'ninja', name: 'Crimson Eclipse', price: 10.0, glowColor: '#EF4444', bodyColor: '#991B1B', pattern: 'crimson' },
   { id: 'skin_valk_holo', characterId: 'valkyrie', name: 'Prismatic Holo', price: 12.0, glowColor: '#E879F9', bodyColor: '#86198F', pattern: 'holo' },
-  { id: 'skin_phantom_nexus', characterId: 'phantom', name: 'Apex Singularity', price: 20.0, glowColor: '#FDE047', bodyColor: '#4ADE80', pattern: 'nexus' }
+  { id: 'skin_phantom_nexus', characterId: 'phantom', name: 'Apex Singularity', price: 20.0, glowColor: '#FDE047', bodyColor: '#4ADE80', pattern: 'nexus' },
+  { id: 'skin_mecha_plasma', characterId: 'mecha', name: 'Plasma Overlord', price: 18.0, glowColor: '#F97316', bodyColor: '#C2410C', pattern: 'plasma' },
+  { id: 'skin_sonic_quantum', characterId: 'sonic', name: 'Neon Solar Flare', price: 25.0, glowColor: '#38BDF8', bodyColor: '#0369A1', pattern: 'solar' },
+  { id: 'skin_chrono_gold', characterId: 'chrono', name: 'Divine Aureate', price: 35.0, glowColor: '#FDE047', bodyColor: '#854D0E', pattern: 'aureate' }
 ];
 
 export const SEED_LEADERBOARDS: LeaderboardEntry[] = [
@@ -451,7 +488,10 @@ export const INITIAL_PLAYER_STATS: PlayerStats = {
     magnetLevel: 0,
     shieldDuration: 0,
     doubleJumpUnlocked: false,
-    speedBoostLevel: 0
+    speedBoostLevel: 0,
+    reviveKitCount: 0,
+    cashMultiplierLevel: 0,
+    headStartLevel: 0
   },
   mineProgress: {
     currentLevel: 1,

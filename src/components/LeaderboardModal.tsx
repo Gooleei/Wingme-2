@@ -5,19 +5,24 @@ import { Trophy, Medal, Flame, Timer, Zap, X, Globe, UserCheck } from 'lucide-re
 import { sound } from '../utils/audio';
 
 interface LeaderboardModalProps {
-  entries: LeaderboardEntry[];
+  entries?: LeaderboardEntry[];
+  leaderboards?: LeaderboardEntry[];
+  currentLevelId?: number;
   currentUserId?: string;
   onClose: () => void;
 }
 
 export const LeaderboardModal: React.FC<LeaderboardModalProps> = ({
   entries,
+  leaderboards,
+  currentLevelId = 1,
   currentUserId,
   onClose
 }) => {
-  const [selectedLevelId, setSelectedLevelId] = useState<number>(1);
+  const [selectedLevelId, setSelectedLevelId] = useState<number>(currentLevelId || 1);
 
-  const filteredEntries = entries
+  const allEntries = entries || leaderboards || [];
+  const filteredEntries = allEntries
     .filter(e => e.levelId === selectedLevelId)
     .sort((a, b) => a.timeMs - b.timeMs);
 

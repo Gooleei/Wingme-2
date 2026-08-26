@@ -53,6 +53,9 @@ export interface PlayerStats {
     shieldDuration: number;
     doubleJumpUnlocked: boolean;
     speedBoostLevel: number;
+    reviveKitCount?: number;
+    cashMultiplierLevel?: number;
+    headStartLevel?: number;
   };
   mineProgress?: {
     currentLevel: number; // 1 to 15

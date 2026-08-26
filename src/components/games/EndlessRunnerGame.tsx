@@ -185,10 +185,10 @@ export const EndlessRunnerGame: React.FC<EndlessRunnerGameProps> = ({
                   sound.playClick();
                   setShowShop(true);
                 }}
-                className="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-bold transition-all cursor-pointer shadow-sm min-h-[36px]"
+                className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-amber-500/20 to-amber-600/20 hover:from-amber-500/30 hover:to-amber-600/30 text-amber-300 border border-amber-500/50 text-xs font-black transition-all cursor-pointer shadow-md min-h-[36px]"
               >
-                <span className="text-sm">{selectedCharacter.avatar}</span>
-                <span>Suits</span>
+                <Zap className="w-3.5 h-3.5 text-amber-400" />
+                <span>Armory & Kits</span>
               </button>
 
               <button
