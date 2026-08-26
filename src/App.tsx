@@ -34,6 +34,7 @@ import { WatchView } from './components/WatchView';
 import { MineView } from './components/MineView';
 import { AuthModal } from './components/AuthModal';
 import { sound } from './utils/audio';
+import { purgeLegacyReferralMocks } from './utils/referralManager';
 
 const STORAGE_KEY = 'LUCKYPLAY_RUNNER_STATS_V2';
 const USER_KEY = 'LUCKYPLAY_USER_PROFILE_V2';
@@ -75,7 +76,17 @@ export default function App() {
 
   // Player Stats State
   const [stats, setStats] = useState<PlayerStats>(() => {
-    const saved = localStorage.getItem(STORAGE_KEY);
+    const activeUserRaw = localStorage.getItem(USER_KEY);
+    let userStatsKey = STORAGE_KEY;
+    if (activeUserRaw) {
+      try {
+        const u = JSON.parse(activeUserRaw);
+        if (u && u.id) userStatsKey = `${STORAGE_KEY}_${u.id}`;
+      } catch {
+        // ignore
+      }
+    }
+    const saved = localStorage.getItem(userStatsKey) || localStorage.getItem(STORAGE_KEY);
     if (saved) {
       try {
         return JSON.parse(saved);
@@ -99,34 +110,23 @@ export default function App() {
     return SEED_LEADERBOARDS;
   });
 
-  // Wallet Transactions
+  // Wallet Transactions - starts clean with no fake initial bonus
   const [transactions, setTransactions] = useState<WalletTransaction[]>(() => {
     const saved = localStorage.getItem(TRANSACTIONS_KEY);
     if (saved) {
       try {
         return JSON.parse(saved);
       } catch {
-        return [
-          {
-            id: 1,
-            description: '🎉 Welcome Starter Credit',
-            amount: 10.00,
-            type: 'bonus',
-            date: 'Initial'
-          }
-        ];
+        return [];
       }
     }
-    return [
-      {
-        id: 1,
-        description: '🎉 Welcome Starter Credit',
-        amount: 10.00,
-        type: 'bonus',
-        date: 'Initial'
-      }
-    ];
+    return [];
   });
+
+  // Purge legacy mock data on startup
+  useEffect(() => {
+    purgeLegacyReferralMocks();
+  }, []);
 
   // Navigation & Modals State
   const [currentView, setCurrentView] = useState<AppView>('DASHBOARD');
@@ -139,7 +139,10 @@ export default function App() {
   // Sync to localStorage
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(stats));
-  }, [stats]);
+    if (user && user.id) {
+      localStorage.setItem(`${STORAGE_KEY}_${user.id}`, JSON.stringify(stats));
+    }
+  }, [stats, user]);
 
   useEffect(() => {
     if (user) {
@@ -157,7 +160,10 @@ export default function App() {
 
   useEffect(() => {
     localStorage.setItem(TRANSACTIONS_KEY, JSON.stringify(transactions));
-  }, [transactions]);
+    if (user && user.id) {
+      localStorage.setItem(`${TRANSACTIONS_KEY}_${user.id}`, JSON.stringify(transactions));
+    }
+  }, [transactions, user]);
 
   // Handler: Generic Game Win Cashout
   const handleGameWin = (amount: number, description: string) => {
@@ -259,12 +265,34 @@ export default function App() {
     localStorage.setItem(AUTH_KEY, 'true');
     setShowAuthModal(false);
 
+    const userStatsKey = `${STORAGE_KEY}_${newUser.id}`;
+    const userTxKey = `${TRANSACTIONS_KEY}_${newUser.id}`;
+
+    const savedStats = localStorage.getItem(userStatsKey);
+    let loadedStats: PlayerStats;
+    if (savedStats) {
+      try {
+        loadedStats = JSON.parse(savedStats);
+      } catch {
+        loadedStats = { ...INITIAL_PLAYER_STATS };
+      }
+    } else {
+      loadedStats = { ...INITIAL_PLAYER_STATS };
+    }
+
+    const savedTx = localStorage.getItem(userTxKey);
+    let loadedTx: WalletTransaction[] = [];
+    if (savedTx) {
+      try {
+        loadedTx = JSON.parse(savedTx);
+      } catch {
+        loadedTx = [];
+      }
+    }
+
     if (bonusAdded && bonusAdded > 0) {
-      setStats((prev) => ({
-        ...prev,
-        balance: +(prev.balance + bonusAdded).toFixed(2),
-        totalCashEarned: +(prev.totalCashEarned + bonusAdded).toFixed(2)
-      }));
+      loadedStats.balance = +(loadedStats.balance + bonusAdded).toFixed(2);
+      loadedStats.totalCashEarned = +(loadedStats.totalCashEarned + bonusAdded).toFixed(2);
 
       const bonusTx: WalletTransaction = {
         id: Date.now(),
@@ -273,8 +301,15 @@ export default function App() {
         type: 'bonus',
         date: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
       };
-      setTransactions((prev) => [bonusTx, ...prev]);
+      loadedTx = [bonusTx, ...loadedTx];
     }
+
+    setStats(loadedStats);
+    setTransactions(loadedTx);
+    localStorage.setItem(userStatsKey, JSON.stringify(loadedStats));
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(loadedStats));
+    localStorage.setItem(userTxKey, JSON.stringify(loadedTx));
+    localStorage.setItem(TRANSACTIONS_KEY, JSON.stringify(loadedTx));
 
     setCurrentView('DASHBOARD');
   };

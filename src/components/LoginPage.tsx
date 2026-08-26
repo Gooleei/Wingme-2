@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { UserProfile } from '../types';
 import { sound } from '../utils/audio';
 import confetti from 'canvas-confetti';
+import { processGenuineReferral, purgeLegacyReferralMocks } from '../utils/referralManager';
 import { 
   Lock, 
   User, 
@@ -40,6 +41,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
 
   // Detect referral query params on load (e.g. ?ref=runner_alex or ?referrer=runner_alex)
   React.useEffect(() => {
+    purgeLegacyReferralMocks();
     if (typeof window !== 'undefined' && window.location.search) {
       const params = new URLSearchParams(window.location.search);
       const ref = params.get('ref') || params.get('referrer') || params.get('code');
@@ -158,17 +160,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
       return;
     }
 
-    // Check optional promo code or referral code
-    let bonus = 0;
-    const promo = promoCode.trim();
-    const promoUpper = promo.toUpperCase();
-    if (promoUpper === 'LUCKY2026' || promoUpper === 'RUNNER' || promoUpper === 'BONUS5') {
-      bonus = 5.00;
-    } else if (promo.length > 0) {
-      // Any valid referral code earns extra $1.00 welcome booster
-      bonus = 1.00;
-    }
-
+    // Account starts fresh at 0 balance - no generated or pad-up earnings
     const newUser: UserProfile = {
       id: `user-${cleanUser.toLowerCase()}-${Date.now().toString().slice(-4)}`,
       username: cleanUser,
@@ -184,12 +176,19 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
     };
 
     saveAccount(newUser);
+
+    // If registered via a referral link, link to referrer's genuine network and credit referrer
+    const refTarget = referrerDetected || promoCode;
+    if (refTarget && refTarget.trim()) {
+      processGenuineReferral(refTarget.trim(), newUser);
+    }
+
     sound.playWin();
     confetti({ particleCount: 90, spread: 80, origin: { y: 0.6 } });
-    setSuccessMsg(bonus > 0 ? `🎉 Account created! Claimed +$${bonus.toFixed(2)} Referral/Promo Bonus!` : '🎉 Account created successfully! Logging you in...');
+    setSuccessMsg('🎉 Account created successfully! Logging you in...');
 
     setTimeout(() => {
-      onLogin(newUser, bonus);
+      onLogin(newUser, 0);
     }, 500);
   };
 
@@ -343,11 +342,11 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
                     <div className="flex items-center gap-2">
                       <Gift className="w-4 h-4 text-emerald-400 shrink-0" />
                       <span>
-                        Invited by <strong className="text-white">@{referrerDetected}</strong>! (+$1.00 Extra Bonus Active)
+                        Invited by <strong className="text-white">@{referrerDetected}</strong> (Network Linked)
                       </span>
                     </div>
                     <span className="text-[10px] bg-emerald-500/30 text-emerald-300 px-2 py-0.5 rounded-full uppercase tracking-wider font-black shrink-0">
-                      Applied
+                      Connected
                     </span>
                   </div>
                 )}
@@ -438,22 +437,6 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
                       >
                         {showPin ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
                       </button>
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="text-[10px] font-bold text-slate-300 uppercase tracking-wider block mb-1">
-                      Promo Code (Optional)
-                    </label>
-                    <div className="relative">
-                      <Gift className="w-3.5 h-3.5 text-amber-400 absolute left-3 top-1/2 -translate-y-1/2" />
-                      <input
-                        type="text"
-                        value={promoCode}
-                        onChange={(e) => setPromoCode(e.target.value)}
-                        placeholder="Code 'LUCKY2026' (+$5)"
-                        className="w-full pl-9 pr-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-amber-300 text-xs font-semibold uppercase focus:outline-none focus:border-amber-400"
-                      />
                     </div>
                   </div>
                 </div>

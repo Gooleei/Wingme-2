@@ -2,21 +2,17 @@ import React, { useState, useEffect } from 'react';
 import { UserProfile, PlayerStats, ReferralTier, ReferralMember, ReferralNetworkState } from '../types';
 import { sound } from '../utils/audio';
 import confetti from 'canvas-confetti';
+import { getUserReferralNetwork, saveUserReferralNetwork } from '../utils/referralManager';
 import { 
   Share2, 
   Copy, 
   Check, 
   Users, 
-  Sparkles, 
   Gift, 
   TrendingUp, 
-  Award, 
-  ChevronRight, 
   Search, 
   Zap, 
-  ExternalLink,
-  ShieldCheck,
-  UserPlus
+  ShieldCheck
 } from 'lucide-react';
 
 interface ReferralSystemProps {
@@ -85,80 +81,38 @@ export const REFERRAL_TIERS: ReferralTier[] = [
   }
 ];
 
-const INITIAL_NETWORK_SEED: ReferralMember[] = [
-  {
-    id: 'ref-alex-99',
-    username: 'CyberAlex_99',
-    avatar: '🤖',
-    joinedDate: '2 hours ago',
-    status: 'Runner Master',
-    earnedForYou: 2.40,
-    activityCount: 18
-  },
-  {
-    id: 'ref-crypto-kat',
-    username: 'Katya_Crypto',
-    avatar: '🐱',
-    joinedDate: 'Yesterday',
-    status: 'Mining Pro',
-    earnedForYou: 1.60,
-    activityCount: 25
-  },
-  {
-    id: 'ref-matrix-runner',
-    username: 'NeoMatrix7',
-    avatar: '⚡',
-    joinedDate: '2 days ago',
-    status: 'VIP Gold',
-    earnedForYou: 3.20,
-    activityCount: 42
-  }
-];
-
 export const ReferralSystem: React.FC<ReferralSystemProps> = ({
   user,
   stats,
   setStats,
   onRewardClaimed
 }) => {
-  const storageKey = `LUCKYPLAY_REFERRAL_NETWORK_${user.id}`;
-  const referralCode = `REF-${user.username.toUpperCase().replace(/\s+/g, '')}`;
-  
   // Construct dynamic referral link
   const currentOrigin = typeof window !== 'undefined' ? window.location.origin : 'https://bellmont.io';
   const referralLink = `${currentOrigin}/?ref=${encodeURIComponent(user.username)}`;
 
-  // Referral Network State
+  // Referral Network State - strictly genuine from clean database / store
   const [network, setNetwork] = useState<ReferralNetworkState>(() => {
-    try {
-      const saved = localStorage.getItem(storageKey);
-      if (saved) {
-        return JSON.parse(saved);
-      }
-    } catch {
-      // ignore
-    }
-    return {
-      referralCode,
-      totalReferrals: INITIAL_NETWORK_SEED.length,
-      totalEarnings: INITIAL_NETWORK_SEED.reduce((acc, m) => acc + m.earnedForYou, 0),
-      claimedTiers: [1], // tier 1 already claimed by default for demo seed
-      networkMembers: INITIAL_NETWORK_SEED
-    };
+    return getUserReferralNetwork(user);
   });
 
   const [copied, setCopied] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [filterStatus, setFilterStatus] = useState<string>('ALL');
 
+  // Reload network if user changes
   useEffect(() => {
-    localStorage.setItem(storageKey, JSON.stringify(network));
-  }, [network, storageKey]);
+    setNetwork(getUserReferralNetwork(user));
+  }, [user]);
+
+  useEffect(() => {
+    saveUserReferralNetwork(user.id, network);
+  }, [network, user.id]);
 
   // WhatsApp Share Handler
   const handleShareWhatsApp = () => {
     sound.playClick();
-    const message = `🚀 Join me on Bellmont Rewards Arcade! Play games, mine diamonds, and earn real cash & crypto rewards. Sign up with my link to claim an extra Welcome Bonus: ${referralLink}`;
+    const message = `🚀 Join me on Bellmont Rewards Arcade! Play games, mine diamonds, and earn real cash & crypto rewards. Sign up with my link to start earning: ${referralLink}`;
     const whatsappUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(message)}`;
     window.open(whatsappUrl, '_blank', 'noopener,noreferrer');
   };
@@ -234,42 +188,6 @@ export const ReferralSystem: React.FC<ReferralSystemProps> = ({
     if (onRewardClaimed) {
       onRewardClaimed(reward, `🏆 Referral Milestone: ${tier.title} (${tier.multiplierText} Bonus +$${reward.toFixed(2)})`);
     }
-  };
-
-  // Invite Simulated Friend (Interactive Demo Action)
-  const handleSimulateInvite = () => {
-    sound.playCoin();
-    const fakeNames = ['ApexRunner', 'CryptoViper', 'NovaStar', 'LuckyStrike', 'GigaChad99', 'PixelPulse', 'HyperDrive'];
-    const fakeAvatars = ['🦊', '🚀', '🔥', '🛡️', '🎯', '👑', '💎', '🐉'];
-    const randomName = `${fakeNames[Math.floor(Math.random() * fakeNames.length)]}_${Math.floor(100 + Math.random() * 900)}`;
-    const randomAvatar = fakeAvatars[Math.floor(Math.random() * fakeAvatars.length)];
-    const bonusFromMember = 0.80;
-
-    const newMember: ReferralMember = {
-      id: `ref-${Date.now()}`,
-      username: randomName,
-      avatar: randomAvatar,
-      joinedDate: 'Just now (via WhatsApp)',
-      status: 'Active',
-      earnedForYou: bonusFromMember,
-      activityCount: 1
-    };
-
-    setNetwork((prev) => ({
-      ...prev,
-      totalReferrals: prev.totalReferrals + 1,
-      totalEarnings: +(prev.totalEarnings + bonusFromMember).toFixed(2),
-      networkMembers: [newMember, ...prev.networkMembers]
-    }));
-
-    // Add immediate $0.80 per-referral reward to player balance
-    setStats((prev) => ({
-      ...prev,
-      balance: +(prev.balance + bonusFromMember).toFixed(2),
-      totalCashEarned: +(prev.totalCashEarned + bonusFromMember).toFixed(2)
-    }));
-
-    confetti({ particleCount: 45, spread: 60, origin: { y: 0.7 } });
   };
 
   // Filtered Network Members
@@ -442,21 +360,10 @@ export const ReferralSystem: React.FC<ReferralSystemProps> = ({
               </div>
             </div>
 
-            {/* Simulated Referral Test Button */}
-            <div className="pt-2 border-t border-slate-800/80 flex flex-col sm:flex-row items-center justify-between gap-2">
-              <div className="flex items-center gap-1.5 text-xs text-slate-400">
-                <ShieldCheck className="w-4 h-4 text-emerald-400 shrink-0" />
-                <span>Invited users earn an extra <strong>+$1.00 - $5.00</strong> sign-up bonus when using your link.</span>
-              </div>
-
-              <button
-                id="btn-simulate-referral"
-                onClick={handleSimulateInvite}
-                className="px-3 py-1.5 rounded-lg bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-500/30 text-emerald-300 text-[11px] font-extrabold flex items-center gap-1.5 cursor-pointer transition-all shrink-0 hover:scale-105 active:scale-95"
-              >
-                <UserPlus className="w-3.5 h-3.5" />
-                <span>Simulate Invite (+1 Friend, +$0.80)</span>
-              </button>
+            {/* Genuine Referral Guarantee */}
+            <div className="pt-2 border-t border-slate-800/80 flex items-center gap-1.5 text-xs text-slate-400">
+              <ShieldCheck className="w-4 h-4 text-emerald-400 shrink-0" />
+              <span>Direct verified referrals: Every genuine recruit automatically credits your balance and advances your multiplier milestones.</span>
             </div>
           </div>
         </div>
@@ -595,14 +502,23 @@ export const ReferralSystem: React.FC<ReferralSystemProps> = ({
 
         {/* Network Member List */}
         {filteredMembers.length === 0 ? (
-          <div className="py-8 text-center bg-slate-950/60 rounded-xl border border-slate-800 space-y-2">
-            <Users className="w-8 h-8 text-slate-600 mx-auto" />
-            <p className="text-xs text-slate-400 font-medium">No network members match your search.</p>
+          <div className="py-10 text-center bg-slate-950/60 rounded-xl border border-slate-800 space-y-3 px-4">
+            <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center mx-auto text-emerald-400">
+              <Users className="w-6 h-6" />
+            </div>
+            <div>
+              <p className="text-sm text-slate-200 font-bold">Your referral network count starts at 0</p>
+              <p className="text-xs text-slate-400 font-medium max-w-md mx-auto mt-1">
+                Share your WhatsApp link with friends and fellow runners. When they sign up, they will appear right here in your live network and credit your earnings!
+              </p>
+            </div>
             <button
+              id="btn-empty-share-whatsapp"
               onClick={handleShareWhatsApp}
-              className="text-xs text-emerald-400 font-bold hover:underline"
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 text-xs font-black shadow-md cursor-pointer transition-all hover:scale-105 active:scale-95"
             >
-              Share link on WhatsApp to invite friends!
+              <Share2 className="w-4 h-4" />
+              <span>Share Link on WhatsApp</span>
             </button>
           </div>
         ) : (

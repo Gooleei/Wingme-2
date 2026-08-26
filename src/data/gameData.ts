@@ -430,13 +430,13 @@ export const MINE_LEVELS: MineLevelConfig[] = [
 ];
 
 export const INITIAL_PLAYER_STATS: PlayerStats = {
-  balance: 10.00, // Initial bonus
+  balance: 0.00, // Fresh clean balance for newly registered users
   totalRuns: 0,
   totalWins: 0,
   totalLosses: 0,
   totalDistanceRun: 0,
-  totalCashEarned: 0,
-  totalPenaltyPaid: 0,
+  totalCashEarned: 0.00,
+  totalPenaltyPaid: 0.00,
   unlockedCharacters: ['volt'],
   selectedCharacterId: 'volt',
   unlockedSkins: ['skin_default'],
@@ -444,7 +444,7 @@ export const INITIAL_PLAYER_STATS: PlayerStats = {
   unlockedLevels: 1,
   highScores: {},
   endlessBestDistance: 0,
-  streak: 1,
+  streak: 0,
   lastPlayDate: new Date().toISOString().split('T')[0],
   lastDailyClaimTime: null,
   upgrades: {

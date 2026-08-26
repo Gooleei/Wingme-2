@@ -28,13 +28,13 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
       sound.playClick();
       setStats((prev) => ({
         ...prev,
-        balance: 10.00,
+        balance: 0.00,
         totalRuns: 0,
         totalWins: 0,
         totalLosses: 0,
         totalDistanceRun: 0,
-        totalCashEarned: 0,
-        totalPenaltyPaid: 0,
+        totalCashEarned: 0.00,
+        totalPenaltyPaid: 0.00,
         unlockedLevels: 1
       }));
     }
