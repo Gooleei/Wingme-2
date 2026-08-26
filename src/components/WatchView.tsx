@@ -1,6 +1,8 @@
 import React, { useEffect, useRef } from 'react';
-import { ArrowLeft, Tv, ExternalLink, Sparkles, ShieldCheck, PlayCircle, Gift } from 'lucide-react';
+import { ArrowLeft, Tv, ExternalLink, Sparkles, ShieldCheck, PlayCircle, Gift, Zap, Video } from 'lucide-react';
 import { sound } from '../utils/audio';
+import { AdPlacement } from './AdPlacement';
+import { triggerSponsorAd } from '../utils/adManager';
 
 interface WatchViewProps {
   onBack: () => void;
@@ -12,6 +14,8 @@ export const WatchView: React.FC<WatchViewProps> = ({ onBack }) => {
   const containerRef2 = useRef<HTMLDivElement>(null);
   const containerRef3 = useRef<HTMLDivElement>(null);
   const containerRef5 = useRef<HTMLDivElement>(null);
+  const containerRefAd74 = useRef<HTMLDivElement>(null);
+  const containerRefAd75 = useRef<HTMLDivElement>(null);
 
   const directAdUrl = "https://www.profitableratecpmnetwork.com/eg93q7e37?key=7708673c87da2f16677aa4d28db3034c";
 
@@ -56,11 +60,31 @@ export const WatchView: React.FC<WatchViewProps> = ({ onBack }) => {
       containerRef5.current.appendChild(script5);
     }
 
+    // WPAdMngr Zone 458074 mount
+    const script74 = document.createElement('script');
+    script74.src = 'https://js.wpadmngr.com/static/adManager.js';
+    script74.async = true;
+    script74.setAttribute('data-admpid', '458074');
+    if (containerRefAd74.current) {
+      containerRefAd74.current.appendChild(script74);
+    }
+
+    // WPAdMngr Zone 458075 mount
+    const script75 = document.createElement('script');
+    script75.src = 'https://js.wpadmngr.com/static/adManager.js';
+    script75.async = true;
+    script75.setAttribute('data-admpid', '458075');
+    if (containerRefAd75.current) {
+      containerRefAd75.current.appendChild(script75);
+    }
+
     return () => {
       if (script1.parentNode) script1.parentNode.removeChild(script1);
       if (script2.parentNode) script2.parentNode.removeChild(script2);
       if (script3.parentNode) script3.parentNode.removeChild(script3);
       if (script5.parentNode) script5.parentNode.removeChild(script5);
+      if (script74.parentNode) script74.parentNode.removeChild(script74);
+      if (script75.parentNode) script75.parentNode.removeChild(script75);
     };
   }, []);
 
@@ -85,13 +109,94 @@ export const WatchView: React.FC<WatchViewProps> = ({ onBack }) => {
               <Tv className="w-5 h-5 text-cyan-400" />
               <span>Watch & Sponsor Hub</span>
             </h1>
-            <p className="text-xs text-slate-400">Media channels, sponsor rewards & premium showcase</p>
+            <p className="text-xs text-slate-400">Media channels, sponsor ad links & interactive reward stations</p>
           </div>
         </div>
 
         <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-950/80 border border-slate-800 text-xs text-slate-400">
           <ShieldCheck className="w-4 h-4 text-emerald-400" />
-          <span>Verified Network</span>
+          <span>Active Ad Network</span>
+        </div>
+      </div>
+
+      {/* Embedded Ad Manager 458074 & 458075 Prime Sections */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {/* Ad Tag 458074 Card */}
+        <div className="bg-gradient-to-br from-slate-900 via-slate-900 to-indigo-950/40 border border-indigo-500/30 rounded-3xl p-5 shadow-xl flex flex-col justify-between space-y-4">
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 flex items-center gap-1.5">
+                <Sparkles className="w-3.5 h-3.5 text-indigo-400" />
+                <span>WPAdMngr Channel #458074</span>
+              </span>
+              <span className="text-[10px] font-mono text-slate-400 bg-slate-950 px-2 py-0.5 rounded-md border border-slate-800">
+                Ad Link 1
+              </span>
+            </div>
+            <h3 className="text-base font-black text-white flex items-center gap-2">
+              <Video className="w-4 h-4 text-indigo-400" />
+              <span>Prime Sponsor Channel 458074</span>
+            </h3>
+            <p className="text-xs text-slate-300">
+              Interactive high-engagement sponsor stream with live monetized impressions and verified rewards.
+            </p>
+          </div>
+
+          <div 
+            ref={containerRefAd74}
+            id="ad-placement-458074-container"
+            className="w-full min-h-[80px] bg-slate-950/80 rounded-2xl border border-slate-800 p-3 flex items-center justify-center overflow-hidden"
+          />
+
+          <button
+            type="button"
+            id="btn-ad-trigger-458074"
+            onClick={() => triggerSponsorAd('ZONE_458074')}
+            className="w-full py-3 rounded-2xl bg-gradient-to-r from-indigo-500 to-cyan-500 hover:from-indigo-400 hover:to-cyan-400 text-slate-950 font-black text-xs shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-95 touch-manipulation"
+          >
+            <PlayCircle className="w-4 h-4 fill-current" />
+            <span>Launch Ad Link 1 (Tag 458074)</span>
+            <ExternalLink className="w-3.5 h-3.5" />
+          </button>
+        </div>
+
+        {/* Ad Tag 458075 Card */}
+        <div className="bg-gradient-to-br from-slate-900 via-slate-900 to-emerald-950/40 border border-emerald-500/30 rounded-3xl p-5 shadow-xl flex flex-col justify-between space-y-4">
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 flex items-center gap-1.5">
+                <Sparkles className="w-3.5 h-3.5 text-emerald-400" />
+                <span>WPAdMngr Channel #458075</span>
+              </span>
+              <span className="text-[10px] font-mono text-slate-400 bg-slate-950 px-2 py-0.5 rounded-md border border-slate-800">
+                Ad Link 2
+              </span>
+            </div>
+            <h3 className="text-base font-black text-white flex items-center gap-2">
+              <Zap className="w-4 h-4 text-emerald-400" />
+              <span>Elite Sponsor Channel 458075</span>
+            </h3>
+            <p className="text-xs text-slate-300">
+              High-yield direct monetization partner feed with automatic reward bonuses and instant access.
+            </p>
+          </div>
+
+          <div 
+            ref={containerRefAd75}
+            id="ad-placement-458075-container"
+            className="w-full min-h-[80px] bg-slate-950/80 rounded-2xl border border-slate-800 p-3 flex items-center justify-center overflow-hidden"
+          />
+
+          <button
+            type="button"
+            id="btn-ad-trigger-458075"
+            onClick={() => triggerSponsorAd('ZONE_458075')}
+            className="w-full py-3 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-400 hover:from-emerald-400 hover:to-teal-300 text-slate-950 font-black text-xs shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-95 touch-manipulation"
+          >
+            <PlayCircle className="w-4 h-4 fill-current" />
+            <span>Launch Ad Link 2 (Tag 458075)</span>
+            <ExternalLink className="w-3.5 h-3.5" />
+          </button>
         </div>
       </div>
 
@@ -201,3 +306,4 @@ export const WatchView: React.FC<WatchViewProps> = ({ onBack }) => {
     </div>
   );
 };
+

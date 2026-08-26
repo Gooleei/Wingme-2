@@ -2,6 +2,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import { AppView, PlayerStats, UserProfile, DOLLARS_PER_T_POINT, convertDollarsToTPoints } from '../types';
 import { sound } from '../utils/audio';
 import confetti from 'canvas-confetti';
+import { AdPlacement } from './AdPlacement';
+import { triggerSponsorAd } from '../utils/adManager';
 import { 
   Play, 
   Sparkles, 
@@ -23,7 +25,9 @@ import {
   TrendingUp,
   Info,
   Layers,
-  ArrowRight
+  ArrowRight,
+  Tv,
+  ExternalLink
 } from 'lucide-react';
 
 interface DashboardViewProps {
@@ -524,6 +528,24 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
             <span>{featuredSlides[carouselIndex].buttonText}</span>
           </button>
         </div>
+      </div>
+
+      {/* Featured Sponsor Monetization Banners (Tags 458074 & 458075) */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+        <AdPlacement
+          zoneId={458074}
+          variant="card"
+          title="Sponsor Network Tag 458074"
+          subtitle="Explore sponsored offers & boost platform rewards. Instant credit activation."
+          rewardLabel="Sponsored Zone 1"
+        />
+        <AdPlacement
+          zoneId={458075}
+          variant="card"
+          title="Sponsor Network Tag 458075"
+          subtitle="Discover verified sponsor partners & trigger special gaming power-ups."
+          rewardLabel="Sponsored Zone 2"
+        />
       </div>
 
       {/* Grid of All Games */}

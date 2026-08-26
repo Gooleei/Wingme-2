@@ -3,6 +3,8 @@ import { PlayerStats, UserProfile, DOLLARS_PER_T_POINT, convertDollarsToTPoints 
 import { MINE_LEVELS } from '../data/gameData';
 import { sound } from '../utils/audio';
 import confetti from 'canvas-confetti';
+import { AdPlacement } from './AdPlacement';
+import { triggerSponsorAd } from '../utils/adManager';
 import { 
   Sparkles, 
   Flame, 
@@ -20,7 +22,9 @@ import {
   TrendingUp,
   Coins,
   ShieldCheck,
-  Star
+  Star,
+  Tv,
+  ExternalLink
 } from 'lucide-react';
 
 interface FloatingTapEffect {
@@ -529,6 +533,24 @@ export const MineView: React.FC<MineViewProps> = ({
           <div 
             className="absolute -top-10 right-0 w-48 h-24 blur-3xl pointer-events-none rounded-full"
             style={{ backgroundColor: currentLevelConfig.glowColor }}
+          />
+        </div>
+      </div>
+
+      {/* SPONSOR MONETIZATION STATION (TAGS 458074 & 458075) */}
+      <div className="max-w-4xl mx-auto w-full px-3 sm:px-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <AdPlacement
+            zoneId={458074}
+            variant="compact"
+            title="Mining Sponsor 1 (458074)"
+            subtitle="Click to activate 2x sparkle mining glow"
+          />
+          <AdPlacement
+            zoneId={458075}
+            variant="compact"
+            title="Mining Sponsor 2 (458075)"
+            subtitle="Click to unlock sponsor tap bonus"
           />
         </div>
       </div>
