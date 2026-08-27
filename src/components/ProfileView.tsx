@@ -25,6 +25,7 @@ import { ReferralSystem } from './ReferralSystem';
 import { 
   updateUserCredentials
 } from '../utils/accountManager';
+import { formatCurrency, formatPoints } from '../utils/formatters';
 
 interface ProfileViewProps {
   user: UserProfile;
@@ -204,9 +205,9 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
           {/* Wallet Balance Widget */}
           <div className="bg-slate-950 p-3.5 rounded-2xl border border-slate-800 text-center sm:text-right space-y-0.5 shrink-0 w-full sm:w-auto shadow-inner">
             <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider block">Wallet Balance & Points</span>
-            <div className="text-2xl sm:text-3xl font-black text-emerald-400 font-mono">${stats.balance.toFixed(2)}</div>
+            <div className="text-2xl sm:text-3xl font-black text-emerald-400 font-mono">{formatCurrency(stats.balance)}</div>
             <div className="text-xs font-black text-cyan-300 font-mono flex items-center justify-center sm:justify-end gap-1">
-              <span className="text-cyan-400">₮</span>{(stats.balance / 15).toFixed(2)} Points
+              <span>{formatPoints(stats.balance / 15)} Points</span>
             </div>
             <span className="text-[9px] text-slate-500 block">Withdrawal Rate: $15.00 = ₮1.00</span>
           </div>

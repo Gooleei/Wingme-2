@@ -42,6 +42,7 @@ import {
   getUserTransactions, 
   saveUserTransactions,
   updateAccount,
+  isVIPUser,
   STATS_STORAGE_PREFIX,
   TRANSACTIONS_STORAGE_PREFIX,
   USER_SESSION_KEY,
@@ -135,7 +136,13 @@ export default function App() {
   useEffect(() => {
     purgeLegacyReferralMocks();
     getAllAccounts();
-  }, []);
+    if (user && isVIPUser(user)) {
+      const freshStats = getUserStats(user.id);
+      const freshTxs = getUserTransactions(user.id);
+      setStats(freshStats);
+      setTransactions(freshTxs);
+    }
+  }, [user]);
 
   // Listen for live referral credits across tabs/modals
   useEffect(() => {

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { PlayerStats } from '../types';
 import { sound } from '../utils/audio';
+import { formatCurrency, formatPoints } from '../utils/formatters';
 import { 
   Wallet, 
   X, 
@@ -209,9 +210,9 @@ export const WithdrawModal: React.FC<WithdrawModalProps> = ({
               <div className="flex items-center justify-between">
                 <div>
                   <span className="text-[10px] text-slate-400 uppercase font-bold tracking-wider">Available Balance</span>
-                  <p className="text-2xl sm:text-3xl font-black text-amber-300 font-arcade">${stats.balance.toFixed(2)}</p>
+                  <p className="text-2xl sm:text-3xl font-black text-amber-300 font-arcade">{formatCurrency(stats.balance)}</p>
                   <p className="text-xs text-cyan-300 font-bold font-mono">
-                    <span className="text-cyan-400 font-black">₮</span>{(stats.balance / 15).toFixed(2)} Points <span className="text-[10px] text-slate-400">($15 = ₮1)</span>
+                    <span>{formatPoints(stats.balance / 15)} Points <span className="text-[10px] text-slate-400">($15 = ₮1)</span></span>
                   </p>
                 </div>
                 <div className="text-right">

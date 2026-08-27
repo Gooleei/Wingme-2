@@ -5,6 +5,7 @@ import confetti from 'canvas-confetti';
 import { AdPlacement, SponsorCarousel } from './AdPlacement';
 import { StagesCarousel } from './StagesCarousel';
 import { triggerSponsorAd } from '../utils/adManager';
+import { formatCurrency, formatPoints, formatCompactFigure } from '../utils/formatters';
 import { 
   Play, 
   Sparkles, 
@@ -28,7 +29,8 @@ import {
   Layers,
   ArrowRight,
   Tv,
-  ExternalLink
+  ExternalLink,
+  Gem
 } from 'lucide-react';
 
 interface DashboardViewProps {
@@ -244,101 +246,101 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
 
   return (
     <div className="max-w-6xl mx-auto px-3 sm:px-6 py-4 sm:py-6 space-y-4 sm:space-y-6">
-      {/* CAROUSEL SIDE SCROLL: CASH BALANCE & ACCUMULATED ₮ POINTS BARS IN SAME LINE */}
-      <div className="space-y-2.5">
+      {/* CAROUSEL SIDE SCROLL: BALANCE, POINTS & DIAMONDS TRACKERS (COMPACT SIZE) */}
+      <div className="space-y-2">
         {/* Carousel Header with Navigation Controls */}
         <div className="flex items-center justify-between px-1">
-          <div className="flex items-center gap-2">
-            <h3 className="text-xs sm:text-sm font-black text-slate-200 uppercase tracking-wider flex items-center gap-1.5">
+          <div className="flex items-center gap-1.5">
+            <h3 className="text-xs sm:text-[13px] font-black text-slate-200 uppercase tracking-wider flex items-center gap-1.5">
               <Layers className="w-3.5 h-3.5 text-cyan-400" />
               <span>Balance & Point Trackers</span>
             </h3>
-            <span className="text-[10px] px-2 py-0.2 rounded-full bg-slate-800 text-slate-400 border border-slate-700 hidden xs:inline-flex items-center gap-1">
-              <span>⇄</span> Carousel Side Scroll
+            <span className="text-[9px] px-1.5 py-0.2 rounded-full bg-slate-800 text-slate-400 border border-slate-700 hidden xs:inline-flex items-center gap-1">
+              <span>⇄ 3 Slides</span>
             </span>
           </div>
 
-          <div className="flex items-center gap-1.5">
+          <div className="flex items-center gap-1">
             <button
               onClick={() => scrollBarsCarousel('left')}
               title="Scroll Left"
-              className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition-colors border border-slate-700 cursor-pointer min-h-[30px] min-w-[30px] flex items-center justify-center shadow-sm active:scale-95"
+              className="p-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition-colors border border-slate-700 cursor-pointer min-h-[26px] min-w-[26px] flex items-center justify-center shadow-sm active:scale-95"
             >
-              <ChevronLeft className="w-3.5 h-3.5" />
+              <ChevronLeft className="w-3 h-3" />
             </button>
             <button
               onClick={() => scrollBarsCarousel('right')}
               title="Scroll Right"
-              className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition-colors border border-slate-700 cursor-pointer min-h-[30px] min-w-[30px] flex items-center justify-center shadow-sm active:scale-95"
+              className="p-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition-colors border border-slate-700 cursor-pointer min-h-[26px] min-w-[26px] flex items-center justify-center shadow-sm active:scale-95"
             >
-              <ChevronRight className="w-3.5 h-3.5" />
+              <ChevronRight className="w-3 h-3" />
             </button>
           </div>
         </div>
 
-        {/* Carousel Track: Both Bars in the Same Line Separated by Space */}
+        {/* Carousel Track: 3 Slides (Cash, ₮ Points, Diamonds Gained) */}
         <div 
           ref={barsCarouselRef}
-          className="flex items-stretch gap-3.5 sm:gap-4 overflow-x-auto pb-2 snap-x snap-mandatory scroll-smooth scrollbar-thin"
+          className="flex items-stretch gap-2.5 sm:gap-3 overflow-x-auto pb-1.5 snap-x snap-mandatory scroll-smooth scrollbar-thin"
         >
-          {/* BAR 1: CASH BALANCE & PAYOUT PROGRESS BAR */}
+          {/* SLIDE 1: CASH BALANCE & PAYOUT PROGRESS BAR */}
           <div 
             id="cash-balance-bar-card"
-            className="flex-1 min-w-[300px] sm:min-w-[420px] md:min-w-[460px] shrink-0 snap-start bg-gradient-to-br from-emerald-950/60 via-slate-900 to-slate-950 border border-emerald-500/30 rounded-2xl sm:rounded-3xl p-4 sm:p-5 shadow-xl space-y-3 sm:space-y-3.5 relative overflow-hidden flex flex-col justify-between"
+            className="flex-1 min-w-[270px] sm:min-w-[320px] md:min-w-[340px] shrink-0 snap-start bg-gradient-to-br from-emerald-950/60 via-slate-900 to-slate-950 border border-emerald-500/30 rounded-xl sm:rounded-2xl p-3 sm:p-3.5 shadow-lg space-y-2.5 relative overflow-hidden flex flex-col justify-between"
           >
-            <div className="space-y-3">
+            <div className="space-y-2">
               {/* Header */}
               <div className="flex items-center justify-between gap-2">
-                <div className="flex items-center gap-2.5">
-                  <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-emerald-400 shrink-0 shadow-inner">
-                    <Wallet className="w-5 h-5" />
+                <div className="flex items-center gap-2">
+                  <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-emerald-400 shrink-0 shadow-inner">
+                    <Wallet className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                   </div>
                   <div>
-                    <h4 className="text-sm sm:text-base font-black text-white flex items-center gap-1.5 flex-wrap">
-                      <span>Cash Balance Bar</span>
-                      <span className="text-[10px] px-2 py-0.2 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-bold">
+                    <h4 className="text-xs sm:text-sm font-black text-white flex items-center gap-1 flex-wrap leading-tight">
+                      <span>Cash Balance</span>
+                      <span className="text-[9px] px-1.5 py-0.2 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-bold">
                         USD Wallet
                       </span>
                     </h4>
-                    <p className="text-[11px] sm:text-xs text-slate-400">Withdrawal qualification threshold ($600 Min)</p>
+                    <p className="text-[10px] text-slate-400 leading-tight">Threshold: $600.00 Min Payout</p>
                   </div>
                 </div>
 
                 <div className="text-right shrink-0">
-                  <span className="text-[9px] sm:text-[10px] text-slate-400 uppercase font-bold block">Available</span>
-                  <span className="text-lg sm:text-xl font-black text-emerald-400 font-mono">
-                    ${stats.balance.toFixed(2)}
+                  <span className="text-[8px] sm:text-[9px] text-slate-400 uppercase font-bold block leading-none">Available</span>
+                  <span className="text-base sm:text-lg font-black text-emerald-400 font-mono">
+                    {formatCurrency(stats.balance)}
                   </span>
                 </div>
               </div>
 
               {/* Progress to $600 Payout Bar */}
-              <div className="space-y-1.5 p-3 rounded-xl sm:rounded-2xl bg-slate-950/80 border border-slate-800">
-                <div className="flex justify-between items-center text-xs">
+              <div className="space-y-1 p-2 rounded-lg sm:rounded-xl bg-slate-950/80 border border-slate-800">
+                <div className="flex justify-between items-center text-[10px] sm:text-[11px]">
                   <span className="text-slate-300 font-bold flex items-center gap-1">
-                    <TrendingUp className="w-3.5 h-3.5 text-emerald-400" />
-                    <span>Payout Threshold Progress</span>
+                    <TrendingUp className="w-3 h-3 text-emerald-400" />
+                    <span>Payout Threshold</span>
                   </span>
                   <span className="text-emerald-300 font-black font-mono">
-                    {withdrawProgress}% (${stats.balance.toFixed(2)} / $600.00)
+                    {withdrawProgress}% ({formatCurrency(stats.balance)} / $600)
                   </span>
                 </div>
 
                 {/* Visual Bar Track */}
-                <div className="w-full h-2.5 sm:h-3 bg-slate-900 rounded-full border border-slate-800 overflow-hidden p-0.5">
+                <div className="w-full h-2 bg-slate-900 rounded-full border border-slate-800 overflow-hidden p-0.5">
                   <div 
                     className="h-full bg-gradient-to-r from-emerald-500 via-teal-400 to-cyan-400 rounded-full transition-all duration-500 shadow-sm shadow-emerald-500/50"
                     style={{ width: `${withdrawProgress}%` }}
                   />
                 </div>
 
-                <div className="flex justify-between items-center text-[10px] text-slate-400">
-                  <span>Min Floor: $600.00</span>
+                <div className="flex justify-between items-center text-[9px] text-slate-400">
+                  <span>Min: $600.00</span>
                   <span>
                     {stats.balance >= MIN_WITHDRAW_USD ? (
-                      <strong className="text-emerald-400">✓ Ready to Cash Out</strong>
+                      <strong className="text-emerald-400">✓ Ready to Withdraw</strong>
                     ) : (
-                      `$${(MIN_WITHDRAW_USD - stats.balance).toFixed(2)} more to unlock`
+                      `$${(MIN_WITHDRAW_USD - stats.balance).toFixed(2)} to unlock`
                     )}
                   </span>
                 </div>
@@ -346,60 +348,60 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
             </div>
 
             {/* Bottom Actions & Policy */}
-            <div className="pt-2 border-t border-slate-800/80 flex items-center justify-between gap-2">
-              <div className="text-[10px] text-slate-400">
-                <span>Fee: <strong className="text-amber-400">0.50%</strong> · Max: <strong className="text-slate-300">$1,000/tx</strong></span>
+            <div className="pt-1.5 border-t border-slate-800/80 flex items-center justify-between gap-1.5">
+              <div className="text-[9px] text-slate-400">
+                <span>Fee: <strong className="text-amber-400">0.50%</strong></span>
               </div>
               <button
                 onClick={() => {
                   sound.playClick();
                   onOpenWithdraw();
                 }}
-                className="px-3.5 py-1.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-xs transition-all shadow-md shadow-emerald-500/20 cursor-pointer flex items-center gap-1 shrink-0"
+                className="px-2.5 py-1 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-[10px] transition-all shadow-sm cursor-pointer flex items-center gap-1 shrink-0 active:scale-95"
               >
                 <span>Request Payout</span>
-                <ArrowRight className="w-3.5 h-3.5" />
+                <ArrowRight className="w-3 h-3" />
               </button>
             </div>
           </div>
 
-          {/* BAR 2: ACCUMULATED ₮ POINTS & CONVERSION BAR */}
+          {/* SLIDE 2: ACCUMULATED ₮ POINTS & CONVERSION BAR */}
           <div 
             id="accumulated-points-bar-card"
-            className="flex-1 min-w-[300px] sm:min-w-[420px] md:min-w-[460px] shrink-0 snap-start bg-gradient-to-br from-cyan-950/60 via-slate-900 to-slate-950 border border-cyan-500/30 rounded-2xl sm:rounded-3xl p-4 sm:p-5 shadow-xl space-y-3 sm:space-y-3.5 relative overflow-hidden flex flex-col justify-between"
+            className="flex-1 min-w-[270px] sm:min-w-[320px] md:min-w-[340px] shrink-0 snap-start bg-gradient-to-br from-cyan-950/60 via-slate-900 to-slate-950 border border-cyan-500/30 rounded-xl sm:rounded-2xl p-3 sm:p-3.5 shadow-lg space-y-2.5 relative overflow-hidden flex flex-col justify-between"
           >
-            <div className="space-y-3">
+            <div className="space-y-2">
               {/* Header */}
               <div className="flex items-center justify-between gap-2">
-                <div className="flex items-center gap-2.5">
-                  <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-cyan-500/20 border border-cyan-500/40 flex items-center justify-center text-cyan-300 font-black text-lg shrink-0 shadow-inner">
+                <div className="flex items-center gap-2">
+                  <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-cyan-500/20 border border-cyan-500/40 flex items-center justify-center text-cyan-300 font-black text-sm shrink-0 shadow-inner">
                     ₮
                   </div>
                   <div>
-                    <h4 className="text-sm sm:text-base font-black text-white flex items-center gap-1.5 flex-wrap">
-                      <span>Accumulated ₮ Points Bar</span>
-                      <span className="text-[10px] px-2 py-0.2 rounded-full bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 font-bold">
+                    <h4 className="text-xs sm:text-sm font-black text-white flex items-center gap-1 flex-wrap leading-tight">
+                      <span>₮ Points Bar</span>
+                      <span className="text-[9px] px-1.5 py-0.2 rounded-full bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 font-bold">
                         $15.00 = ₮1.00
                       </span>
                     </h4>
-                    <p className="text-[11px] sm:text-xs text-slate-400">Real-time reward points calculated from games</p>
+                    <p className="text-[10px] text-slate-400 leading-tight">Calculated live from gameplay earnings</p>
                   </div>
                 </div>
 
                 <div className="text-right shrink-0">
-                  <span className="text-[9px] sm:text-[10px] text-slate-400 uppercase font-bold block">Points Balance</span>
-                  <span className="text-lg sm:text-xl font-black text-cyan-400 font-mono">
-                    ₮{accumulatedTPoints.toFixed(2)}
+                  <span className="text-[8px] sm:text-[9px] text-slate-400 uppercase font-bold block leading-none">Points</span>
+                  <span className="text-base sm:text-lg font-black text-cyan-400 font-mono">
+                    {formatPoints(accumulatedTPoints)}
                   </span>
                 </div>
               </div>
 
               {/* Progress to Next ₮1.00 Bar */}
-              <div className="space-y-1.5 p-3 rounded-xl sm:rounded-2xl bg-slate-950/80 border border-slate-800">
-                <div className="flex justify-between items-center text-xs">
+              <div className="space-y-1 p-2 rounded-lg sm:rounded-xl bg-slate-950/80 border border-slate-800">
+                <div className="flex justify-between items-center text-[10px] sm:text-[11px]">
                   <span className="text-slate-300 font-bold flex items-center gap-1">
-                    <Sparkles className="w-3.5 h-3.5 text-cyan-400" />
-                    <span>Progress to Next ₮1.00 Point</span>
+                    <Sparkles className="w-3 h-3 text-cyan-400" />
+                    <span>Progress to Next ₮1.00</span>
                   </span>
                   <span className="text-cyan-300 font-black font-mono">
                     {progressToNextTPoint}% (${dollarsIntoCurrentT.toFixed(2)} / $15.00)
@@ -407,22 +409,22 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                 </div>
 
                 {/* Visual Bar Track */}
-                <div className="w-full h-2.5 sm:h-3 bg-slate-900 rounded-full border border-slate-800 overflow-hidden p-0.5">
+                <div className="w-full h-2 bg-slate-900 rounded-full border border-slate-800 overflow-hidden p-0.5">
                   <div 
                     className="h-full bg-gradient-to-r from-cyan-500 via-teal-400 to-emerald-400 rounded-full transition-all duration-500 shadow-sm shadow-cyan-500/50"
                     style={{ width: `${progressToNextTPoint}%` }}
                   />
                 </div>
 
-                <div className="flex justify-between items-center text-[10px] text-slate-400">
-                  <span>Current: ₮{Math.floor(accumulatedTPoints)}</span>
-                  <span>+${dollarsNeededForNextT} for ₮{(Math.floor(accumulatedTPoints) + 1).toFixed(2)}</span>
+                <div className="flex justify-between items-center text-[9px] text-slate-400">
+                  <span>Current: {formatPoints(Math.floor(accumulatedTPoints))}</span>
+                  <span>+${dollarsNeededForNextT} for next ₮1.00</span>
                 </div>
               </div>
             </div>
 
-            {/* Milestones Track in the card */}
-            <div className="pt-2 border-t border-slate-800/80 flex items-center justify-between gap-1 text-center">
+            {/* Milestones Track */}
+            <div className="pt-1.5 border-t border-slate-800/80 flex items-center justify-between gap-1 text-center">
               {[
                 { label: '₮1.00', usd: '$15', target: 1 },
                 { label: '₮10.00', usd: '$150', target: 10 },
@@ -433,14 +435,93 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                 return (
                   <div 
                     key={idx}
-                    className={`flex-1 px-1 py-1 rounded-lg border text-[9px] ${
+                    className={`flex-1 px-0.5 py-0.5 rounded border text-[8px] sm:text-[9px] ${
                       reached 
                         ? 'bg-cyan-500/15 border-cyan-500/40 text-cyan-300 font-bold' 
                         : 'bg-slate-950/60 border-slate-800 text-slate-500'
                     }`}
                   >
                     <div className="font-bold truncate">{m.label}</div>
-                    <div className="text-[8px] text-slate-400">{m.usd}</div>
+                    <div className="text-[7px] text-slate-400">{m.usd}</div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* SLIDE 3: DIAMONDS GAINED BAR (REMAINS AT 0 UNTIL RULES ARE IMPLEMENTED) */}
+          <div 
+            id="diamonds-gained-bar-card"
+            className="flex-1 min-w-[270px] sm:min-w-[320px] md:min-w-[340px] shrink-0 snap-start bg-gradient-to-br from-violet-950/60 via-slate-900 to-slate-950 border border-violet-500/30 rounded-xl sm:rounded-2xl p-3 sm:p-3.5 shadow-lg space-y-2.5 relative overflow-hidden flex flex-col justify-between"
+          >
+            <div className="space-y-2">
+              {/* Header */}
+              <div className="flex items-center justify-between gap-2">
+                <div className="flex items-center gap-2">
+                  <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-violet-500/20 border border-violet-500/40 flex items-center justify-center text-violet-300 shrink-0 shadow-inner">
+                    <Gem className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-violet-400" />
+                  </div>
+                  <div>
+                    <h4 className="text-xs sm:text-sm font-black text-white flex items-center gap-1 flex-wrap leading-tight">
+                      <span>Diamonds Gained</span>
+                      <span className="text-[9px] px-1.5 py-0.2 rounded-full bg-violet-500/20 text-violet-300 border border-violet-500/30 font-bold">
+                        Rules Pending
+                      </span>
+                    </h4>
+                    <p className="text-[10px] text-slate-400 leading-tight">Diamonds gained across games & mining</p>
+                  </div>
+                </div>
+
+                <div className="text-right shrink-0">
+                  <span className="text-[8px] sm:text-[9px] text-slate-400 uppercase font-bold block leading-none">Diamonds</span>
+                  <span className="text-base sm:text-lg font-black text-violet-400 font-mono">
+                    0 💎
+                  </span>
+                </div>
+              </div>
+
+              {/* Progress to Next Tier Bar (Default 0%) */}
+              <div className="space-y-1 p-2 rounded-lg sm:rounded-xl bg-slate-950/80 border border-slate-800">
+                <div className="flex justify-between items-center text-[10px] sm:text-[11px]">
+                  <span className="text-slate-300 font-bold flex items-center gap-1">
+                    <Gem className="w-3 h-3 text-violet-400" />
+                    <span>Diamond Milestone Tier</span>
+                  </span>
+                  <span className="text-violet-300 font-black font-mono">
+                    0% (0 / 100 💎)
+                  </span>
+                </div>
+
+                {/* Visual Bar Track */}
+                <div className="w-full h-2 bg-slate-900 rounded-full border border-slate-800 overflow-hidden p-0.5">
+                  <div 
+                    className="h-full bg-gradient-to-r from-violet-500 via-purple-400 to-cyan-400 rounded-full transition-all duration-500 shadow-sm shadow-violet-500/50"
+                    style={{ width: `0%` }}
+                  />
+                </div>
+
+                <div className="flex justify-between items-center text-[9px] text-slate-400">
+                  <span>Balance: 0 💎</span>
+                  <span className="text-violet-300 font-medium">Rules unlock pending</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Milestones Track */}
+            <div className="pt-1.5 border-t border-slate-800/80 flex items-center justify-between gap-1 text-center">
+              {[
+                { label: '10 💎', tier: 'Tier I' },
+                { label: '50 💎', tier: 'Tier II' },
+                { label: '100 💎', tier: 'Tier III' },
+                { label: '500 💎', tier: 'Master' }
+              ].map((m, idx) => {
+                return (
+                  <div 
+                    key={idx}
+                    className="flex-1 px-0.5 py-0.5 rounded border text-[8px] sm:text-[9px] bg-slate-950/60 border-slate-800 text-slate-500"
+                  >
+                    <div className="font-bold truncate">{m.label}</div>
+                    <div className="text-[7px] text-slate-400">{m.tier}</div>
                   </div>
                 );
               })}

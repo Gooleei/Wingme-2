@@ -1,6 +1,7 @@
 import React from 'react';
 import { PlayerStats, WalletTransaction } from '../types';
 import { sound } from '../utils/audio';
+import { formatCurrency } from '../utils/formatters';
 import { ArrowLeft, Wallet, ArrowDownRight, ArrowUpRight, Plus, Minus, ExternalLink, ShieldCheck } from 'lucide-react';
 
 interface HistoryViewProps {
@@ -40,7 +41,7 @@ export const HistoryView: React.FC<HistoryViewProps> = ({
 
         <div className="bg-slate-950 px-3.5 py-1.5 sm:px-4 sm:py-2 rounded-xl border border-slate-800 text-right">
           <span className="text-[9px] text-slate-400 block font-bold">Balance</span>
-          <span className="text-sm sm:text-base font-black text-emerald-400">${userBalance.toFixed(2)}</span>
+          <span className="text-sm sm:text-base font-black text-emerald-400">{formatCurrency(userBalance)}</span>
         </div>
       </div>
 

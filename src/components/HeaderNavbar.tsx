@@ -12,6 +12,7 @@ import {
   Tv 
 } from 'lucide-react';
 import { sound } from '../utils/audio';
+import { formatCurrency, formatPoints } from '../utils/formatters';
 
 interface HeaderNavbarProps {
   currentView: AppView;
@@ -92,11 +93,11 @@ export const HeaderNavbar: React.FC<HeaderNavbarProps> = ({
                 sound.playClick();
                 onOpenWithdraw();
               }}
-              title="Click to Withdraw Balance ($15 = ₮1)"
+              title={`Click to Withdraw Balance: $${balance.toLocaleString('en-US', { minimumFractionDigits: 2 })} ($15 = ₮1)`}
               className="flex items-center gap-1.5 px-2.5 sm:px-3.5 py-1.5 rounded-xl bg-emerald-950/70 hover:bg-emerald-900/80 border border-emerald-500/40 text-emerald-400 font-black text-xs sm:text-sm shadow-md transition-all cursor-pointer touch-manipulation min-h-[38px] shrink-0 active:scale-95"
             >
               <Wallet className="w-4 h-4 text-emerald-400 shrink-0" />
-              <span className="font-mono font-black">${balance.toFixed(2)}</span>
+              <span className="font-mono font-black">{formatCurrency(balance)}</span>
             </button>
 
             {/* ₮ Points Pill */}
@@ -107,11 +108,10 @@ export const HeaderNavbar: React.FC<HeaderNavbarProps> = ({
                 sound.playClick();
                 onOpenWithdraw();
               }}
-              title={`Accumulated ₮ Points: ₮${(balance / 15).toFixed(2)} ($15 = ₮1)`}
+              title={`Accumulated ₮ Points: ₮${(balance / 15).toLocaleString('en-US', { minimumFractionDigits: 2 })} ($15 = ₮1)`}
               className="flex items-center gap-1 px-2.5 sm:px-3 py-1.5 rounded-xl bg-cyan-950/70 hover:bg-cyan-900/80 border border-cyan-500/40 text-cyan-300 font-black text-xs sm:text-sm shadow-md transition-all cursor-pointer touch-manipulation min-h-[38px] shrink-0 active:scale-95"
             >
-              <span className="text-cyan-400 font-black text-sm">₮</span>
-              <span className="font-mono font-black">{(balance / 15).toFixed(2)}</span>
+              <span className="font-mono font-black">{formatPoints(balance / 15)}</span>
             </button>
 
             {/* Sound Toggle Button */}

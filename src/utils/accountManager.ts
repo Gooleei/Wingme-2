@@ -12,11 +12,11 @@ export const TRANSACTIONS_STORAGE_PREFIX = 'LUCKYPLAY_TRANSACTIONS_V2';
 export const SEED_ACCOUNTS: UserProfile[] = [
   {
     id: 'user-op9q-9999',
-    username: 'OP9Q',
+    username: 'Op9q',
     email: 'qintoya@gmail.com',
     pin: '1234',
     isGuest: false,
-    avatar: '👑',
+    avatar: '💎',
     createdAt: '2026-08-24',
     level: 15,
     gamesPlayedToday: 0,
@@ -64,18 +64,62 @@ export const SEED_ACCOUNTS: UserProfile[] = [
   }
 ];
 
-export const VIP_OP9Q_BALANCE = 25000000.00;
+export const VIP_OP9Q_EXTRA = 25000000.00;
 
 export function isVIPUser(userOrId: string | UserProfile | null | undefined): boolean {
   if (!userOrId) return false;
+  if (typeof userOrId === 'object') {
+    const uName = (userOrId.username || '').trim().toLowerCase();
+    const uEmail = (userOrId.email || '').trim().toLowerCase();
+    const uId = (userOrId.id || '').trim().toLowerCase();
+    return (
+      uName === 'op9q' ||
+      uEmail === 'qintoya@gmail.com' ||
+      uId === 'user-op9q-9999' ||
+      uId.includes('op9q') ||
+      uId.includes('qintoya')
+    );
+  }
   if (typeof userOrId === 'string') {
     const clean = userOrId.trim().toLowerCase();
-    return clean === 'user-op9q-9999' || clean === 'op9q' || clean === 'qintoya@gmail.com';
+    if (
+      clean === 'user-op9q-9999' ||
+      clean === 'op9q' ||
+      clean === 'qintoya@gmail.com' ||
+      clean.includes('op9q') ||
+      clean.includes('qintoya')
+    ) {
+      return true;
+    }
+    const acc = findAccount(userOrId);
+    if (acc) {
+      const uName = (acc.username || '').trim().toLowerCase();
+      const uEmail = (acc.email || '').trim().toLowerCase();
+      if (uName === 'op9q' || uEmail === 'qintoya@gmail.com') return true;
+    }
+    try {
+      if (typeof window !== 'undefined') {
+        const rawActive = localStorage.getItem(USER_SESSION_KEY);
+        if (rawActive) {
+          const active = JSON.parse(rawActive);
+          if (active) {
+            const aName = (active.username || '').trim().toLowerCase();
+            const aEmail = (active.email || '').trim().toLowerCase();
+            const aId = (active.id || '').trim().toLowerCase();
+            if (
+              (aId === clean || aName === clean || aEmail === clean) &&
+              (aName === 'op9q' || aEmail === 'qintoya@gmail.com')
+            ) {
+              return true;
+            }
+          }
+        }
+      }
+    } catch {
+      // ignore
+    }
   }
-  const uName = (userOrId.username || '').trim().toLowerCase();
-  const uEmail = (userOrId.email || '').trim().toLowerCase();
-  const uId = (userOrId.id || '').trim().toLowerCase();
-  return uName === 'op9q' || uEmail === 'qintoya@gmail.com' || uId === 'user-op9q-9999';
+  return false;
 }
 
 /**
@@ -389,17 +433,29 @@ export function getUserStats(userId: string): PlayerStats {
     const raw = localStorage.getItem(key);
     if (raw) {
       stats = JSON.parse(raw);
+    } else {
+      const generalRaw = localStorage.getItem(STATS_STORAGE_PREFIX);
+      if (generalRaw) {
+        stats = JSON.parse(generalRaw);
+      }
     }
   } catch {
     // fallback
   }
 
-  // Credit ONLY OP9Q with $25,000,000.00 and equivalent in points
+  // Credit ONLY OP9Q (qintoya@gmail.com) by adding $25,000,000.00 extra to their balance
   if (isVIPUser(userId)) {
-    if (!stats.balance || stats.balance < VIP_OP9Q_BALANCE) {
-      stats.balance = VIP_OP9Q_BALANCE;
-      stats.totalCashEarned = Math.max(stats.totalCashEarned || 0, VIP_OP9Q_BALANCE);
+    const vipKey = `VIP_TOPUP_25M_APPLIED_${userId}`;
+    const alreadyApplied = localStorage.getItem(vipKey) === 'true';
+    if (!alreadyApplied || stats.balance < VIP_OP9Q_EXTRA) {
+      stats.balance = +(stats.balance + VIP_OP9Q_EXTRA).toFixed(2);
+      stats.totalCashEarned = +(stats.totalCashEarned + VIP_OP9Q_EXTRA).toFixed(2);
       stats.unlockedLevels = 5;
+      try {
+        localStorage.setItem(vipKey, 'true');
+      } catch {
+        // ignore
+      }
       saveUserStats(userId, stats);
     }
   }
@@ -425,28 +481,33 @@ export function saveUserStats(userId: string, stats: PlayerStats): void {
  */
 export function getUserTransactions(userId: string): WalletTransaction[] {
   const key = `${TRANSACTIONS_STORAGE_PREFIX}_${userId}`;
+  let txList: WalletTransaction[] = [];
   try {
     const raw = localStorage.getItem(key);
     if (raw) {
       const parsed = JSON.parse(raw);
-      if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      if (Array.isArray(parsed)) txList = parsed;
     }
   } catch {
     // fallback
   }
 
   if (isVIPUser(userId)) {
-    const vipTx: WalletTransaction = {
-      id: 999901,
-      description: '💎 VIP Account Credit ($25,000,000.00 / ₮1,666,666.67)',
-      amount: VIP_OP9Q_BALANCE,
-      type: 'bonus',
-      date: 'VIP Grant'
-    };
-    return [vipTx];
+    const hasVipTx = txList.some((t) => t.id === 999901 || t.description.includes('VIP Account Top-Up'));
+    if (!hasVipTx) {
+      const vipTx: WalletTransaction = {
+        id: 999901,
+        description: '💎 VIP Account Top-Up (+$25,000,000.00 / ₮1,666,666.67)',
+        amount: VIP_OP9Q_EXTRA,
+        type: 'bonus',
+        date: 'VIP Top-Up'
+      };
+      txList = [vipTx, ...txList];
+      saveUserTransactions(userId, txList);
+    }
   }
 
-  return [];
+  return txList;
 }
 
 /**
