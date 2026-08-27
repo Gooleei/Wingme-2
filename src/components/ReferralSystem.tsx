@@ -1,8 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import { UserProfile, PlayerStats, ReferralTier, ReferralMember, ReferralNetworkState } from '../types';
+import { UserProfile, PlayerStats, ReferralTier, ReferralNetworkState } from '../types';
 import { sound } from '../utils/audio';
 import confetti from 'canvas-confetti';
-import { getUserReferralNetwork, saveUserReferralNetwork } from '../utils/referralManager';
+import { 
+  getUserReferralNetwork, 
+  saveUserReferralNetwork,
+  getAppDownloadReferralLink,
+  getWebReferralLink,
+  getUserReferralCode,
+  redeemInviteCodeInApp,
+  OFFICIAL_APP_DOWNLOAD_URL
+} from '../utils/referralManager';
 import { 
   Share2, 
   Copy, 
@@ -12,7 +20,14 @@ import {
   TrendingUp, 
   Search, 
   Zap, 
-  ShieldCheck
+  ShieldCheck,
+  Download,
+  Smartphone,
+  ExternalLink,
+  Sparkles,
+  QrCode,
+  CheckCircle2,
+  AlertCircle
 } from 'lucide-react';
 
 interface ReferralSystemProps {
@@ -87,73 +102,150 @@ export const ReferralSystem: React.FC<ReferralSystemProps> = ({
   setStats,
   onRewardClaimed
 }) => {
-  // Construct dynamic referral link
-  const currentOrigin = typeof window !== 'undefined' ? window.location.origin : 'https://bellmont.io';
-  const referralLink = `${currentOrigin}/?ref=${encodeURIComponent(user.username)}`;
+  // Construct dynamic personal download link and promo code
+  const appDownloadLink = getAppDownloadReferralLink(user.username);
+  const webReferralLink = getWebReferralLink(user.username);
+  const personalReferralCode = getUserReferralCode(user.username);
 
-  // Referral Network State - strictly genuine from clean database / store
+  // Referral Network State
   const [network, setNetwork] = useState<ReferralNetworkState>(() => {
     return getUserReferralNetwork(user);
   });
 
-  const [copied, setCopied] = useState(false);
+  const [copiedType, setCopiedType] = useState<'APP_LINK' | 'CODE' | 'WEB_LINK' | 'PITCH' | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [filterStatus, setFilterStatus] = useState<string>('ALL');
 
-  // Reload network if user changes
+  // In-app referral code redemption state
+  const [redeemInput, setRedeemInput] = useState('');
+  const [redeemStatus, setRedeemStatus] = useState<{
+    type: 'idle' | 'success' | 'error';
+    message: string;
+  }>({ type: 'idle', message: '' });
+  const [alreadyRedeemedBy, setAlreadyRedeemedBy] = useState<string | null>(null);
+
+  // Check if current user already redeemed an invite code
   useEffect(() => {
+    const redeemed = localStorage.getItem('LUCKYPLAY_USER_REDEEMED_REF_' + user.id);
+    if (redeemed) {
+      setAlreadyRedeemedBy(redeemed);
+    }
+  }, [user.id]);
+
+  // Reload network if user changes or on referral credit event
+  useEffect(() => {
+    const handleReferralUpdate = (e: Event) => {
+      const customEvent = e as CustomEvent;
+      if (!customEvent.detail || customEvent.detail.referrerId === user.id) {
+        setNetwork(getUserReferralNetwork(user));
+      }
+    };
+    window.addEventListener('luckyplay:referral_credited', handleReferralUpdate);
     setNetwork(getUserReferralNetwork(user));
+    return () => {
+      window.removeEventListener('luckyplay:referral_credited', handleReferralUpdate);
+    };
   }, [user]);
 
   useEffect(() => {
     saveUserReferralNetwork(user.id, network);
   }, [network, user.id]);
 
-  // WhatsApp Share Handler
-  const handleShareWhatsApp = () => {
-    sound.playClick();
-    const message = `🚀 Join me on Bellmont Rewards Arcade! Play games, mine diamonds, and earn real cash & crypto rewards. Sign up with my link to start earning: ${referralLink}`;
-    const whatsappUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(message)}`;
-    window.open(whatsappUrl, '_blank', 'noopener,noreferrer');
-  };
-
-  // Copy Link Handler
-  const handleCopyLink = async () => {
+  const copyToClipboard = async (text: string, type: 'APP_LINK' | 'CODE' | 'WEB_LINK' | 'PITCH') => {
     sound.playClick();
     try {
-      if (navigator.clipboard) {
-        await navigator.clipboard.writeText(referralLink);
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        await navigator.clipboard.writeText(text);
       } else {
         const textarea = document.createElement('textarea');
-        textarea.value = referralLink;
+        textarea.value = text;
         document.body.appendChild(textarea);
         textarea.select();
         document.execCommand('copy');
         document.body.removeChild(textarea);
       }
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2500);
+      setCopiedType(type);
+      setTimeout(() => setCopiedType(null), 2500);
     } catch {
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2500);
+      setCopiedType(type);
+      setTimeout(() => setCopiedType(null), 2500);
     }
+  };
+
+  // WhatsApp Share Handler with App Download Link
+  const handleShareWhatsApp = () => {
+    sound.playClick();
+    const message = `🚀 Join me on Bellmont Rewards Arcade!\n\n📲 1. Download the App: ${appDownloadLink}\n🎁 2. Use my Referral Code: ${personalReferralCode} for an instant $0.80 starter bonus!\n🌐 Or play in browser: ${webReferralLink}\n\nPlay Endless Runner, Crack Eggs & Mine Gems for real cash & crypto rewards! 💰`;
+    const whatsappUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(message)}`;
+    window.open(whatsappUrl, '_blank', 'noopener,noreferrer');
+  };
+
+  // Telegram Share Handler
+  const handleShareTelegram = () => {
+    sound.playClick();
+    const message = `🚀 Join Bellmont Rewards Arcade! Download the app: ${appDownloadLink} and use my code ${personalReferralCode} to get a $0.80 welcome bonus!`;
+    const tgUrl = `https://t.me/share/url?url=${encodeURIComponent(appDownloadLink)}&text=${encodeURIComponent(message)}`;
+    window.open(tgUrl, '_blank', 'noopener,noreferrer');
   };
 
   // Web Share API fallback
   const handleNativeShare = async () => {
     sound.playClick();
+    const message = `Download Bellmont Rewards Arcade app: ${appDownloadLink} (Code: ${personalReferralCode}) to earn crypto & cash rewards!`;
     if (navigator.share) {
       try {
         await navigator.share({
           title: 'Join Bellmont Rewards Arcade',
-          text: 'Play endless runner, egg matrix, and mine gems to earn crypto rewards!',
-          url: referralLink
+          text: message,
+          url: appDownloadLink
         });
       } catch {
-        // user cancelled share
+        // user cancelled
       }
     } else {
-      handleCopyLink();
+      copyToClipboard(appDownloadLink, 'APP_LINK');
+    }
+  };
+
+  // In-app invite code redemption handler
+  const handleRedeemCode = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!redeemInput.trim()) return;
+
+    sound.playClick();
+    const result = redeemInviteCodeInApp(redeemInput.trim(), user);
+
+    if (result.success) {
+      sound.playWin();
+      confetti({
+        particleCount: 120,
+        spread: 90,
+        origin: { y: 0.6 }
+      });
+
+      // Credit player balance with welcome bonus
+      setStats((prev) => ({
+        ...prev,
+        balance: +(prev.balance + result.bonusAmount).toFixed(2),
+        totalCashEarned: +(prev.totalCashEarned + result.bonusAmount).toFixed(2)
+      }));
+
+      if (onRewardClaimed) {
+        onRewardClaimed(result.bonusAmount, `🎁 Referral Welcome Bonus via ${result.referrerName}`);
+      }
+
+      setRedeemStatus({
+        type: 'success',
+        message: result.message
+      });
+      setAlreadyRedeemedBy(result.referrerName || 'Friend');
+      setRedeemInput('');
+    } else {
+      sound.playWrong();
+      setRedeemStatus({
+        type: 'error',
+        message: result.message
+      });
     }
   };
 
@@ -164,8 +256,8 @@ export const ReferralSystem: React.FC<ReferralSystemProps> = ({
 
     sound.playWin();
     confetti({
-      particleCount: 100,
-      spread: 80,
+      particleCount: 120,
+      spread: 90,
       origin: { y: 0.6 }
     });
 
@@ -217,11 +309,11 @@ export const ReferralSystem: React.FC<ReferralSystemProps> = ({
               <div className="flex items-center gap-2">
                 <span className="text-xl sm:text-2xl">🤝</span>
                 <h2 className="text-lg sm:text-2xl font-black text-white">
-                  Referral Network & WhatsApp Booster
+                  App Download & Referral Network
                 </h2>
               </div>
               <p className="text-xs sm:text-sm text-slate-300 mt-1 max-w-xl font-medium">
-                Share your personal link via WhatsApp. Anyone who downloads and joins with your link earns an instant extra welcome bonus, while you unlock massive multiplier milestone payouts!
+                Share your personal App Download Link or Invite Code. When players download and register with your link, they receive an instant $0.80 welcome bonus, while you earn $0.80 per player plus unlock multiplier tier cash rewards up to $800!
               </p>
             </div>
 
@@ -243,7 +335,7 @@ export const ReferralSystem: React.FC<ReferralSystemProps> = ({
                 <Users className="w-4 h-4 text-emerald-400" />
                 <span>{network.totalReferrals}</span>
               </div>
-              <span className="text-[9px] text-slate-500 font-semibold block mt-0.5">Direct Network</span>
+              <span className="text-[9px] text-slate-500 font-semibold block mt-0.5">Verified Recruits</span>
             </div>
 
             <div className="bg-slate-950/80 border border-slate-800 rounded-xl sm:rounded-2xl p-3 text-center">
@@ -263,7 +355,11 @@ export const ReferralSystem: React.FC<ReferralSystemProps> = ({
                 Active Multiplier
               </span>
               <div className="text-xl sm:text-2xl font-black text-amber-400 mt-0.5">
-                {network.totalReferrals >= 100
+                {network.totalReferrals >= 500
+                  ? 'X1,000'
+                  : network.totalReferrals >= 250
+                  ? 'X400'
+                  : network.totalReferrals >= 100
                   ? 'X150'
                   : network.totalReferrals >= 20
                   ? 'X30'
@@ -307,64 +403,224 @@ export const ReferralSystem: React.FC<ReferralSystemProps> = ({
             </div>
           </div>
 
-          {/* WhatsApp & Link Share Actions */}
-          <div className="bg-slate-950/90 border border-emerald-500/20 rounded-xl sm:rounded-2xl p-3.5 sm:p-4 space-y-3">
-            <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
-              <div className="flex-1 min-w-0">
-                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">
-                  Your Personal Referral Link (Extra Bonus for Friends)
-                </label>
-                <div className="flex items-center gap-2 bg-slate-900 px-3 py-2 rounded-xl border border-slate-800 text-xs font-mono text-emerald-300 truncate">
-                  <span className="truncate">{referralLink}</span>
-                </div>
+          {/* PERSONAL APP DOWNLOAD LINK & REFERRAL CODE SECTION */}
+          <div className="bg-slate-950/95 border border-emerald-500/30 rounded-xl sm:rounded-2xl p-3.5 sm:p-5 space-y-4 shadow-xl">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Smartphone className="w-4 h-4 text-emerald-400" />
+                <h3 className="text-xs sm:text-sm font-black text-white uppercase tracking-wider">
+                  Your Personal Download Link & Referral Code
+                </h3>
               </div>
+              <span className="text-[10px] font-bold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">
+                Official bit.ly App Link
+              </span>
+            </div>
 
-              <div className="flex flex-wrap items-center gap-2 shrink-0">
-                {/* WHATSAPP SHARE BUTTON */}
-                <button
-                  id="btn-share-whatsapp"
-                  onClick={handleShareWhatsApp}
-                  className="flex-1 sm:flex-none px-4 py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 font-black text-xs transition-all shadow-md shadow-emerald-500/20 flex items-center justify-center gap-2 cursor-pointer touch-manipulation hover:scale-105 active:scale-95"
-                >
-                  <span className="text-base">💬</span>
-                  <span>Share on WhatsApp</span>
-                </button>
+            {/* Official App Download Link Bar */}
+            <div className="space-y-1.5">
+              <label className="text-[11px] font-bold text-slate-300 flex items-center justify-between">
+                <span className="flex items-center gap-1.5 text-emerald-300">
+                  <Download className="w-3.5 h-3.5" />
+                  <span>Personal App Download Link (Bit.ly)</span>
+                </span>
+                <span className="text-[10px] text-slate-500 font-mono">Auto-tracks your username</span>
+              </label>
 
-                {/* COPY LINK BUTTON */}
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+                <div className="flex-1 flex items-center gap-2 bg-slate-900 px-3.5 py-2.5 rounded-xl border border-slate-800 text-xs font-mono text-emerald-300 truncate">
+                  <span className="text-slate-500 select-none">🔗</span>
+                  <span className="truncate font-semibold select-all">{appDownloadLink}</span>
+                </div>
+
                 <button
-                  id="btn-copy-ref-link"
-                  onClick={handleCopyLink}
-                  className="px-3.5 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold border border-slate-700 flex items-center justify-center gap-1.5 transition-all cursor-pointer hover:text-white"
+                  id="btn-copy-download-link"
+                  onClick={() => copyToClipboard(appDownloadLink, 'APP_LINK')}
+                  className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 text-xs font-black flex items-center justify-center gap-1.5 transition-all shadow-md shadow-emerald-500/20 cursor-pointer touch-manipulation hover:scale-105 active:scale-95"
                 >
-                  {copied ? (
+                  {copiedType === 'APP_LINK' ? (
                     <>
-                      <Check className="w-4 h-4 text-emerald-400" />
-                      <span className="text-emerald-400">Copied!</span>
+                      <Check className="w-4 h-4 text-slate-950 stroke-[3]" />
+                      <span>Copied Download Link!</span>
                     </>
                   ) : (
                     <>
                       <Copy className="w-4 h-4" />
-                      <span>Copy Link</span>
+                      <span>Copy Download Link</span>
                     </>
                   )}
-                </button>
-
-                {/* NATIVE SHARE BUTTON */}
-                <button
-                  onClick={handleNativeShare}
-                  className="p-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700 cursor-pointer"
-                  title="More Share Options"
-                >
-                  <Share2 className="w-4 h-4" />
                 </button>
               </div>
             </div>
 
-            {/* Genuine Referral Guarantee */}
-            <div className="pt-2 border-t border-slate-800/80 flex items-center gap-1.5 text-xs text-slate-400">
-              <ShieldCheck className="w-4 h-4 text-emerald-400 shrink-0" />
-              <span>Direct verified referrals: Every genuine recruit automatically credits your balance and advances your multiplier milestones.</span>
+            {/* Referral Code & Web Link Split Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-1">
+              {/* Unique Promo Code Card */}
+              <div className="bg-slate-900/90 border border-slate-800 rounded-xl p-3 flex items-center justify-between gap-3">
+                <div>
+                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
+                    Your Unique Invite Code
+                  </span>
+                  <div className="text-base sm:text-lg font-black text-amber-400 tracking-wider font-mono mt-0.5">
+                    {personalReferralCode}
+                  </div>
+                </div>
+
+                <button
+                  id="btn-copy-promo-code"
+                  onClick={() => copyToClipboard(personalReferralCode, 'CODE')}
+                  className="px-3 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white border border-slate-700 text-xs font-bold transition-all flex items-center gap-1 cursor-pointer"
+                >
+                  {copiedType === 'CODE' ? (
+                    <>
+                      <Check className="w-3.5 h-3.5 text-emerald-400" />
+                      <span className="text-emerald-400">Copied!</span>
+                    </>
+                  ) : (
+                    <>
+                      <Copy className="w-3.5 h-3.5" />
+                      <span>Copy Code</span>
+                    </>
+                  )}
+                </button>
+              </div>
+
+              {/* Web Arcade Link Card */}
+              <div className="bg-slate-900/90 border border-slate-800 rounded-xl p-3 flex items-center justify-between gap-3">
+                <div className="min-w-0">
+                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
+                    Web Arcade Direct Link
+                  </span>
+                  <div className="text-xs font-mono text-cyan-300 truncate mt-0.5">
+                    {webReferralLink}
+                  </div>
+                </div>
+
+                <button
+                  id="btn-copy-web-link"
+                  onClick={() => copyToClipboard(webReferralLink, 'WEB_LINK')}
+                  className="px-3 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white border border-slate-700 text-xs font-bold transition-all flex items-center gap-1 cursor-pointer shrink-0"
+                >
+                  {copiedType === 'WEB_LINK' ? (
+                    <>
+                      <Check className="w-3.5 h-3.5 text-cyan-400" />
+                      <span className="text-cyan-400">Copied!</span>
+                    </>
+                  ) : (
+                    <>
+                      <Copy className="w-3.5 h-3.5" />
+                      <span>Copy Web</span>
+                    </>
+                  )}
+                </button>
+              </div>
             </div>
+
+            {/* Quick Share Action Buttons */}
+            <div className="pt-2 border-t border-slate-800 flex flex-wrap items-center gap-2">
+              {/* WhatsApp Share Button */}
+              <button
+                id="btn-share-whatsapp-primary"
+                onClick={handleShareWhatsApp}
+                className="flex-1 min-w-[140px] px-4 py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 font-black text-xs transition-all shadow-md shadow-emerald-500/20 flex items-center justify-center gap-2 cursor-pointer touch-manipulation hover:scale-105 active:scale-95"
+              >
+                <span className="text-base">💬</span>
+                <span>Share on WhatsApp</span>
+              </button>
+
+              {/* Telegram Share Button */}
+              <button
+                id="btn-share-telegram"
+                onClick={handleShareTelegram}
+                className="px-3.5 py-2.5 rounded-xl bg-sky-600 hover:bg-sky-500 text-white font-black text-xs transition-all shadow-md flex items-center justify-center gap-1.5 cursor-pointer touch-manipulation"
+              >
+                <span className="text-base">✈️</span>
+                <span>Telegram</span>
+              </button>
+
+              {/* Native Mobile Share Button */}
+              <button
+                id="btn-native-share"
+                onClick={handleNativeShare}
+                className="px-3.5 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white border border-slate-700 text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+                title="System Share Sheet"
+              >
+                <Share2 className="w-4 h-4 text-slate-300" />
+                <span>Share More</span>
+              </button>
+            </div>
+
+            {/* Genuine Referral Guarantee */}
+            <div className="pt-2 border-t border-slate-800/80 flex items-center gap-2 text-xs text-slate-400">
+              <ShieldCheck className="w-4 h-4 text-emerald-400 shrink-0" />
+              <span>
+                Guaranteed Fair Play: Each genuine recruit joining via your download link automatically credits +$0.80 to your balance.
+              </span>
+            </div>
+          </div>
+
+          {/* IN-APP REDEEM FRIEND'S INVITE CODE CARD */}
+          <div className="bg-slate-950/80 border border-slate-800 rounded-xl sm:rounded-2xl p-4 space-y-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Gift className="w-4 h-4 text-amber-400" />
+                <h3 className="text-xs sm:text-sm font-black text-white">
+                  Downloaded the App from a Friend's Link?
+                </h3>
+              </div>
+              <span className="text-[10px] font-bold text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/20">
+                Claim $0.80 Bonus
+              </span>
+            </div>
+
+            {alreadyRedeemedBy ? (
+              <div className="flex items-center gap-2 bg-emerald-950/50 border border-emerald-500/30 p-3 rounded-xl text-xs text-emerald-300">
+                <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+                <span>
+                  You successfully redeemed an invite code and joined <strong>{alreadyRedeemedBy}</strong>'s network! Welcome bonus credited.
+                </span>
+              </div>
+            ) : (
+              <form onSubmit={handleRedeemCode} className="space-y-2">
+                <p className="text-xs text-slate-300">
+                  If you downloaded via <code className="text-emerald-400 font-mono text-[11px]">{OFFICIAL_APP_DOWNLOAD_URL}</code> or received an invite code, enter your friend's code or link below to claim your $0.80 instant welcome bonus.
+                </p>
+
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+                  <input
+                    type="text"
+                    value={redeemInput}
+                    onChange={(e) => setRedeemInput(e.target.value)}
+                    placeholder="Enter friend's code (e.g. REF-ALEX or https://bit.ly/3UntvRh?ref=alex)"
+                    className="flex-1 px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-white text-xs font-mono placeholder:text-slate-500 focus:outline-none focus:border-amber-400"
+                  />
+                  <button
+                    type="submit"
+                    className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-slate-950 font-black text-xs shadow-md transition-all cursor-pointer flex items-center justify-center gap-1.5 touch-manipulation hover:scale-105 active:scale-95"
+                  >
+                    <Sparkles className="w-3.5 h-3.5" />
+                    <span>Redeem $0.80 Bonus</span>
+                  </button>
+                </div>
+
+                {redeemStatus.type !== 'idle' && (
+                  <div
+                    className={`flex items-center gap-2 p-2.5 rounded-xl text-xs ${
+                      redeemStatus.type === 'success'
+                        ? 'bg-emerald-950/60 border border-emerald-500/40 text-emerald-300'
+                        : 'bg-rose-950/60 border border-rose-500/40 text-rose-300'
+                    }`}
+                  >
+                    {redeemStatus.type === 'success' ? (
+                      <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+                    ) : (
+                      <AlertCircle className="w-4 h-4 text-rose-400 shrink-0" />
+                    )}
+                    <span>{redeemStatus.message}</span>
+                  </div>
+                )}
+              </form>
+            )}
           </div>
         </div>
       </div>
@@ -382,7 +638,7 @@ export const ReferralSystem: React.FC<ReferralSystemProps> = ({
             </p>
           </div>
           <span className="text-xs text-amber-400 font-bold">
-            Total Potential Rewards: $1,276.80+
+            Total Potential Milestone Rewards: $1,276.80+
           </span>
         </div>
 
@@ -471,7 +727,7 @@ export const ReferralSystem: React.FC<ReferralSystemProps> = ({
               <span>My Referral Network ({network.networkMembers.length} Members)</span>
             </h3>
             <p className="text-xs text-slate-400">
-              Live roster of players who joined using your referral link
+              Live roster of players who joined using your download link or invite code
             </p>
           </div>
 
@@ -509,7 +765,7 @@ export const ReferralSystem: React.FC<ReferralSystemProps> = ({
             <div>
               <p className="text-sm text-slate-200 font-bold">Your referral network count starts at 0</p>
               <p className="text-xs text-slate-400 font-medium max-w-md mx-auto mt-1">
-                Share your WhatsApp link with friends and fellow runners. When they sign up, they will appear right here in your live network and credit your earnings!
+                Share your personal App Download Link (<span className="text-emerald-400 font-mono text-[11px]">{appDownloadLink}</span>) with friends and fellow runners. When they sign up, they will appear right here in your live network and credit your earnings!
               </p>
             </div>
             <button
@@ -518,7 +774,7 @@ export const ReferralSystem: React.FC<ReferralSystemProps> = ({
               className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 text-xs font-black shadow-md cursor-pointer transition-all hover:scale-105 active:scale-95"
             >
               <Share2 className="w-4 h-4" />
-              <span>Share Link on WhatsApp</span>
+              <span>Share Download Link on WhatsApp</span>
             </button>
           </div>
         ) : (

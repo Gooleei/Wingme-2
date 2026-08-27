@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { PlayerStats, WalletTransaction } from '../types';
 import { sound } from '../utils/audio';
 import { Gift, Flame, Trophy, Wallet, History, Sparkles, Clock, CheckCircle2, TrendingUp, AlertTriangle } from 'lucide-react';
-import { AdPlacement } from './AdPlacement';
+import { AdPlacement, SponsorCarousel } from './AdPlacement';
 import confetti from 'canvas-confetti';
 
 interface RewardsHubProps {
@@ -270,21 +270,11 @@ export const RewardsHub: React.FC<RewardsHubProps> = ({
         </div>
       </div>
 
-      {/* Sponsored Partner Links (458074 & 458075) */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-        <AdPlacement
-          zoneId={458074}
-          variant="compact"
-          title="Sponsor Link (458074)"
-          subtitle="Support network & boost points"
-        />
-        <AdPlacement
-          zoneId={458075}
-          variant="compact"
-          title="Sponsor Link (458075)"
-          subtitle="Explore partner offerings"
-        />
-      </div>
+      {/* Sponsored Partner Side Slide Carousel (458074 & 458075) */}
+      <SponsorCarousel
+        title="Sponsored Partner Rewards"
+        subtitle="Support the network & unlock bonus coin multipliers"
+      />
 
       {/* Transaction History Log */}
       <div className="glass-card p-3.5 sm:p-4 rounded-2xl sm:rounded-3xl border border-slate-800 space-y-2.5">

@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from 'react';
-import { ArrowLeft, Tv, ExternalLink, Sparkles, ShieldCheck, PlayCircle, Gift, Zap, Video } from 'lucide-react';
+import { ArrowLeft, Tv, ExternalLink, Sparkles, ShieldCheck, PlayCircle, Gift, Zap, Video, ChevronLeft, ChevronRight } from 'lucide-react';
 import { sound } from '../utils/audio';
 import { AdPlacement } from './AdPlacement';
 import { triggerSponsorAd } from '../utils/adManager';
@@ -16,6 +16,18 @@ export const WatchView: React.FC<WatchViewProps> = ({ onBack }) => {
   const containerRef5 = useRef<HTMLDivElement>(null);
   const containerRefAd74 = useRef<HTMLDivElement>(null);
   const containerRefAd75 = useRef<HTMLDivElement>(null);
+  const adCarouselRef = useRef<HTMLDivElement>(null);
+
+  const scrollAdCarousel = (direction: 'left' | 'right') => {
+    sound.playClick();
+    if (adCarouselRef.current) {
+      const scrollAmount = adCarouselRef.current.clientWidth * 0.75;
+      adCarouselRef.current.scrollBy({
+        left: direction === 'left' ? -scrollAmount : scrollAmount,
+        behavior: 'smooth'
+      });
+    }
+  };
 
   const directAdUrl = "https://www.profitableratecpmnetwork.com/eg93q7e37?key=7708673c87da2f16677aa4d28db3034c";
 
@@ -119,84 +131,123 @@ export const WatchView: React.FC<WatchViewProps> = ({ onBack }) => {
         </div>
       </div>
 
-      {/* Embedded Ad Manager 458074 & 458075 Prime Sections */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {/* Ad Tag 458074 Card */}
-        <div className="bg-gradient-to-br from-slate-900 via-slate-900 to-indigo-950/40 border border-indigo-500/30 rounded-3xl p-5 shadow-xl flex flex-col justify-between space-y-4">
-          <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 flex items-center gap-1.5">
-                <Sparkles className="w-3.5 h-3.5 text-indigo-400" />
-                <span>WPAdMngr Channel #458074</span>
-              </span>
-              <span className="text-[10px] font-mono text-slate-400 bg-slate-950 px-2 py-0.5 rounded-md border border-slate-800">
-                Ad Link 1
-              </span>
-            </div>
-            <h3 className="text-base font-black text-white flex items-center gap-2">
-              <Video className="w-4 h-4 text-indigo-400" />
-              <span>Prime Sponsor Channel 458074</span>
+      {/* Embedded Ad Manager 458074 & 458075 Side Slide Carousel */}
+      <div className="space-y-2.5">
+        <div className="flex items-center justify-between px-1">
+          <div className="flex items-center gap-2">
+            <h3 className="text-xs sm:text-sm font-black text-white flex items-center gap-1.5">
+              <Sparkles className="w-4 h-4 text-cyan-400" />
+              <span>Sponsor Video & Offer Streams</span>
             </h3>
-            <p className="text-xs text-slate-300">
-              Interactive high-engagement sponsor stream with live monetized impressions and verified rewards.
-            </p>
+            <span className="text-[10px] px-2 py-0.5 rounded-full bg-slate-800 text-slate-300 border border-slate-700 hidden xs:inline-flex items-center gap-1 font-bold">
+              <span>2 Channels</span>
+            </span>
           </div>
 
-          <div 
-            ref={containerRefAd74}
-            id="ad-placement-458074-container"
-            className="w-full min-h-[80px] bg-slate-950/80 rounded-2xl border border-slate-800 p-3 flex items-center justify-center overflow-hidden"
-          />
-
-          <button
-            type="button"
-            id="btn-ad-trigger-458074"
-            onClick={() => triggerSponsorAd('ZONE_458074')}
-            className="w-full py-3 rounded-2xl bg-gradient-to-r from-indigo-500 to-cyan-500 hover:from-indigo-400 hover:to-cyan-400 text-slate-950 font-black text-xs shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-95 touch-manipulation"
-          >
-            <PlayCircle className="w-4 h-4 fill-current" />
-            <span>Launch Ad Link 1 (Tag 458074)</span>
-            <ExternalLink className="w-3.5 h-3.5" />
-          </button>
+          <div className="flex items-center gap-1.5">
+            <span className="text-[10px] text-slate-400 hidden sm:inline-flex items-center gap-1 font-medium mr-1">
+              <span>⇄ Slide channels</span>
+            </span>
+            <button
+              onClick={() => scrollAdCarousel('left')}
+              title="Scroll Sponsor Channels Left"
+              className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition-colors border border-slate-700 cursor-pointer min-h-[30px] min-w-[30px] flex items-center justify-center shadow-sm active:scale-95"
+            >
+              <ChevronLeft className="w-3.5 h-3.5" />
+            </button>
+            <button
+              onClick={() => scrollAdCarousel('right')}
+              title="Scroll Sponsor Channels Right"
+              className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition-colors border border-slate-700 cursor-pointer min-h-[30px] min-w-[30px] flex items-center justify-center shadow-sm active:scale-95"
+            >
+              <ChevronRight className="w-3.5 h-3.5" />
+            </button>
+          </div>
         </div>
 
-        {/* Ad Tag 458075 Card */}
-        <div className="bg-gradient-to-br from-slate-900 via-slate-900 to-emerald-950/40 border border-emerald-500/30 rounded-3xl p-5 shadow-xl flex flex-col justify-between space-y-4">
-          <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 flex items-center gap-1.5">
-                <Sparkles className="w-3.5 h-3.5 text-emerald-400" />
-                <span>WPAdMngr Channel #458075</span>
-              </span>
-              <span className="text-[10px] font-mono text-slate-400 bg-slate-950 px-2 py-0.5 rounded-md border border-slate-800">
-                Ad Link 2
-              </span>
+        {/* Carousel Row */}
+        <div
+          ref={adCarouselRef}
+          className="flex items-stretch gap-2.5 sm:gap-3 overflow-x-auto pb-2.5 pt-1 px-1 scroll-smooth snap-x snap-mandatory select-none"
+          style={{ scrollbarWidth: 'thin' }}
+        >
+          {/* Ad Tag 458074 Card */}
+          <div className="w-[240px] sm:w-[270px] shrink-0 snap-start bg-gradient-to-br from-slate-900 via-slate-900 to-indigo-950/40 border border-indigo-500/30 hover:border-cyan-400/50 rounded-xl sm:rounded-2xl p-3 sm:p-3.5 shadow-md flex flex-col justify-between space-y-2.5 transition-all hover:scale-[1.01]">
+            <div className="space-y-1.5">
+              <div className="flex items-center justify-between gap-1">
+                <span className="px-2 py-0.5 rounded-full text-[8px] sm:text-[9px] font-black uppercase tracking-wider bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 flex items-center gap-1">
+                  <Sparkles className="w-2.5 h-2.5 text-indigo-400" />
+                  <span>Channel #458074</span>
+                </span>
+                <span className="text-[8px] sm:text-[9px] font-mono text-slate-400 bg-slate-950 px-1.5 py-0.5 rounded border border-slate-800">
+                  Ad Link 1
+                </span>
+              </div>
+              <h4 className="text-xs sm:text-[13px] font-black text-white flex items-center gap-1.5 truncate">
+                <Video className="w-3.5 h-3.5 text-indigo-400 shrink-0" />
+                <span className="truncate">Prime Sponsor 458074</span>
+              </h4>
+              <p className="text-[10px] text-slate-300/90 leading-tight line-clamp-2">
+                Interactive sponsor stream with verified impressions & instant bonus points.
+              </p>
             </div>
-            <h3 className="text-base font-black text-white flex items-center gap-2">
-              <Zap className="w-4 h-4 text-emerald-400" />
-              <span>Elite Sponsor Channel 458075</span>
-            </h3>
-            <p className="text-xs text-slate-300">
-              High-yield direct monetization partner feed with automatic reward bonuses and instant access.
-            </p>
+
+            <div 
+              ref={containerRefAd74}
+              id="ad-placement-458074-container"
+              className="w-full min-h-[50px] bg-slate-950/80 rounded-xl border border-slate-800 p-2 flex items-center justify-center overflow-hidden"
+            />
+
+            <button
+              type="button"
+              id="btn-ad-trigger-458074"
+              onClick={() => triggerSponsorAd('ZONE_458074')}
+              className="w-full py-2 px-3 rounded-xl bg-gradient-to-r from-indigo-500 to-cyan-400 hover:from-indigo-400 hover:to-cyan-300 text-slate-950 font-black text-[10px] sm:text-[11px] shadow-sm transition-all flex items-center justify-center gap-1.5 cursor-pointer active:scale-95 touch-manipulation"
+            >
+              <PlayCircle className="w-3.5 h-3.5 fill-current" />
+              <span>Launch Link 1 (458074)</span>
+              <ExternalLink className="w-3 h-3" />
+            </button>
           </div>
 
-          <div 
-            ref={containerRefAd75}
-            id="ad-placement-458075-container"
-            className="w-full min-h-[80px] bg-slate-950/80 rounded-2xl border border-slate-800 p-3 flex items-center justify-center overflow-hidden"
-          />
+          {/* Ad Tag 458075 Card */}
+          <div className="w-[240px] sm:w-[270px] shrink-0 snap-start bg-gradient-to-br from-slate-900 via-slate-900 to-emerald-950/40 border border-emerald-500/30 hover:border-emerald-400/50 rounded-xl sm:rounded-2xl p-3 sm:p-3.5 shadow-md flex flex-col justify-between space-y-2.5 transition-all hover:scale-[1.01]">
+            <div className="space-y-1.5">
+              <div className="flex items-center justify-between gap-1">
+                <span className="px-2 py-0.5 rounded-full text-[8px] sm:text-[9px] font-black uppercase tracking-wider bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 flex items-center gap-1">
+                  <Sparkles className="w-2.5 h-2.5 text-emerald-400" />
+                  <span>Channel #458075</span>
+                </span>
+                <span className="text-[8px] sm:text-[9px] font-mono text-slate-400 bg-slate-950 px-1.5 py-0.5 rounded border border-slate-800">
+                  Ad Link 2
+                </span>
+              </div>
+              <h4 className="text-xs sm:text-[13px] font-black text-white flex items-center gap-1.5 truncate">
+                <Zap className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                <span className="truncate">Elite Sponsor 458075</span>
+              </h4>
+              <p className="text-[10px] text-slate-300/90 leading-tight line-clamp-2">
+                Direct monetization partner feed with automatic reward multipliers & speed boosts.
+              </p>
+            </div>
 
-          <button
-            type="button"
-            id="btn-ad-trigger-458075"
-            onClick={() => triggerSponsorAd('ZONE_458075')}
-            className="w-full py-3 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-400 hover:from-emerald-400 hover:to-teal-300 text-slate-950 font-black text-xs shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-95 touch-manipulation"
-          >
-            <PlayCircle className="w-4 h-4 fill-current" />
-            <span>Launch Ad Link 2 (Tag 458075)</span>
-            <ExternalLink className="w-3.5 h-3.5" />
-          </button>
+            <div 
+              ref={containerRefAd75}
+              id="ad-placement-458075-container"
+              className="w-full min-h-[50px] bg-slate-950/80 rounded-xl border border-slate-800 p-2 flex items-center justify-center overflow-hidden"
+            />
+
+            <button
+              type="button"
+              id="btn-ad-trigger-458075"
+              onClick={() => triggerSponsorAd('ZONE_458075')}
+              className="w-full py-2 px-3 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-400 hover:from-emerald-400 hover:to-teal-300 text-slate-950 font-black text-[10px] sm:text-[11px] shadow-sm transition-all flex items-center justify-center gap-1.5 cursor-pointer active:scale-95 touch-manipulation"
+            >
+              <PlayCircle className="w-3.5 h-3.5 fill-current" />
+              <span>Launch Link 2 (458075)</span>
+              <ExternalLink className="w-3 h-3" />
+            </button>
+          </div>
         </div>
       </div>
 

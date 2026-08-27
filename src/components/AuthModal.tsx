@@ -1,14 +1,14 @@
 import React, { useState } from 'react';
 import { UserProfile } from '../types';
 import { sound } from '../utils/audio';
-import { X, Lock, User, Mail } from 'lucide-react';
+import { X, Lock, User, Mail, AlertCircle, CheckCircle2 } from 'lucide-react';
+import { authenticateUser, registerAccount } from '../utils/accountManager';
 
 interface AuthModalProps {
   onLogin: (user: UserProfile) => void;
   onClose: () => void;
 }
 
-const ACCOUNTS_STORAGE_KEY = 'LUCKYPLAY_REGISTERED_ACCOUNTS_V2';
 const AVATARS = ['👑', '⚡', '🤖', '🦊', '🚀', '🔥', '🛡️', '🎯', '🐱', '🎮'];
 
 export const AuthModal: React.FC<AuthModalProps> = ({ onLogin, onClose }) => {
@@ -19,68 +19,31 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onLogin, onClose }) => {
   const [selectedAvatar, setSelectedAvatar] = useState(AVATARS[0]);
   const [error, setError] = useState('');
 
-  const getSavedAccounts = (): UserProfile[] => {
-    try {
-      const data = localStorage.getItem(ACCOUNTS_STORAGE_KEY);
-      if (data) return JSON.parse(data);
-    } catch {
-      // fallback
-    }
-    return [];
-  };
-
-  const saveAccount = (newProfile: UserProfile) => {
-    const existing = getSavedAccounts();
-    const updated = [...existing.filter(a => a.username.toLowerCase() !== newProfile.username.toLowerCase()), newProfile];
-    localStorage.setItem(ACCOUNTS_STORAGE_KEY, JSON.stringify(updated));
-  };
-
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
 
-    const cleanUser = username.trim().toLowerCase();
+    const cleanUser = username.trim();
     const cleanPin = pin.trim();
 
-    if (!cleanUser) {
-      setError('Please enter a username or email.');
-      return;
-    }
-
-    if (cleanPin.length < 4) {
-      setError('PIN must be at least 4 digits.');
-      return;
-    }
-
-    const saved = getSavedAccounts();
-
     if (tab === 'LOGIN') {
-      const found = saved.find(a => a.username.toLowerCase() === cleanUser || (a.email && a.email.toLowerCase() === cleanUser));
-      if (!found) {
-        setError('Account not found. Please register first.');
-        return;
-      }
-      if (found.pin && found.pin !== cleanPin) {
-        setError('Incorrect PIN for this account.');
+      const authResult = authenticateUser(cleanUser, cleanPin);
+      if (!authResult.success || !authResult.user) {
+        sound.playWrong();
+        setError(authResult.error || 'Authentication failed.');
         return;
       }
       sound.playWin();
-      onLogin(found);
+      onLogin(authResult.user);
+      onClose();
       return;
     }
 
     // Register
-    const existing = saved.find(a => a.username.toLowerCase() === cleanUser);
-    if (existing) {
-      setError('Username already taken. Please choose another.');
-      return;
-    }
-
-    sound.playWin();
-    const newUser: UserProfile = {
-      id: `user-${cleanUser}-${Date.now().toString().slice(-4)}`,
-      username: username.trim(),
-      email: email.trim() || `${cleanUser}@bellmont.io`,
+    const newProfile: UserProfile = {
+      id: `user-${cleanUser.toLowerCase()}-${Date.now().toString().slice(-4)}`,
+      username: cleanUser,
+      email: email.trim() || `${cleanUser.toLowerCase()}@bellmont.io`,
       pin: cleanPin,
       isGuest: false,
       avatar: selectedAvatar,
@@ -91,8 +54,16 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onLogin, onClose }) => {
       spinLockedUntil: null
     };
 
-    saveAccount(newUser);
-    onLogin(newUser);
+    const regResult = registerAccount(newProfile);
+    if (!regResult.success || !regResult.user) {
+      sound.playWrong();
+      setError(regResult.error || 'Registration failed.');
+      return;
+    }
+
+    sound.playWin();
+    onLogin(regResult.user);
+    onClose();
   };
 
   return (
@@ -180,7 +151,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onLogin, onClose }) => {
 
           <div>
             <label className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-1">
-              Username
+              Username or Registered Email
             </label>
             <div className="relative">
               <User className="w-4 h-4 text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
@@ -189,7 +160,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onLogin, onClose }) => {
                 required
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
-                placeholder="e.g. CyberRunner"
+                placeholder="e.g. RunnerOne"
                 className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white text-xs font-semibold focus:outline-none focus:border-emerald-400"
               />
             </div>
@@ -232,13 +203,18 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onLogin, onClose }) => {
             </div>
           </div>
 
-          {error && <p className="text-xs text-rose-400 font-bold">{error}</p>}
+          {error && (
+            <div className="p-2.5 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs font-bold flex items-center gap-2">
+              <AlertCircle className="w-4 h-4 text-rose-400 shrink-0" />
+              <span>{error}</span>
+            </div>
+          )}
 
           <button
             type="submit"
             className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-400 hover:from-emerald-400 hover:to-teal-300 text-slate-950 font-black text-sm transition-all shadow-lg shadow-emerald-500/20 cursor-pointer"
           >
-            {tab === 'LOGIN' ? 'Sign In & Save Session' : 'Create & Save Account'}
+            {tab === 'LOGIN' ? 'Sign In & Restore Session' : 'Create & Save Account'}
           </button>
         </form>
       </div>

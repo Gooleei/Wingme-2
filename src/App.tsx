@@ -35,12 +35,24 @@ import { MineView } from './components/MineView';
 import { AuthModal } from './components/AuthModal';
 import { sound } from './utils/audio';
 import { purgeLegacyReferralMocks } from './utils/referralManager';
+import { 
+  getAllAccounts, 
+  getUserStats, 
+  saveUserStats, 
+  getUserTransactions, 
+  saveUserTransactions,
+  updateAccount,
+  STATS_STORAGE_PREFIX,
+  TRANSACTIONS_STORAGE_PREFIX,
+  USER_SESSION_KEY,
+  AUTH_SESSION_KEY
+} from './utils/accountManager';
 
-const STORAGE_KEY = 'LUCKYPLAY_RUNNER_STATS_V2';
-const USER_KEY = 'LUCKYPLAY_USER_PROFILE_V2';
-const AUTH_KEY = 'LUCKYPLAY_AUTHENTICATED_V2';
+const STORAGE_KEY = STATS_STORAGE_PREFIX;
+const USER_KEY = USER_SESSION_KEY;
+const AUTH_KEY = AUTH_SESSION_KEY;
 const LEADERBOARD_KEY = 'LUCKYPLAY_LEADERBOARDS_V2';
-const TRANSACTIONS_KEY = 'LUCKYPLAY_TRANSACTIONS_V2';
+const TRANSACTIONS_KEY = TRANSACTIONS_STORAGE_PREFIX;
 
 const DEFAULT_USER: UserProfile = {
   id: 'guest-runner-88',
@@ -123,10 +135,28 @@ export default function App() {
     return [];
   });
 
-  // Purge legacy mock data on startup
+  // Purge legacy mock data and ensure accounts and stats are seeded on startup
   useEffect(() => {
     purgeLegacyReferralMocks();
+    getAllAccounts();
   }, []);
+
+  // Listen for live referral credits across tabs/modals
+  useEffect(() => {
+    const handleReferralCredited = (e: Event) => {
+      const customEvent = e as CustomEvent;
+      if (user && customEvent.detail && customEvent.detail.referrerId === user.id) {
+        const freshStats = getUserStats(user.id);
+        const freshTxs = getUserTransactions(user.id);
+        setStats(freshStats);
+        setTransactions(freshTxs);
+      }
+    };
+    window.addEventListener('luckyplay:referral_credited', handleReferralCredited);
+    return () => {
+      window.removeEventListener('luckyplay:referral_credited', handleReferralCredited);
+    };
+  }, [user]);
 
   // Navigation & Modals State
   const [currentView, setCurrentView] = useState<AppView>('DASHBOARD');
@@ -260,6 +290,7 @@ export default function App() {
 
   // Handler: Sign In / Registration
   const handleUserLogin = (newUser: UserProfile, bonusAdded?: number) => {
+    updateAccount(newUser);
     setUser(newUser);
     localStorage.setItem(USER_KEY, JSON.stringify(newUser));
     localStorage.setItem(AUTH_KEY, 'true');
@@ -483,6 +514,13 @@ export default function App() {
             setStats={setStats}
             onBack={() => setCurrentView('DASHBOARD')}
             onSignOut={handleSignOut}
+            onUpdateUser={(updated) => {
+              setUser(updated);
+              localStorage.setItem(USER_KEY, JSON.stringify(updated));
+            }}
+            onSwitchUser={(target) => {
+              handleUserLogin(target);
+            }}
             onRewardClaimed={(amount, description) => {
               const newTx: WalletTransaction = {
                 id: Date.now(),

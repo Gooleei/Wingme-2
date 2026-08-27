@@ -1,8 +1,15 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { UserProfile } from '../types';
 import { sound } from '../utils/audio';
 import confetti from 'canvas-confetti';
-import { processGenuineReferral, purgeLegacyReferralMocks } from '../utils/referralManager';
+import { processGenuineReferral, purgeLegacyReferralMocks, extractReferralIdentifier } from '../utils/referralManager';
+import { 
+  authenticateUser, 
+  registerAccount, 
+  getAllAccounts, 
+  findAccount,
+  SEED_ACCOUNTS
+} from '../utils/accountManager';
 import { 
   Lock, 
   User, 
@@ -16,14 +23,14 @@ import {
   Gift, 
   CheckCircle2, 
   AlertCircle,
-  UserPlus
+  UserPlus,
+  Users
 } from 'lucide-react';
 
 interface LoginPageProps {
   onLogin: (user: UserProfile, bonusAdded?: number) => void;
 }
 
-const ACCOUNTS_STORAGE_KEY = 'LUCKYPLAY_REGISTERED_ACCOUNTS_V2';
 const AVATARS = ['👑', '⚡', '🤖', '🦊', '🚀', '🔥', '🛡️', '🎯', '🐱', '🎮', '💎', '🐉'];
 
 export const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
@@ -38,15 +45,19 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
   const [agreeTerms, setAgreeTerms] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
+  const [registeredAccountsCount, setRegisteredAccountsCount] = useState<number>(0);
 
-  // Detect referral query params on load (e.g. ?ref=runner_alex or ?referrer=runner_alex)
-  React.useEffect(() => {
+  // Initialize and detect referral query params on load (e.g. ?ref=RunnerOne or ?referrer=RunnerOne)
+  useEffect(() => {
     purgeLegacyReferralMocks();
+    const accounts = getAllAccounts();
+    setRegisteredAccountsCount(accounts.length);
+
     if (typeof window !== 'undefined' && window.location.search) {
       const params = new URLSearchParams(window.location.search);
       const ref = params.get('ref') || params.get('referrer') || params.get('code');
       if (ref && ref.trim()) {
-        const cleanRef = ref.trim();
+        const cleanRef = extractReferralIdentifier(ref.trim());
         setPromoCode(cleanRef);
         setReferrerDetected(cleanRef);
         setTab('REGISTER');
@@ -54,93 +65,32 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
     }
   }, []);
 
-  // Load existing accounts from local storage
-  const getSavedAccounts = (): UserProfile[] => {
-    try {
-      const data = localStorage.getItem(ACCOUNTS_STORAGE_KEY);
-      if (data) {
-        return JSON.parse(data);
-      }
-    } catch {
-      // fallback
-    }
-    return [];
-  };
-
-  const saveAccount = (newProfile: UserProfile) => {
-    const existing = getSavedAccounts();
-    const updated = [...existing.filter(a => a.username.toLowerCase() !== newProfile.username.toLowerCase()), newProfile];
-    localStorage.setItem(ACCOUNTS_STORAGE_KEY, JSON.stringify(updated));
-  };
-
   const handleSignIn = (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
+    setSuccessMsg(null);
 
-    const cleanUser = username.trim().toLowerCase();
-    const cleanPin = pin.trim();
+    const authResult = authenticateUser(username, pin);
 
-    if (!cleanUser) {
-      setError('Please enter your username or registered email.');
+    if (!authResult.success || !authResult.user) {
       sound.playWrong();
+      setError(authResult.error || 'Login failed. Please check your credentials.');
       return;
     }
 
-    if (!cleanPin || cleanPin.length < 4) {
-      setError('PIN must be at least 4 digits.');
-      sound.playWrong();
-      return;
-    }
-
-    const savedAccounts = getSavedAccounts();
-    const found = savedAccounts.find(
-      (acc) => acc.username.toLowerCase() === cleanUser || (acc.email && acc.email.toLowerCase() === cleanUser)
-    );
-
-    if (!found) {
-      setError('Account not found. Please click "Register Account" to create a new profile.');
-      sound.playWrong();
-      return;
-    }
-
-    if (found.pin && found.pin !== cleanPin) {
-      setError('Incorrect security PIN. Please enter your correct PIN.');
-      sound.playWrong();
-      return;
-    }
-
+    const verifiedUser = authResult.user;
     sound.playWin();
-    setSuccessMsg(`Welcome back, ${found.username}! Logging you in...`);
+    setSuccessMsg(`Welcome back, ${verifiedUser.username}! Loading your wallet & stats...`);
+
     setTimeout(() => {
-      onLogin(found);
-    }, 400);
+      onLogin(verifiedUser);
+    }, 350);
   };
 
   const handleSignUp = (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
-
-    const cleanUser = username.trim();
-    const cleanEmail = email.trim();
-    const cleanPin = pin.trim();
-
-    if (!cleanUser || cleanUser.length < 3) {
-      setError('Username must be at least 3 characters long.');
-      sound.playWrong();
-      return;
-    }
-
-    if (!cleanEmail || !cleanEmail.includes('@')) {
-      setError('Please provide a valid email address.');
-      sound.playWrong();
-      return;
-    }
-
-    if (!cleanPin || cleanPin.length < 4) {
-      setError('Security PIN must be at least 4 digits.');
-      sound.playWrong();
-      return;
-    }
+    setSuccessMsg(null);
 
     if (!agreeTerms) {
       setError('You must agree to the Terms of Service & Fair Play rules.');
@@ -148,20 +98,11 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
       return;
     }
 
-    // Check if username or email already registered
-    const saved = getSavedAccounts();
-    const existing = saved.find(
-      (a) => a.username.toLowerCase() === cleanUser.toLowerCase() || (a.email && a.email.toLowerCase() === cleanEmail.toLowerCase())
-    );
+    const cleanUser = username.trim();
+    const cleanEmail = email.trim();
+    const cleanPin = pin.trim();
 
-    if (existing) {
-      setError('An account with this username or email already exists. Please switch to Sign In.');
-      sound.playWrong();
-      return;
-    }
-
-    // Account starts fresh at 0 balance - no generated or pad-up earnings
-    const newUser: UserProfile = {
+    const newProfile: UserProfile = {
       id: `user-${cleanUser.toLowerCase()}-${Date.now().toString().slice(-4)}`,
       username: cleanUser,
       email: cleanEmail,
@@ -175,21 +116,44 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
       spinLockedUntil: null
     };
 
-    saveAccount(newUser);
+    const regResult = registerAccount(newProfile);
+    if (!regResult.success || !regResult.user) {
+      sound.playWrong();
+      setError(regResult.error || 'Registration failed. Please try a different username.');
+      return;
+    }
 
-    // If registered via a referral link, link to referrer's genuine network and credit referrer
+    const registeredUser = regResult.user;
+    let welcomeBonus = 0;
+
+    // Process referral code / link if provided
     const refTarget = referrerDetected || promoCode;
     if (refTarget && refTarget.trim()) {
-      processGenuineReferral(refTarget.trim(), newUser);
+      const refResult = processGenuineReferral(refTarget.trim(), registeredUser);
+      if (refResult.success) {
+        welcomeBonus = 0.80; // $0.80 welcome bonus
+      }
     }
 
     sound.playWin();
     confetti({ particleCount: 90, spread: 80, origin: { y: 0.6 } });
-    setSuccessMsg('🎉 Account created successfully! Logging you in...');
+    setSuccessMsg(
+      welcomeBonus > 0 
+        ? `🎉 Account created! You received a $${welcomeBonus.toFixed(2)} welcome referral bonus!` 
+        : '🎉 Account created successfully! Logging you in...'
+    );
 
     setTimeout(() => {
-      onLogin(newUser, 0);
-    }, 500);
+      onLogin(registeredUser, welcomeBonus);
+    }, 450);
+  };
+
+  const handleQuickFillDemo = (demoUser: typeof SEED_ACCOUNTS[0]) => {
+    sound.playClick();
+    setUsername(demoUser.username);
+    setPin(demoUser.pin);
+    setTab('LOGIN');
+    setError(null);
   };
 
   return (
@@ -203,7 +167,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
         <div className="text-center space-y-1.5">
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-900/90 border border-emerald-500/30 text-[11px] font-black text-emerald-300 shadow-md backdrop-blur-md">
             <Lock className="w-3.5 h-3.5 text-emerald-400" />
-            <span>Registration or Sign-In Required</span>
+            <span>Secure Player Authentication</span>
           </div>
 
           <h1 className="text-2xl sm:text-4xl font-black text-white tracking-tight">
@@ -213,18 +177,23 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
             </span>
           </h1>
           <p className="text-xs sm:text-sm text-slate-300 max-w-md mx-auto font-medium">
-            Create your player profile or log in to access games, earn balanced $ cash and ₮ points, and request crypto withdrawals.
+            Log in to your player account or register a new profile. Your wallet balance, unlock progress, and referral network are permanently saved.
           </p>
         </div>
 
         {/* Auth Interface Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-5 items-stretch">
-          {/* Left Column: Arcade Perks */}
+          {/* Left Column: Arcade Perks & Quick Access */}
           <div className="lg:col-span-5 bg-slate-900/80 border border-slate-800 rounded-2xl sm:rounded-3xl p-4 sm:p-5 backdrop-blur-md flex flex-col justify-between space-y-4 shadow-xl">
             <div className="space-y-3">
-              <div className="flex items-center gap-2">
-                <span className="text-xl">🎮</span>
-                <h3 className="text-sm sm:text-base font-black text-white">Player Account Perks</h3>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <span className="text-xl">🎮</span>
+                  <h3 className="text-sm sm:text-base font-black text-white">Player Account Perks</h3>
+                </div>
+                <span className="text-[10px] font-bold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">
+                  Auto-Save Active
+                </span>
               </div>
 
               <div className="space-y-2.5">
@@ -254,27 +223,40 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
 
                 <div className="flex items-start gap-2.5 p-2.5 sm:p-3 rounded-xl sm:rounded-2xl bg-slate-950/70 border border-slate-800">
                   <div className="w-7 h-7 rounded-lg bg-cyan-500/20 text-cyan-400 flex items-center justify-center text-xs font-bold shrink-0">
-                    🎁
+                    🤝
                   </div>
                   <div>
-                    <h4 className="text-xs font-extrabold text-white">Daily Rewards & Egg Scratch</h4>
+                    <h4 className="text-xs font-extrabold text-white">App Download Referrals</h4>
                     <p className="text-[11px] text-slate-400 mt-0.5 leading-snug">
-                      Claim $1.00 daily login streaks and scratch 100 lucky prize eggs.
+                      Earn $0.80 per recruit and unlock tier multipliers up to $800 in milestone bonuses.
                     </p>
                   </div>
                 </div>
               </div>
             </div>
 
-            {/* Security Guarantee Box */}
-            <div className="p-3 rounded-xl bg-slate-950/80 border border-slate-800 space-y-1">
-              <div className="flex items-center gap-1.5 text-emerald-400 text-xs font-bold">
-                <ShieldCheck className="w-3.5 h-3.5" />
-                <span>Account Vault Protection</span>
+            {/* Quick Demo Login Preset Buttons */}
+            <div className="p-3 rounded-xl bg-slate-950/80 border border-slate-800 space-y-1.5">
+              <div className="flex items-center justify-between text-[11px] font-bold text-slate-300">
+                <span className="flex items-center gap-1 text-cyan-300">
+                  <Users className="w-3.5 h-3.5" />
+                  <span>Quick Test Accounts</span>
+                </span>
+                <span className="text-[10px] text-slate-500 font-mono">PIN: 1234</span>
               </div>
-              <p className="text-[10px] text-slate-400 leading-normal">
-                Your wallet balance, character unlocks, and run telemetry are safely synced with your unique player ID and security PIN.
-              </p>
+              <div className="flex flex-wrap gap-1.5">
+                {SEED_ACCOUNTS.map((demo) => (
+                  <button
+                    key={demo.id}
+                    type="button"
+                    onClick={() => handleQuickFillDemo(demo)}
+                    className="px-2.5 py-1 rounded-lg bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-white border border-slate-700 text-[10px] font-semibold transition-all cursor-pointer flex items-center gap-1"
+                  >
+                    <span>{demo.avatar}</span>
+                    <span>{demo.username}</span>
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
 
@@ -283,29 +265,12 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
             {/* Tabs */}
             <div className="grid grid-cols-2 bg-slate-950 p-1 rounded-xl border border-slate-800">
               <button
-                id="login-tab-signup"
-                type="button"
-                onClick={() => {
-                  setTab('REGISTER');
-                  setError(null);
-                  sound.playClick();
-                }}
-                className={`py-2 rounded-lg text-xs font-black transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
-                  tab === 'REGISTER'
-                    ? 'bg-gradient-to-r from-cyan-500 to-blue-500 text-slate-950 shadow-sm shadow-cyan-500/20'
-                    : 'text-slate-400 hover:text-white'
-                }`}
-              >
-                <UserPlus className="w-3.5 h-3.5" />
-                <span>Register Account</span>
-              </button>
-
-              <button
                 id="login-tab-signin"
                 type="button"
                 onClick={() => {
                   setTab('LOGIN');
                   setError(null);
+                  setSuccessMsg(null);
                   sound.playClick();
                 }}
                 className={`py-2 rounded-lg text-xs font-black transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
@@ -317,21 +282,135 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
                 <Lock className="w-3.5 h-3.5" />
                 <span>Sign In</span>
               </button>
+
+              <button
+                id="login-tab-signup"
+                type="button"
+                onClick={() => {
+                  setTab('REGISTER');
+                  setError(null);
+                  setSuccessMsg(null);
+                  sound.playClick();
+                }}
+                className={`py-2 rounded-lg text-xs font-black transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
+                  tab === 'REGISTER'
+                    ? 'bg-gradient-to-r from-cyan-500 to-blue-500 text-slate-950 shadow-sm shadow-cyan-500/20'
+                    : 'text-slate-400 hover:text-white'
+                }`}
+              >
+                <UserPlus className="w-3.5 h-3.5" />
+                <span>Register Account</span>
+              </button>
             </div>
 
             {/* Error or Success Alert */}
             {error && (
-              <div className="p-2.5 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs font-bold flex items-center gap-2">
-                <AlertCircle className="w-3.5 h-3.5 text-rose-400 shrink-0" />
-                <span>{error}</span>
+              <div className="p-3 rounded-xl bg-rose-500/10 border border-rose-500/40 text-rose-300 text-xs font-bold flex items-start gap-2 animate-in fade-in duration-200">
+                <AlertCircle className="w-4 h-4 text-rose-400 shrink-0 mt-0.5" />
+                <div className="flex-1">
+                  <span>{error}</span>
+                  {error.includes('does not exist') && (
+                    <div className="mt-1.5">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setTab('REGISTER');
+                          setError(null);
+                        }}
+                        className="text-[11px] text-cyan-300 hover:underline font-extrabold flex items-center gap-1 cursor-pointer"
+                      >
+                        <span>Click here to create this account now</span>
+                        <ArrowRight className="w-3 h-3" />
+                      </button>
+                    </div>
+                  )}
+                </div>
               </div>
             )}
 
             {successMsg && (
-              <div className="p-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-xs font-bold flex items-center gap-2">
-                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+              <div className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/40 text-emerald-300 text-xs font-bold flex items-center gap-2 animate-in fade-in duration-200">
+                <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
                 <span>{successMsg}</span>
               </div>
+            )}
+
+            {/* SIGN IN FORM */}
+            {tab === 'LOGIN' && (
+              <form onSubmit={handleSignIn} className="space-y-3">
+                <div>
+                  <label className="text-[10px] font-bold text-slate-300 uppercase tracking-wider block mb-1">
+                    Username or Registered Email
+                  </label>
+                  <div className="relative">
+                    <User className="w-3.5 h-3.5 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2" />
+                    <input
+                      id="login-input-username"
+                      type="text"
+                      required
+                      value={username}
+                      onChange={(e) => setUsername(e.target.value)}
+                      placeholder="e.g. RunnerOne or runner@bellmont.io"
+                      className="w-full pl-9 pr-3 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white text-xs font-semibold focus:outline-none focus:border-emerald-400 transition-colors"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <div className="flex items-center justify-between mb-1">
+                    <label className="text-[10px] font-bold text-slate-300 uppercase tracking-wider block">
+                      4-Digit Security PIN
+                    </label>
+                    <span className="text-[10px] text-slate-500 font-bold">Min 4 Digits</span>
+                  </div>
+                  <div className="relative">
+                    <KeyRound className="w-3.5 h-3.5 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2" />
+                    <input
+                      id="login-input-pin"
+                      type={showPin ? 'text' : 'password'}
+                      required
+                      maxLength={8}
+                      value={pin}
+                      onChange={(e) => setPin(e.target.value)}
+                      placeholder="••••"
+                      className="w-full pl-9 pr-9 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white text-xs font-semibold tracking-widest focus:outline-none focus:border-emerald-400 transition-colors"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPin(!showPin)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300 cursor-pointer"
+                    >
+                      {showPin ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                    </button>
+                  </div>
+                </div>
+
+                <div className="text-xs text-slate-400 pt-0.5 flex items-center justify-between">
+                  <span>
+                    Need a new profile?{' '}
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setTab('REGISTER');
+                        setError(null);
+                      }}
+                      className="text-emerald-400 font-bold hover:underline cursor-pointer"
+                    >
+                      Register here
+                    </button>
+                  </span>
+                </div>
+
+                <button
+                  id="login-btn-submit"
+                  type="submit"
+                  className="w-full py-3 rounded-xl bg-gradient-to-r from-emerald-500 via-teal-400 to-cyan-400 hover:from-emerald-400 hover:to-cyan-300 text-slate-950 font-black text-xs sm:text-sm transition-all shadow-md shadow-emerald-500/25 flex items-center justify-center gap-2 cursor-pointer hover:scale-[1.01] active:scale-95"
+                >
+                  <Lock className="w-4 h-4 fill-current" />
+                  <span>Log In & Restore Profile</span>
+                  <ArrowRight className="w-4 h-4" />
+                </button>
+              </form>
             )}
 
             {/* REGISTER FORM */}
@@ -342,14 +421,15 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
                     <div className="flex items-center gap-2">
                       <Gift className="w-4 h-4 text-emerald-400 shrink-0" />
                       <span>
-                        Invited by <strong className="text-white">@{referrerDetected}</strong> (Network Linked)
+                        Invited by <strong className="text-white">@{referrerDetected}</strong> (+$0.80 Bonus)
                       </span>
                     </div>
                     <span className="text-[10px] bg-emerald-500/30 text-emerald-300 px-2 py-0.5 rounded-full uppercase tracking-wider font-black shrink-0">
-                      Connected
+                      Linked
                     </span>
                   </div>
                 )}
+
                 <div>
                   <label className="text-[10px] font-bold text-slate-300 uppercase tracking-wider block mb-1">
                     Select Avatar
@@ -424,7 +504,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
                         id="signup-input-pin"
                         type={showPin ? 'text' : 'password'}
                         required
-                        maxLength={6}
+                        maxLength={8}
                         value={pin}
                         onChange={(e) => setPin(e.target.value)}
                         placeholder="••••"
@@ -437,6 +517,24 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
                       >
                         {showPin ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
                       </button>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="text-[10px] font-bold text-slate-300 uppercase tracking-wider block mb-1 flex items-center justify-between">
+                      <span>Referral / Invite Code</span>
+                      <span className="text-[10px] text-amber-400 font-bold">+$0.80 Welcome Bonus</span>
+                    </label>
+                    <div className="relative">
+                      <Gift className="w-3.5 h-3.5 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2" />
+                      <input
+                        id="signup-input-promo"
+                        type="text"
+                        value={promoCode}
+                        onChange={(e) => setPromoCode(e.target.value)}
+                        placeholder="e.g. RunnerOne or REF-RUNNERONE"
+                        className="w-full pl-9 pr-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-white text-xs font-mono font-semibold focus:outline-none focus:border-amber-400 placeholder:text-slate-600"
+                      />
                     </div>
                   </div>
                 </div>
@@ -463,84 +561,6 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
                 >
                   <Sparkles className="w-4 h-4 fill-current" />
                   <span>Register & Open Dashboard</span>
-                  <ArrowRight className="w-4 h-4" />
-                </button>
-              </form>
-            )}
-
-            {/* SIGN IN FORM */}
-            {tab === 'LOGIN' && (
-              <form onSubmit={handleSignIn} className="space-y-3">
-                <div>
-                  <label className="text-[10px] font-bold text-slate-300 uppercase tracking-wider block mb-1">
-                    Username or Email
-                  </label>
-                  <div className="relative">
-                    <User className="w-3.5 h-3.5 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2" />
-                    <input
-                      id="login-input-username"
-                      type="text"
-                      required
-                      value={username}
-                      onChange={(e) => setUsername(e.target.value)}
-                      placeholder="Enter registered username or email"
-                      className="w-full pl-9 pr-3 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white text-xs font-semibold focus:outline-none focus:border-emerald-400 transition-colors"
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <div className="flex items-center justify-between mb-1">
-                    <label className="text-[10px] font-bold text-slate-300 uppercase tracking-wider block">
-                      Security PIN
-                    </label>
-                    <span className="text-[10px] text-slate-500 font-bold">Min 4 Digits</span>
-                  </div>
-                  <div className="relative">
-                    <KeyRound className="w-3.5 h-3.5 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2" />
-                    <input
-                      id="login-input-pin"
-                      type={showPin ? 'text' : 'password'}
-                      required
-                      maxLength={8}
-                      value={pin}
-                      onChange={(e) => setPin(e.target.value)}
-                      placeholder="••••"
-                      className="w-full pl-9 pr-9 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white text-xs font-semibold tracking-widest focus:outline-none focus:border-emerald-400 transition-colors"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowPin(!showPin)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300 cursor-pointer"
-                    >
-                      {showPin ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
-                    </button>
-                  </div>
-                </div>
-
-                <div className="text-xs text-slate-400 pt-0.5">
-                  <span>
-                    Don't have an account yet?{' '}
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setTab('REGISTER');
-                        setError(null);
-                      }}
-                      className="text-emerald-400 font-bold hover:underline cursor-pointer"
-                    >
-                      Register here
-                    </button>
-                  </span>
-                </div>
-
-                <button
-                  id="login-btn-submit"
-                  type="submit"
-                  className="w-full py-3 rounded-xl bg-gradient-to-r from-emerald-500 via-teal-400 to-cyan-400 hover:from-emerald-400 hover:to-cyan-300 text-slate-950 font-black text-xs sm:text-sm transition-all shadow-md shadow-emerald-500/25 flex items-center justify-center gap-2 cursor-pointer hover:scale-[1.01] active:scale-95"
-                >
-                  <Lock className="w-4 h-4 fill-current" />
-                  <span>Log In & Enter Dashboard</span>
                   <ArrowRight className="w-4 h-4" />
                 </button>
               </form>

@@ -3,7 +3,7 @@ import { PlayerStats, UserProfile, DOLLARS_PER_T_POINT, convertDollarsToTPoints 
 import { MINE_LEVELS } from '../data/gameData';
 import { sound } from '../utils/audio';
 import confetti from 'canvas-confetti';
-import { AdPlacement } from './AdPlacement';
+import { AdPlacement, SponsorCarousel } from './AdPlacement';
 import { triggerSponsorAd } from '../utils/adManager';
 import { 
   Sparkles, 
@@ -539,20 +539,10 @@ export const MineView: React.FC<MineViewProps> = ({
 
       {/* SPONSOR MONETIZATION STATION (TAGS 458074 & 458075) */}
       <div className="max-w-4xl mx-auto w-full px-3 sm:px-6">
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <AdPlacement
-            zoneId={458074}
-            variant="compact"
-            title="Mining Sponsor 1 (458074)"
-            subtitle="Click to activate 2x sparkle mining glow"
-          />
-          <AdPlacement
-            zoneId={458075}
-            variant="compact"
-            title="Mining Sponsor 2 (458075)"
-            subtitle="Click to unlock sponsor tap bonus"
-          />
-        </div>
+        <SponsorCarousel
+          title="Mining Sponsor Monetization"
+          subtitle="Explore sponsor channels to activate mining boosts and bonus drops"
+        />
       </div>
 
       {/* 15 LEVEL MILESTONE MAP FOOTER (SCROLLABLE ROADMAP) */}

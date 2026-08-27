@@ -28,6 +28,8 @@ export interface UserProfile {
   gamesPlayedToday: number;
   winStreak: number;
   spinLockedUntil: number | null; // 7-day jackpot timer or null if unlocked
+  referredBy?: string; // Username or ID of the user who referred this account
+  redeemedReferralCode?: string;
 }
 
 export interface PlayerStats {

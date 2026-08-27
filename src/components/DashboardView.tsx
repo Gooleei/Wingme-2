@@ -2,7 +2,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import { AppView, PlayerStats, UserProfile, DOLLARS_PER_T_POINT, convertDollarsToTPoints } from '../types';
 import { sound } from '../utils/audio';
 import confetti from 'canvas-confetti';
-import { AdPlacement } from './AdPlacement';
+import { AdPlacement, SponsorCarousel } from './AdPlacement';
+import { StagesCarousel } from './StagesCarousel';
 import { triggerSponsorAd } from '../utils/adManager';
 import { 
   Play, 
@@ -53,6 +54,9 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
   // Bars Carousel Ref for horizontal side-scrolling
   const barsCarouselRef = useRef<HTMLDivElement>(null);
 
+  // Games Carousel Ref for horizontal side-scrolling
+  const gamesCarouselRef = useRef<HTMLDivElement>(null);
+
   // Daily Claim Countdown
   const [timeUntilDailyClaim, setTimeUntilDailyClaim] = useState<number>(0);
 
@@ -71,6 +75,17 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
     if (barsCarouselRef.current) {
       const scrollAmount = barsCarouselRef.current.clientWidth * 0.8;
       barsCarouselRef.current.scrollBy({
+        left: direction === 'left' ? -scrollAmount : scrollAmount,
+        behavior: 'smooth'
+      });
+    }
+  };
+
+  const scrollGamesCarousel = (direction: 'left' | 'right') => {
+    sound.playClick();
+    if (gamesCarouselRef.current) {
+      const scrollAmount = gamesCarouselRef.current.clientWidth * 0.75;
+      gamesCarouselRef.current.scrollBy({
         left: direction === 'left' ? -scrollAmount : scrollAmount,
         behavior: 'smooth'
       });
@@ -103,11 +118,11 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
 
   const featuredSlides = [
     {
-      title: '🤝 WhatsApp Referral Network',
-      badge: 'EARN UP TO X150 MULTIPLIER',
+      title: '🤝 App Download & Referral Network',
+      badge: 'EARN UP TO X1,000 MULTIPLIER',
       badgeColor: 'bg-emerald-400 text-slate-950',
-      description: 'Share via WhatsApp! Earn $0.80 for 1st referral, X5 for 5, X10 for 10, X30 for 20, X150 for 100+ referrals. See and grow your live network.',
-      buttonText: 'Open Referral Network ($800+ Rewards)',
+      description: 'Share your personal app download link (bit.ly/3UntvRh)! Earn $0.80 per recruit, unlock up to X1,000 tier multipliers, and get up to $800+ cash rewards.',
+      buttonText: 'Get My App Download Link ($800+ Rewards)',
       bgGradient: 'from-emerald-600/35 via-slate-900 to-slate-950',
       borderColor: 'border-emerald-400/50',
       action: () => setCurrentView('PROFILE')
@@ -479,40 +494,40 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
         </div>
       </div>
 
-      {/* Featured Carousel */}
-      <div className="space-y-2.5">
-        <div className="flex items-center justify-between">
-          <h3 className="text-base sm:text-lg font-black text-white flex items-center gap-2">
-            <Sparkles className="w-4 h-4 text-amber-400" />
+      {/* Featured Carousel (Compact & Refined Size) */}
+      <div className="space-y-2">
+        <div className="flex items-center justify-between px-1">
+          <h3 className="text-xs sm:text-[13px] font-black text-white flex items-center gap-1.5">
+            <Sparkles className="w-3.5 h-3.5 text-amber-400" />
             <span>Featured Tournaments & Events</span>
           </h3>
-          <div className="flex items-center gap-1.5">
+          <div className="flex items-center gap-1">
             {featuredSlides.map((_, idx) => (
               <button
                 key={idx}
                 onClick={() => setCarouselIndex(idx)}
                 className={`h-1.5 rounded-full transition-all ${
-                  carouselIndex === idx ? 'w-5 bg-emerald-400' : 'w-1.5 bg-slate-700'
+                  carouselIndex === idx ? 'w-4 bg-emerald-400' : 'w-1.5 bg-slate-700'
                 }`}
               />
             ))}
           </div>
         </div>
 
-        {/* Slide Card */}
+        {/* Compact Slide Card */}
         <div
-          className={`p-4 sm:p-6 rounded-2xl sm:rounded-3xl border ${featuredSlides[carouselIndex].borderColor} bg-gradient-to-r ${featuredSlides[carouselIndex].bgGradient} shadow-xl transition-all duration-300 relative overflow-hidden flex flex-col md:flex-row items-start md:items-center justify-between gap-4`}
+          className={`p-3 sm:p-4 rounded-xl sm:rounded-2xl border ${featuredSlides[carouselIndex].borderColor} bg-gradient-to-r ${featuredSlides[carouselIndex].bgGradient} shadow-md transition-all duration-300 relative overflow-hidden flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2.5 sm:gap-3`}
         >
-          <div className="space-y-2 max-w-2xl">
-            <div className="inline-flex items-center gap-2">
-              <span className={`text-[10px] font-black px-2 py-0.5 rounded-md ${featuredSlides[carouselIndex].badgeColor}`}>
+          <div className="space-y-1 max-w-xl">
+            <div className="inline-flex items-center gap-1.5">
+              <span className={`text-[8px] sm:text-[9px] font-black px-1.5 py-0.2 rounded ${featuredSlides[carouselIndex].badgeColor}`}>
                 {featuredSlides[carouselIndex].badge}
               </span>
             </div>
-            <h2 className="text-xl sm:text-2xl font-black text-white">
+            <h4 className="text-sm sm:text-base font-black text-white leading-tight">
               {featuredSlides[carouselIndex].title}
-            </h2>
-            <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
+            </h4>
+            <p className="text-[10px] sm:text-[11px] text-slate-300 leading-snug line-clamp-2">
               {featuredSlides[carouselIndex].description}
             </p>
           </div>
@@ -522,46 +537,69 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
               sound.playClick();
               featuredSlides[carouselIndex].action();
             }}
-            className="px-5 py-3 rounded-xl bg-white text-slate-950 hover:bg-slate-100 font-black text-xs sm:text-sm flex items-center gap-2 transition-all shadow-xl hover:scale-105 active:scale-95 cursor-pointer whitespace-nowrap shrink-0"
+            className="w-full sm:w-auto px-3.5 py-2 rounded-xl bg-white text-slate-950 hover:bg-slate-100 font-black text-[10px] sm:text-xs flex items-center justify-center gap-1.5 transition-all shadow-md active:scale-95 cursor-pointer whitespace-nowrap shrink-0"
           >
-            <Play className="w-3.5 h-3.5 fill-current" />
+            <Play className="w-3 h-3 fill-current" />
             <span>{featuredSlides[carouselIndex].buttonText}</span>
           </button>
         </div>
       </div>
 
-      {/* Featured Sponsor Monetization Banners (Tags 458074 & 458075) */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
-        <AdPlacement
-          zoneId={458074}
-          variant="card"
-          title="Sponsor Network Tag 458074"
-          subtitle="Explore sponsored offers & boost platform rewards. Instant credit activation."
-          rewardLabel="Sponsored Zone 1"
-        />
-        <AdPlacement
-          zoneId={458075}
-          variant="card"
-          title="Sponsor Network Tag 458075"
-          subtitle="Discover verified sponsor partners & trigger special gaming power-ups."
-          rewardLabel="Sponsored Zone 2"
-        />
-      </div>
+      {/* 15 STAGES PROGRESSION SIDE SLIDE CAROUSEL (Stage 1 Active, Stages 2-15 Coming Soon) */}
+      <StagesCarousel
+        onSelectActiveStage={() => {
+          if (gamesCarouselRef.current) {
+            gamesCarouselRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }
+        }}
+      />
 
-      {/* Grid of All Games */}
-      <div className="space-y-3">
-        <div className="flex items-center justify-between">
-          <div>
-            <h3 className="text-lg sm:text-xl font-black text-white flex items-center gap-2">
-              <Gamepad2 className="w-4.5 h-4.5 text-emerald-400" />
+      {/* Featured Sponsor Monetization Side Slide Carousel (Tags 458074 & 458075) */}
+      <SponsorCarousel
+        title="Featured Sponsor Networks"
+        subtitle="Explore verified sponsor partners & boost cash rewards"
+      />
+
+      {/* Side Slide Carousel of All Arcade Games */}
+      <div className="space-y-2.5">
+        <div className="flex items-center justify-between px-1">
+          <div className="flex items-center gap-2">
+            <h3 className="text-xs sm:text-sm font-black text-white flex items-center gap-1.5">
+              <Gamepad2 className="w-4 h-4 text-emerald-400" />
               <span>All Arcade Mini-Games</span>
             </h3>
-            <p className="text-xs text-slate-400">Play any minigame to automatically accrue cash and ₮ points ($15 = ₮1)</p>
+            <span className="text-[10px] px-2 py-0.5 rounded-full bg-slate-800 text-slate-300 border border-slate-700 hidden xs:inline-flex items-center gap-1 font-bold">
+              <span>{allGames.length} Games</span>
+            </span>
           </div>
-          <span className="text-xs font-bold text-slate-400">7 Games Ready</span>
+
+          <div className="flex items-center gap-1.5">
+            <span className="text-[10px] text-slate-400 hidden sm:inline-flex items-center gap-1 font-medium mr-1">
+              <span>⇄ Slide to explore</span>
+            </span>
+            <button
+              onClick={() => scrollGamesCarousel('left')}
+              title="Scroll Games Left"
+              className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition-colors border border-slate-700 cursor-pointer min-h-[30px] min-w-[30px] flex items-center justify-center shadow-sm active:scale-95"
+            >
+              <ChevronLeft className="w-3.5 h-3.5" />
+            </button>
+            <button
+              onClick={() => scrollGamesCarousel('right')}
+              title="Scroll Games Right"
+              className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition-colors border border-slate-700 cursor-pointer min-h-[30px] min-w-[30px] flex items-center justify-center shadow-sm active:scale-95"
+            >
+              <ChevronRight className="w-3.5 h-3.5" />
+            </button>
+          </div>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5 sm:gap-4">
+        {/* Side Slide Horizontal Carousel */}
+        <div
+          ref={gamesCarouselRef}
+          className="flex items-stretch gap-2.5 sm:gap-3 overflow-x-auto pb-2.5 pt-1 px-1 scroll-smooth snap-x snap-mandatory select-none"
+          style={{ scrollbarWidth: 'thin' }}
+        >
           {allGames.map((game) => (
             <div
               key={game.id}
@@ -569,34 +607,36 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                 sound.playClick();
                 game.action();
               }}
-              className="group bg-slate-900/80 hover:bg-slate-900 border border-slate-800 hover:border-slate-700 rounded-2xl p-4 transition-all duration-200 hover:shadow-xl hover:scale-[1.01] cursor-pointer flex flex-col justify-between space-y-3 relative overflow-hidden"
+              className="group w-[175px] sm:w-[195px] shrink-0 snap-start bg-slate-900/90 hover:bg-slate-900 border border-slate-800 hover:border-emerald-500/50 rounded-xl sm:rounded-2xl p-3 transition-all duration-200 hover:shadow-xl hover:scale-[1.02] cursor-pointer flex flex-col justify-between space-y-2.5 relative overflow-hidden active:scale-98"
             >
               <div>
-                <div className="flex items-center justify-between">
-                  <div className="w-10 h-10 rounded-xl bg-slate-800 group-hover:bg-slate-700 flex items-center justify-center text-xl border border-slate-700 transition-colors shadow-md">
+                <div className="flex items-center justify-between gap-1.5">
+                  <div className="w-8 h-8 rounded-lg bg-slate-800 group-hover:bg-slate-700 flex items-center justify-center text-lg border border-slate-700 transition-colors shadow-sm shrink-0">
                     {game.icon}
                   </div>
-                  <span className={`text-[10px] font-black px-2 py-0.5 rounded ${game.tagColor}`}>
+                  <span className={`text-[9px] font-black px-1.5 py-0.5 rounded truncate max-w-[100px] ${game.tagColor}`}>
                     {game.tag}
                   </span>
                 </div>
 
-                <h4 className="text-base font-black text-white mt-2.5 group-hover:text-emerald-300 transition-colors">
+                <h4 className="text-xs sm:text-sm font-black text-white mt-2 group-hover:text-emerald-300 transition-colors truncate">
                   {game.title}
                 </h4>
-                <p className="text-xs text-slate-400 mt-1 line-clamp-2 leading-relaxed">
+                <p className="text-[10px] text-slate-400 mt-0.5 line-clamp-2 leading-tight">
                   {game.description}
                 </p>
               </div>
 
-              <div className="pt-2 flex items-center justify-between border-t border-slate-800/80">
-                <div>
-                  <span className="text-[9px] text-slate-500 uppercase font-bold block">Reward Pool</span>
-                  <strong className="text-emerald-400 font-extrabold text-xs">{game.reward}</strong>
+              <div className="pt-2 flex items-center justify-between border-t border-slate-800/80 gap-1.5">
+                <div className="min-w-0 flex-1">
+                  <span className="text-[8px] text-slate-500 uppercase font-bold block leading-none">Reward Pool</span>
+                  <strong className="text-emerald-400 font-black text-[10px] sm:text-[11px] truncate block mt-0.5">
+                    {game.reward}
+                  </strong>
                 </div>
 
-                <div className="w-7 h-7 rounded-lg bg-slate-800 group-hover:bg-emerald-500 group-hover:text-slate-950 text-slate-400 flex items-center justify-center transition-all">
-                  <ChevronRight className="w-3.5 h-3.5" />
+                <div className="w-6 h-6 rounded-md bg-slate-800 group-hover:bg-emerald-500 group-hover:text-slate-950 text-slate-400 flex items-center justify-center transition-all shrink-0 shadow-sm">
+                  <ChevronRight className="w-3 h-3" />
                 </div>
               </div>
             </div>
