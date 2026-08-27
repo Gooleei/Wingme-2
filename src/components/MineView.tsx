@@ -233,7 +233,33 @@ export const MineView: React.FC<MineViewProps> = ({
 
     const nextTapsInLevel = tapsInCurrentLevel + 1;
     const nextTotalTaps = totalLifetimeTaps + 1;
-    const nextMinedCash = +(totalMinedCash + activeTapReward).toFixed(2);
+    const is100TapMilestone = nextTotalTaps % 100 === 0;
+    const milestoneBonus = is100TapMilestone ? 75.00 : 0; // 5₮ = $75.00 (1₮ = $15)
+    const nextMinedCash = +(totalMinedCash + activeTapReward + milestoneBonus).toFixed(2);
+
+    if (is100TapMilestone) {
+      sound.playWin();
+      confetti({
+        particleCount: 100,
+        spread: 70,
+        origin: { y: 0.5 }
+      });
+      // Spawn extra milestone particle
+      const milestoneParticleId = Date.now() + 0.999;
+      setFloatingParticles(prev => [
+        ...prev,
+        {
+          id: milestoneParticleId,
+          x: clientX,
+          y: clientY - 40,
+          text: `🎉 +5₮ ($75.00) BONUS!`,
+          subtext: `100 Taps Milestone Reached!`
+        }
+      ]);
+      setTimeout(() => {
+        setFloatingParticles(prev => prev.filter(p => p.id !== milestoneParticleId));
+      }, 1500);
+    }
 
     setTapsInCurrentLevel(nextTapsInLevel);
     setTotalLifetimeTaps(nextTotalTaps);
@@ -243,13 +269,14 @@ export const MineView: React.FC<MineViewProps> = ({
     if (nextTapsInLevel >= currentLevelConfig.requiredTaps) {
       triggerLevelCompletion(currentLevelConfig.level);
     } else {
-      // Synchronize active tap reward to PlayerStats Balance
+      // Synchronize active tap reward and milestone bonus to PlayerStats Balance
       setStats(prev => {
-        const newBal = +(prev.balance + activeTapReward).toFixed(2);
+        const addedReward = activeTapReward + milestoneBonus;
+        const newBal = +(prev.balance + addedReward).toFixed(2);
         return {
           ...prev,
           balance: newBal,
-          totalCashEarned: +(prev.totalCashEarned + activeTapReward).toFixed(2),
+          totalCashEarned: +(prev.totalCashEarned + addedReward).toFixed(2),
           mineProgress: {
             currentLevel: prev.mineProgress?.currentLevel ?? 1,
             tapsInLevel: nextTapsInLevel,
@@ -482,17 +509,47 @@ export const MineView: React.FC<MineViewProps> = ({
 
         {/* Tap Action Helper Instructions */}
         <div className="text-center mt-3 sm:mt-4 space-y-0.5">
-          <p className="text-xs sm:text-sm font-black text-amber-300 tracking-wide uppercase flex items-center justify-center gap-1.5">
-            <span>💎 Tap the Gem to Mine (+${(currentLevelConfig.tapReward ?? 0.30).toFixed(2)} / tap) 💎</span>
+          <p className="text-xs sm:text-sm font-black text-amber-300 tracking-wide uppercase flex items-center justify-center gap-1.5 flex-wrap">
+            <span>💎 Tap the Gem to Mine (+${(currentLevelConfig.tapReward ?? 0.30).toFixed(2)} / tap)</span>
+            <span className="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 text-[10px] sm:text-xs font-black">
+              +5₮ ($75.00) every 100 Taps!
+            </span>
           </p>
           <p className="text-[11px] sm:text-xs text-slate-400">
-            Reward grows +20% on every level! Watch the diamond expand with every tap!
+            Earn +5₮ ($75.00) on every 100 taps milestone + level bonus rewards!
           </p>
         </div>
       </div>
 
       {/* SHIFTED DOWN: LEVEL STATUS & LIVE PROGRESS INDICATOR BAR */}
       <div className="max-w-4xl mx-auto w-full px-3 sm:px-6 my-2 space-y-3">
+        {/* 100-TAP 5₮ MILESTONE CARD */}
+        <div className="bg-gradient-to-r from-emerald-950/70 via-slate-900 to-cyan-950/70 border border-emerald-500/40 rounded-2xl sm:rounded-3xl p-3.5 sm:p-4 shadow-xl space-y-2 relative overflow-hidden">
+          <div className="flex justify-between items-center text-xs font-bold flex-wrap gap-1">
+            <span className="text-slate-200 flex items-center gap-1.5 font-black">
+              <Sparkles className="w-4 h-4 text-emerald-400" />
+              <span>100-Tap Milestone: +5₮ ($75.00) Reward</span>
+            </span>
+            <span className="text-emerald-300 font-mono font-black text-xs sm:text-sm">
+              {totalLifetimeTaps % 100} / 100 Taps ({totalLifetimeTaps % 100}%)
+            </span>
+          </div>
+
+          <div className="w-full h-2.5 sm:h-3 bg-slate-950 rounded-full border border-emerald-900/60 overflow-hidden p-0.5">
+            <div
+              className="h-full bg-gradient-to-r from-emerald-500 to-teal-300 rounded-full transition-all duration-150"
+              style={{ width: `${totalLifetimeTaps % 100}%` }}
+            />
+          </div>
+
+          <div className="flex justify-between items-center text-[10px] sm:text-[11px] text-slate-400">
+            <span>Milestone Rate: <strong className="text-emerald-300">5₮ ($75.00) every 100 taps</strong></span>
+            <span className="text-cyan-300 font-mono font-bold">
+              {100 - (totalLifetimeTaps % 100)} taps to next 5₮ reward
+            </span>
+          </div>
+        </div>
+
         <div className="bg-gradient-to-br from-slate-900 via-slate-950 to-slate-900 border border-cyan-500/30 rounded-2xl sm:rounded-3xl p-3.5 sm:p-4 shadow-xl space-y-2 sm:space-y-2.5 relative overflow-hidden">
           
           {/* Progress Header */}

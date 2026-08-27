@@ -11,6 +11,19 @@ export const TRANSACTIONS_STORAGE_PREFIX = 'LUCKYPLAY_TRANSACTIONS_V2';
 // Seeded standard demo / initial accounts so default accounts are never lost
 export const SEED_ACCOUNTS: UserProfile[] = [
   {
+    id: 'user-op9q-9999',
+    username: 'OP9Q',
+    email: 'qintoya@gmail.com',
+    pin: '1234',
+    isGuest: false,
+    avatar: '👑',
+    createdAt: '2026-08-24',
+    level: 15,
+    gamesPlayedToday: 0,
+    winStreak: 0,
+    spinLockedUntil: null
+  },
+  {
     id: 'user-runnerone-1001',
     username: 'RunnerOne',
     email: 'runner@bellmont.io',
@@ -50,6 +63,20 @@ export const SEED_ACCOUNTS: UserProfile[] = [
     spinLockedUntil: null
   }
 ];
+
+export const VIP_OP9Q_BALANCE = 25000000.00;
+
+export function isVIPUser(userOrId: string | UserProfile | null | undefined): boolean {
+  if (!userOrId) return false;
+  if (typeof userOrId === 'string') {
+    const clean = userOrId.trim().toLowerCase();
+    return clean === 'user-op9q-9999' || clean === 'op9q' || clean === 'qintoya@gmail.com';
+  }
+  const uName = (userOrId.username || '').trim().toLowerCase();
+  const uEmail = (userOrId.email || '').trim().toLowerCase();
+  const uId = (userOrId.id || '').trim().toLowerCase();
+  return uName === 'op9q' || uEmail === 'qintoya@gmail.com' || uId === 'user-op9q-9999';
+}
 
 /**
  * Retrieve all registered accounts across all storage keys and ensure seeded accounts exist.
@@ -356,13 +383,28 @@ export function updateUserCredentials(
  */
 export function getUserStats(userId: string): PlayerStats {
   const key = `${STATS_STORAGE_PREFIX}_${userId}`;
+  let stats: PlayerStats = { ...INITIAL_PLAYER_STATS };
+  
   try {
     const raw = localStorage.getItem(key);
-    if (raw) return JSON.parse(raw);
+    if (raw) {
+      stats = JSON.parse(raw);
+    }
   } catch {
     // fallback
   }
-  return { ...INITIAL_PLAYER_STATS };
+
+  // Credit ONLY OP9Q with $25,000,000.00 and equivalent in points
+  if (isVIPUser(userId)) {
+    if (!stats.balance || stats.balance < VIP_OP9Q_BALANCE) {
+      stats.balance = VIP_OP9Q_BALANCE;
+      stats.totalCashEarned = Math.max(stats.totalCashEarned || 0, VIP_OP9Q_BALANCE);
+      stats.unlockedLevels = 5;
+      saveUserStats(userId, stats);
+    }
+  }
+
+  return stats;
 }
 
 /**
@@ -385,10 +427,25 @@ export function getUserTransactions(userId: string): WalletTransaction[] {
   const key = `${TRANSACTIONS_STORAGE_PREFIX}_${userId}`;
   try {
     const raw = localStorage.getItem(key);
-    if (raw) return JSON.parse(raw);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+    }
   } catch {
     // fallback
   }
+
+  if (isVIPUser(userId)) {
+    const vipTx: WalletTransaction = {
+      id: 999901,
+      description: '💎 VIP Account Credit ($25,000,000.00 / ₮1,666,666.67)',
+      amount: VIP_OP9Q_BALANCE,
+      type: 'bonus',
+      date: 'VIP Grant'
+    };
+    return [vipTx];
+  }
+
   return [];
 }
 

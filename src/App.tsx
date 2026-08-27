@@ -89,21 +89,14 @@ export default function App() {
   // Player Stats State
   const [stats, setStats] = useState<PlayerStats>(() => {
     const activeUserRaw = localStorage.getItem(USER_KEY);
-    let userStatsKey = STORAGE_KEY;
     if (activeUserRaw) {
       try {
         const u = JSON.parse(activeUserRaw);
-        if (u && u.id) userStatsKey = `${STORAGE_KEY}_${u.id}`;
+        if (u && u.id) {
+          return getUserStats(u.id);
+        }
       } catch {
         // ignore
-      }
-    }
-    const saved = localStorage.getItem(userStatsKey) || localStorage.getItem(STORAGE_KEY);
-    if (saved) {
-      try {
-        return JSON.parse(saved);
-      } catch {
-        return INITIAL_PLAYER_STATS;
       }
     }
     return INITIAL_PLAYER_STATS;
@@ -122,14 +115,17 @@ export default function App() {
     return SEED_LEADERBOARDS;
   });
 
-  // Wallet Transactions - starts clean with no fake initial bonus
+  // Wallet Transactions
   const [transactions, setTransactions] = useState<WalletTransaction[]>(() => {
-    const saved = localStorage.getItem(TRANSACTIONS_KEY);
-    if (saved) {
+    const activeUserRaw = localStorage.getItem(USER_KEY);
+    if (activeUserRaw) {
       try {
-        return JSON.parse(saved);
+        const u = JSON.parse(activeUserRaw);
+        if (u && u.id) {
+          return getUserTransactions(u.id);
+        }
       } catch {
-        return [];
+        // ignore
       }
     }
     return [];
@@ -296,30 +292,8 @@ export default function App() {
     localStorage.setItem(AUTH_KEY, 'true');
     setShowAuthModal(false);
 
-    const userStatsKey = `${STORAGE_KEY}_${newUser.id}`;
-    const userTxKey = `${TRANSACTIONS_KEY}_${newUser.id}`;
-
-    const savedStats = localStorage.getItem(userStatsKey);
-    let loadedStats: PlayerStats;
-    if (savedStats) {
-      try {
-        loadedStats = JSON.parse(savedStats);
-      } catch {
-        loadedStats = { ...INITIAL_PLAYER_STATS };
-      }
-    } else {
-      loadedStats = { ...INITIAL_PLAYER_STATS };
-    }
-
-    const savedTx = localStorage.getItem(userTxKey);
-    let loadedTx: WalletTransaction[] = [];
-    if (savedTx) {
-      try {
-        loadedTx = JSON.parse(savedTx);
-      } catch {
-        loadedTx = [];
-      }
-    }
+    let loadedStats = getUserStats(newUser.id);
+    let loadedTx = getUserTransactions(newUser.id);
 
     if (bonusAdded && bonusAdded > 0) {
       loadedStats.balance = +(loadedStats.balance + bonusAdded).toFixed(2);
@@ -337,10 +311,8 @@ export default function App() {
 
     setStats(loadedStats);
     setTransactions(loadedTx);
-    localStorage.setItem(userStatsKey, JSON.stringify(loadedStats));
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(loadedStats));
-    localStorage.setItem(userTxKey, JSON.stringify(loadedTx));
-    localStorage.setItem(TRANSACTIONS_KEY, JSON.stringify(loadedTx));
+    saveUserStats(newUser.id, loadedStats);
+    saveUserTransactions(newUser.id, loadedTx);
 
     setCurrentView('DASHBOARD');
   };

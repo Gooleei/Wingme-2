@@ -51,7 +51,7 @@ export const MemoryMatchGame: React.FC<MemoryMatchGameProps> = ({
   const [earnedCash, setEarnedCash] = useState<number>(0);
 
   const pairCount = difficulty === 'standard' ? 8 : 12; // 16 cards vs 24 cards
-  const rewardAmount = difficulty === 'standard' ? 0.50 : 1.50;
+  const rewardAmount = 45.00; // 3₮ ($45.00, since 1₮ = $15.00)
 
   // Initialize Game Board
   const startNewGame = useCallback(() => {
@@ -149,7 +149,7 @@ export const MemoryMatchGame: React.FC<MemoryMatchGameProps> = ({
       spread: 70,
       origin: { y: 0.6 }
     });
-    onWin(rewardAmount, `🧠 Memory Match (${difficulty.toUpperCase()}) Win in ${moves + 1} moves!`);
+    onWin(rewardAmount, `🧠 Memory Match Win! (+3₮ / $${rewardAmount.toFixed(2)}) in ${moves + 1} moves!`);
   };
 
   return (
@@ -169,11 +169,12 @@ export const MemoryMatchGame: React.FC<MemoryMatchGameProps> = ({
           <div>
             <h1 className="text-base sm:text-lg font-black text-white flex items-center gap-1.5 flex-wrap">
               <span>🧠 Memory Matrix Match</span>
-              <span className="text-[10px] sm:text-xs px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 font-bold">
-                +${rewardAmount.toFixed(2)} Win
+              <span className="text-[10px] sm:text-xs px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-black flex items-center gap-1">
+                <Sparkles className="w-3 h-3 text-emerald-400" />
+                Earn 3₮ / $45.00 Win
               </span>
             </h1>
-            <p className="text-xs text-slate-400">Match all card pairs to claim cash</p>
+            <p className="text-xs text-slate-400">Match all card pairs to claim 3₮ on every win</p>
           </div>
         </div>
 
@@ -243,7 +244,7 @@ export const MemoryMatchGame: React.FC<MemoryMatchGameProps> = ({
 
         <div className="bg-slate-900/60 border border-slate-800 rounded-xl p-2.5 text-center">
           <span className="text-[10px] sm:text-[11px] text-slate-400 font-medium">Reward Pool</span>
-          <div className="text-sm sm:text-base font-black text-emerald-400 mt-0.5">+${rewardAmount.toFixed(2)}</div>
+          <div className="text-sm sm:text-base font-black text-emerald-400 mt-0.5">+3₮ (${rewardAmount.toFixed(2)})</div>
         </div>
       </div>
 

@@ -20,22 +20,25 @@ interface LevelInfo {
   aiSmartness: number; // 1.0 = 100% perfect Minimax calculation
 }
 
+const WIN_REWARD_T_POINTS = 5; // 5₮
+const WIN_REWARD_DOLLARS = 75.00; // 5₮ * $15 = $75.00
+
 const TTT_LEVELS: LevelInfo[] = [
-  { level: 1, name: 'Neural Sentinel', reward: 0.50, aiSmartness: 1.0 },
-  { level: 2, name: 'Cyber Tactician', reward: 0.80, aiSmartness: 1.0 },
-  { level: 3, name: 'Deep Matrix Core', reward: 1.20, aiSmartness: 1.0 },
-  { level: 4, name: 'Quantum Predictor', reward: 2.00, aiSmartness: 1.0 },
-  { level: 5, name: 'Apex Neural Engine', reward: 3.50, aiSmartness: 1.0 },
-  { level: 6, name: 'Singularity Overlord', reward: 5.00, aiSmartness: 1.0 },
-  { level: 7, name: 'Grandmaster Omega', reward: 8.00, aiSmartness: 1.0 },
-  { level: 8, name: 'Hypermind Oracle', reward: 12.00, aiSmartness: 1.0 },
-  { level: 9, name: 'Matrix Sovereign', reward: 18.00, aiSmartness: 1.0 },
-  { level: 10, name: 'Infinite Algorithm', reward: 25.00, aiSmartness: 1.0 },
-  { level: 11, name: 'Celestial Titan', reward: 30.00, aiSmartness: 1.0 },
-  { level: 12, name: 'Zero-Error Nexus', reward: 35.00, aiSmartness: 1.0 },
-  { level: 13, name: 'Omega Godmind', reward: 40.00, aiSmartness: 1.0 },
-  { level: 14, name: 'Cosmic Dominator', reward: 45.00, aiSmartness: 1.0 },
-  { level: 15, name: 'The Unbeatable AI', reward: 50.00, aiSmartness: 1.0 }
+  { level: 1, name: 'Neural Sentinel', reward: WIN_REWARD_DOLLARS, aiSmartness: 1.0 },
+  { level: 2, name: 'Cyber Tactician', reward: WIN_REWARD_DOLLARS, aiSmartness: 1.0 },
+  { level: 3, name: 'Deep Matrix Core', reward: WIN_REWARD_DOLLARS, aiSmartness: 1.0 },
+  { level: 4, name: 'Quantum Predictor', reward: WIN_REWARD_DOLLARS, aiSmartness: 1.0 },
+  { level: 5, name: 'Apex Neural Engine', reward: WIN_REWARD_DOLLARS, aiSmartness: 1.0 },
+  { level: 6, name: 'Singularity Overlord', reward: WIN_REWARD_DOLLARS, aiSmartness: 1.0 },
+  { level: 7, name: 'Grandmaster Omega', reward: WIN_REWARD_DOLLARS, aiSmartness: 1.0 },
+  { level: 8, name: 'Hypermind Oracle', reward: WIN_REWARD_DOLLARS, aiSmartness: 1.0 },
+  { level: 9, name: 'Matrix Sovereign', reward: WIN_REWARD_DOLLARS, aiSmartness: 1.0 },
+  { level: 10, name: 'Infinite Algorithm', reward: WIN_REWARD_DOLLARS, aiSmartness: 1.0 },
+  { level: 11, name: 'Celestial Titan', reward: WIN_REWARD_DOLLARS, aiSmartness: 1.0 },
+  { level: 12, name: 'Zero-Error Nexus', reward: WIN_REWARD_DOLLARS, aiSmartness: 1.0 },
+  { level: 13, name: 'Omega Godmind', reward: WIN_REWARD_DOLLARS, aiSmartness: 1.0 },
+  { level: 14, name: 'Cosmic Dominator', reward: WIN_REWARD_DOLLARS, aiSmartness: 1.0 },
+  { level: 15, name: 'The Unbeatable AI', reward: WIN_REWARD_DOLLARS, aiSmartness: 1.0 }
 ];
 
 export const TicTacToeGame: React.FC<TicTacToeGameProps> = ({
@@ -220,7 +223,7 @@ export const TicTacToeGame: React.FC<TicTacToeGameProps> = ({
           }
         }
 
-        onWin(activeLevelConfig.reward, `❌⭕ Tic Tac Toe Level ${currentLevel} (${activeLevelConfig.name}) Win!`);
+        onWin(WIN_REWARD_DOLLARS, `❌⭕ Tic Tac Toe vs System Win! (+5₮ / $${WIN_REWARD_DOLLARS.toFixed(2)})`);
       } else if (outcome.winner === 'TIE') {
         sound.playWrong();
       }
@@ -246,12 +249,12 @@ export const TicTacToeGame: React.FC<TicTacToeGameProps> = ({
           <div>
             <h1 className="text-base sm:text-lg font-black text-white flex items-center gap-2 flex-wrap">
               <span>❌⭕ Tic Tac Toe</span>
-              <span className="text-[10px] sm:text-xs px-2 py-0.5 rounded-full bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 font-black flex items-center gap-1">
-                <Brain className="w-3 h-3 text-cyan-400" />
-                100% Smart
+              <span className="text-[10px] sm:text-xs px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-black flex items-center gap-1">
+                <Sparkles className="w-3 h-3 text-emerald-400" />
+                Earn 5₮ / $75.00 Per Win
               </span>
             </h1>
-            <p className="text-xs text-slate-400">Master Minimax counter-tactics for rewards</p>
+            <p className="text-xs text-slate-400">Earn 5₮ on each win against the system</p>
           </div>
         </div>
 
@@ -290,7 +293,7 @@ export const TicTacToeGame: React.FC<TicTacToeGameProps> = ({
             >
               <span className="text-[11px]">Lvl {lvl.level}</span>
               <span className={`text-[10px] ${isSelected ? 'text-slate-950 font-black' : 'text-emerald-400 font-extrabold'}`}>
-                ${lvl.reward.toFixed(2)}
+                5₮ ($75)
               </span>
             </button>
           );
@@ -326,24 +329,24 @@ export const TicTacToeGame: React.FC<TicTacToeGameProps> = ({
           </div>
 
           <div className="space-y-1.5 p-2.5 rounded-xl bg-slate-950/90 border border-slate-800/80 text-xs">
-            <div className="flex justify-between">
+            <div className="flex justify-between items-center">
               <span className="text-slate-400">Match Prize</span>
-              <span className="text-emerald-400 font-black">+${activeLevelConfig.reward.toFixed(2)}</span>
+              <span className="text-emerald-400 font-black text-sm">+5₮ ($75.00)</span>
             </div>
             <div className="flex justify-between">
               <span className="text-slate-400">Win Streak</span>
               <span className="text-amber-400 font-black">{playerStreak} Wins</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-slate-400">Jackpot</span>
-              <span className="text-purple-400 font-black">$50.00 (Lvl 15)</span>
+              <span className="text-slate-400">Reward Rate</span>
+              <span className="text-cyan-400 font-black">5₮ Per Win</span>
             </div>
           </div>
 
           <div className="p-2.5 rounded-xl bg-slate-800/50 border border-slate-700/60 text-xs text-slate-300">
             <span className="font-bold text-white">Status: </span>
             {winner === 'X' ? (
-              <span className="text-emerald-400 font-black">🎉 VICTORY! Level Cleared</span>
+              <span className="text-emerald-400 font-black">🎉 VICTORY! Cleared (+5₮ / $75.00)</span>
             ) : winner === 'O' ? (
               <span className="text-rose-400 font-black">💀 Defeated by AI Counter</span>
             ) : winner === 'TIE' ? (
@@ -394,7 +397,7 @@ export const TicTacToeGame: React.FC<TicTacToeGameProps> = ({
           <div>
             <h4 className="font-extrabold text-white text-sm sm:text-base">Level {currentLevel} Mastered!</h4>
             <p className="text-xs text-slate-300">
-              You earned <strong className="text-emerald-400">+${activeLevelConfig.reward.toFixed(2)}</strong>. Next: Level {currentLevel + 1} (${TTT_LEVELS[currentLevel].reward.toFixed(2)} prize).
+              You earned <strong className="text-emerald-400">+5₮ ($75.00)</strong>! Next: Level {currentLevel + 1} (+5₮ / $75.00 prize).
             </p>
           </div>
           <button
