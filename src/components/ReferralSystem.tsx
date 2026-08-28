@@ -9,6 +9,7 @@ import {
   getWebReferralLink,
   getUserReferralCode,
   redeemInviteCodeInApp,
+  validateReferralCode,
   OFFICIAL_APP_DOWNLOAD_URL
 } from '../utils/referralManager';
 import { 
@@ -136,7 +137,11 @@ export const ReferralSystem: React.FC<ReferralSystemProps> = ({
   useEffect(() => {
     const handleReferralUpdate = (e: Event) => {
       const customEvent = e as CustomEvent;
-      if (!customEvent.detail || customEvent.detail.referrerId === user.id) {
+      if (
+        !customEvent.detail || 
+        customEvent.detail.referrerId === user.id || 
+        customEvent.detail.referrerUsername?.toLowerCase() === user.username.toLowerCase()
+      ) {
         setNetwork(getUserReferralNetwork(user));
       }
     };

@@ -210,30 +210,71 @@ export function getAllAccounts(): UserProfile[] {
 }
 
 /**
- * Find an account by username, email, or user ID (case-insensitive & trimmed)
+ * Find an account by username, email, user ID, or referral code/link (case-insensitive & trimmed)
  */
 export function findAccount(identifier: string): UserProfile | null {
   if (!identifier) return null;
-  const clean = identifier.trim().toLowerCase();
-  const cleanNoPrefix = clean.replace(/^ref-/i, '').replace(/^user-/i, '');
+  let raw = identifier.trim();
+
+  // Extract from URL if a URL or query string was passed
+  try {
+    if (raw.includes('ref=') || raw.includes('referrer=') || raw.includes('code=') || raw.includes('invite=')) {
+      const urlPattern = /[?&](?:ref|referrer|code|invite)=([^&#\s]+)/i;
+      const match = raw.match(urlPattern);
+      if (match && match[1]) {
+        raw = decodeURIComponent(match[1]).trim();
+      }
+    }
+  } catch {
+    // fallback
+  }
+
+  // If input was a raw URL without query params, take the last path slug
+  if (raw.startsWith('http://') || raw.startsWith('https://')) {
+    const parts = raw.split('/');
+    const lastPart = parts[parts.length - 1];
+    if (lastPart && !lastPart.includes('3UntvRh')) {
+      raw = lastPart.split('?')[0];
+    }
+  }
+
+  const clean = raw.trim().toLowerCase();
+  const cleanNoPrefix = clean
+    .replace(/^@/, '')
+    .replace(/^ref[-_:]/i, '')
+    .replace(/^user[-_:]/i, '')
+    .trim();
 
   const accounts = getAllAccounts();
 
-  return (
-    accounts.find((acc) => {
-      const uName = acc.username.trim().toLowerCase();
-      const uEmail = acc.email ? acc.email.trim().toLowerCase() : '';
-      const uId = acc.id ? acc.id.trim().toLowerCase() : '';
+  // 1. Direct and prefix matches across all accounts
+  const matched = accounts.find((acc) => {
+    const uName = acc.username.trim().toLowerCase();
+    const uEmail = acc.email ? acc.email.trim().toLowerCase() : '';
+    const uId = acc.id ? acc.id.trim().toLowerCase() : '';
 
-      return (
-        uName === clean ||
-        uEmail === clean ||
-        uId === clean ||
-        uName === cleanNoPrefix ||
-        uId.includes(cleanNoPrefix)
-      );
-    }) || null
-  );
+    return (
+      uName === clean ||
+      uEmail === clean ||
+      uId === clean ||
+      uName === cleanNoPrefix ||
+      uEmail === cleanNoPrefix ||
+      uId === cleanNoPrefix ||
+      uId.includes(cleanNoPrefix) ||
+      `ref-${uName}` === clean ||
+      `@${uName}` === clean
+    );
+  });
+
+  if (matched) return matched;
+
+  // 2. Specific fallback for Op9q if not found above
+  if (clean === 'op9q' || cleanNoPrefix === 'op9q' || clean === 'qintoya@gmail.com') {
+    const op9qSeed = SEED_ACCOUNTS.find((a) => a.username.toLowerCase() === 'op9q');
+    if (op9qSeed) return op9qSeed;
+  }
+
+  return null;
 }
 
 /**

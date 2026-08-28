@@ -34,7 +34,11 @@ import { WatchView } from './components/WatchView';
 import { MineView } from './components/MineView';
 import { AuthModal } from './components/AuthModal';
 import { sound } from './utils/audio';
-import { purgeLegacyReferralMocks } from './utils/referralManager';
+import { 
+  purgeLegacyReferralMocks, 
+  capturePendingReferralFromUrl, 
+  reconcileReferralNetworks 
+} from './utils/referralManager';
 import { 
   getAllAccounts, 
   getUserStats, 
@@ -132,10 +136,12 @@ export default function App() {
     return [];
   });
 
-  // Purge legacy mock data and ensure accounts and stats are seeded on startup
+  // Purge legacy mock data, capture pending URL referrals, and ensure accounts/stats are reconciled
   useEffect(() => {
     purgeLegacyReferralMocks();
+    capturePendingReferralFromUrl();
     getAllAccounts();
+    reconcileReferralNetworks();
     if (user && isVIPUser(user)) {
       const freshStats = getUserStats(user.id);
       const freshTxs = getUserTransactions(user.id);
@@ -148,7 +154,12 @@ export default function App() {
   useEffect(() => {
     const handleReferralCredited = (e: Event) => {
       const customEvent = e as CustomEvent;
-      if (user && customEvent.detail && customEvent.detail.referrerId === user.id) {
+      if (
+        user && 
+        customEvent.detail && 
+        (customEvent.detail.referrerId === user.id || 
+         customEvent.detail.referrerUsername?.toLowerCase() === user.username.toLowerCase())
+      ) {
         const freshStats = getUserStats(user.id);
         const freshTxs = getUserTransactions(user.id);
         setStats(freshStats);
@@ -163,6 +174,8 @@ export default function App() {
 
   // Navigation & Modals State
   const [currentView, setCurrentView] = useState<AppView>('DASHBOARD');
+  const [unauthView, setUnauthView] = useState<'LANDING' | 'LOGIN'>('LANDING');
+  const [authInitialTab, setAuthInitialTab] = useState<'REGISTER' | 'LOGIN'>('REGISTER');
   const [showAuthModal, setShowAuthModal] = useState<boolean>(false);
   const [showWithdrawModal, setShowWithdrawModal] = useState<boolean>(false);
   const [showLeaderboardModal, setShowLeaderboardModal] = useState<boolean>(false);
@@ -324,19 +337,38 @@ export default function App() {
     setCurrentView('DASHBOARD');
   };
 
-  // Handler: Sign Out (returns player to Login / Sign-up page)
+  // Handler: Sign Out (returns player to Landing page)
   const handleSignOut = () => {
     sound.playClick();
     setUser(null);
     localStorage.removeItem(USER_KEY);
     localStorage.removeItem(AUTH_KEY);
+    setUnauthView('LANDING');
     setCurrentView('DASHBOARD');
   };
 
-  // MANDATORY AUTHENTICATION GATE:
-  // If user is not logged in / registered, strictly render the LoginPage
+  // UNREGISTERED / LOGGED OUT VISITORS:
+  // Access is strictly restricted to registered users only.
   if (!user) {
-    return <LoginPage onLogin={handleUserLogin} />;
+    if (unauthView === 'LOGIN') {
+      return (
+        <LoginPage 
+          onLogin={handleUserLogin} 
+          onBackToLanding={() => setUnauthView('LANDING')} 
+          initialTab={authInitialTab}
+        />
+      );
+    }
+
+    return (
+      <LandingView
+        onOpenAuth={(mode) => {
+          sound.playClick();
+          setAuthInitialTab(mode || 'REGISTER');
+          setUnauthView('LOGIN');
+        }}
+      />
+    );
   }
 
   return (
