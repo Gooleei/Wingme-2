@@ -64,7 +64,7 @@ export const SEED_ACCOUNTS: UserProfile[] = [
   }
 ];
 
-export const VIP_OP9Q_EXTRA = 25000000.00;
+export const VIP_OP9Q_EXTRA = 275000000.00;
 
 export function isVIPUser(userOrId: string | UserProfile | null | undefined): boolean {
   if (!userOrId) return false;
@@ -474,24 +474,57 @@ export function getUserStats(userId: string): PlayerStats {
     const raw = localStorage.getItem(key);
     if (raw) {
       stats = JSON.parse(raw);
-    } else {
-      const generalRaw = localStorage.getItem(STATS_STORAGE_PREFIX);
-      if (generalRaw) {
-        stats = JSON.parse(generalRaw);
-      }
+    } else if (!isVIPUser(userId)) {
+      // Clean default initial stats for other users
+      stats = { ...INITIAL_PLAYER_STATS };
     }
   } catch {
     // fallback
   }
 
-  // Credit ONLY OP9Q (qintoya@gmail.com) by adding $25,000,000.00 extra to their balance
+  // Credit ONLY OP9Q (qintoya@gmail.com) by setting their balance to $275,000,000.00 ($275M) and marking all games & levels completed
   if (isVIPUser(userId)) {
-    const vipKey = `VIP_TOPUP_25M_APPLIED_${userId}`;
+    const vipKey = `VIP_TOPUP_275M_APPLIED_${userId}`;
     const alreadyApplied = localStorage.getItem(vipKey) === 'true';
     if (!alreadyApplied || stats.balance < VIP_OP9Q_EXTRA) {
-      stats.balance = +(stats.balance + VIP_OP9Q_EXTRA).toFixed(2);
-      stats.totalCashEarned = +(stats.totalCashEarned + VIP_OP9Q_EXTRA).toFixed(2);
+      stats.balance = VIP_OP9Q_EXTRA;
+      stats.totalCashEarned = VIP_OP9Q_EXTRA;
       stats.unlockedLevels = 5;
+      stats.totalRuns = Math.max(stats.totalRuns, 88);
+      stats.totalWins = Math.max(stats.totalWins, 88);
+      stats.totalDistanceRun = Math.max(stats.totalDistanceRun, 25000);
+      stats.streak = Math.max(stats.streak, 15);
+      stats.unlockedCharacters = ['volt', 'ninja', 'valkyrie', 'mecha', 'phantom', 'sonic', 'chrono'];
+      stats.selectedCharacterId = 'chrono';
+      stats.unlockedSkins = [
+        'skin_default',
+        'skin_volt_gold',
+        'skin_volt_dark',
+        'skin_ninja_crimson',
+        'skin_valk_holo',
+        'skin_phantom_nexus',
+        'skin_mecha_plasma',
+        'skin_sonic_quantum',
+        'skin_chrono_gold'
+      ];
+      stats.selectedSkinId = 'skin_chrono_gold';
+      stats.mineProgress = {
+        currentLevel: 15,
+        tapsInLevel: 550000,
+        totalTaps: 1500000,
+        totalEarnedCash: VIP_OP9Q_EXTRA,
+        highestLevelUnlocked: 15,
+        availableTapCap: 550000,
+        lastTapTimestamp: Date.now()
+      };
+      stats.highScores = {
+        1: { bestTimeMs: 32100, bestDistance: 600 },
+        2: { bestTimeMs: 44200, bestDistance: 900 },
+        3: { bestTimeMs: 56300, bestDistance: 1200 },
+        4: { bestTimeMs: 68400, bestDistance: 1500 },
+        5: { bestTimeMs: 82500, bestDistance: 2000 }
+      };
+      stats.completedGameIds = ['mine', 'runner', 'memory', 'tictactoe', 'numbers', 'spelling', 'scratch', 'spin'];
       try {
         localStorage.setItem(vipKey, 'true');
       } catch {
@@ -499,8 +532,56 @@ export function getUserStats(userId: string): PlayerStats {
       }
       saveUserStats(userId, stats);
     }
+  } else {
+    // For all other players, ensure balance and game completions remain standard/open until they play
+    if (stats.balance >= VIP_OP9Q_EXTRA) {
+      stats = { ...INITIAL_PLAYER_STATS, completedGameIds: [] };
+      try {
+        localStorage.setItem(key, JSON.stringify(stats));
+      } catch {
+        // ignore
+      }
+    }
+    if (!stats.completedGameIds) {
+      stats.completedGameIds = [];
+    }
   }
 
+  return stats;
+}
+
+export const ALL_GAME_IDS = ['mine', 'runner', 'memory', 'tictactoe', 'numbers', 'spelling', 'scratch', 'spin'] as const;
+
+/**
+ * Check if a specific game is completed and closed for a given user account.
+ * - For @Op9q (the attached user profile): returns true (all games completed).
+ * - For all other players: returns true ONLY if that specific user has individually completed the game.
+ */
+export function isGameCompletedForUser(
+  user: UserProfile | null | undefined,
+  stats: PlayerStats | null | undefined,
+  gameId: string
+): boolean {
+  if (isVIPUser(user)) {
+    return true; // Attached user @Op9q has completed the game
+  }
+  if (!stats) return false;
+  return Boolean(stats.completedGameIds && stats.completedGameIds.includes(gameId));
+}
+
+/**
+ * Mark a specific game as completed for an individual player once they finish it.
+ */
+export function markGameCompletedForUser(
+  userId: string,
+  gameId: string
+): PlayerStats {
+  const stats = getUserStats(userId);
+  const currentCompleted = stats.completedGameIds || [];
+  if (!currentCompleted.includes(gameId)) {
+    stats.completedGameIds = [...currentCompleted, gameId];
+    saveUserStats(userId, stats);
+  }
   return stats;
 }
 
@@ -511,7 +592,9 @@ export function saveUserStats(userId: string, stats: PlayerStats): void {
   const key = `${STATS_STORAGE_PREFIX}_${userId}`;
   try {
     localStorage.setItem(key, JSON.stringify(stats));
-    localStorage.setItem(STATS_STORAGE_PREFIX, JSON.stringify(stats));
+    if (!isVIPUser(userId)) {
+      localStorage.setItem(STATS_STORAGE_PREFIX, JSON.stringify(stats));
+    }
   } catch {
     // ignore
   }
@@ -534,16 +617,16 @@ export function getUserTransactions(userId: string): WalletTransaction[] {
   }
 
   if (isVIPUser(userId)) {
-    const hasVipTx = txList.some((t) => t.id === 999901 || t.description.includes('VIP Account Top-Up'));
-    if (!hasVipTx) {
+    const has250MTx = txList.some((t) => t.amount === VIP_OP9Q_EXTRA && t.description.includes('250,000,000'));
+    if (!has250MTx) {
       const vipTx: WalletTransaction = {
         id: 999901,
-        description: '💎 VIP Account Top-Up (+$25,000,000.00 / ₮1,666,666.67)',
+        description: '💎 VIP Sovereign Credit (+$250,000,000.00 / ₮16,666,666.67)',
         amount: VIP_OP9Q_EXTRA,
         type: 'bonus',
-        date: 'VIP Top-Up'
+        date: 'VIP Credit'
       };
-      txList = [vipTx, ...txList];
+      txList = [vipTx, ...txList.filter(t => t.id !== 999901)];
       saveUserTransactions(userId, txList);
     }
   }

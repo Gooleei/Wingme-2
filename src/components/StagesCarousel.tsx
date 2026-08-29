@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import { 
   Gamepad2, 
   Lock, 
@@ -18,7 +18,9 @@ import {
   Medal, 
   Ticket, 
   Coins, 
-  Globe 
+  Globe,
+  Timer,
+  Calendar
 } from 'lucide-react';
 import { sound } from '../utils/audio';
 
@@ -35,6 +37,8 @@ export interface StageItem {
   borderStyle: string;
 }
 
+export const STAGE_1_END_TIMESTAMP = new Date('2026-09-08T00:00:00Z').getTime();
+
 export const CAMPAIGN_STAGES: StageItem[] = [
   {
     stageNumber: 1,
@@ -43,7 +47,7 @@ export const CAMPAIGN_STAGES: StageItem[] = [
     icon: '🎮',
     isActive: true,
     statusText: 'CURRENT STAGE',
-    description: 'Active Stage: Play 8 minigames (Mine, Runner, Egg Crack, TicTacToe, etc.) to accrue rewards.',
+    description: 'Active Stage: Play 8 minigames (Mine, Runner, Egg Crack, TicTacToe, etc.) to accrue rewards. Concludes on 8th September, 2026.',
     accentColor: 'text-emerald-400',
     gradient: 'from-emerald-950/80 via-slate-900 to-slate-950',
     borderStyle: 'border-emerald-500/80 shadow-emerald-500/20 ring-1 ring-emerald-400/50'
@@ -228,7 +232,35 @@ export const StagesCarousel: React.FC<StagesCarouselProps> = ({
   className = ''
 }) => {
   const carouselRef = useRef<HTMLDivElement>(null);
-  const [selectedStage, setSelectedStage] = React.useState<StageItem | null>(null);
+  const [selectedStage, setSelectedStage] = useState<StageItem | null>(null);
+
+  // Live ticking countdown until 8th September, 2026
+  const [countdown, setCountdown] = useState({
+    days: 0,
+    hours: 0,
+    minutes: 0,
+    seconds: 0,
+    totalSeconds: 0
+  });
+
+  useEffect(() => {
+    const updateCountdown = () => {
+      const now = Date.now();
+      const diff = Math.max(0, Math.floor((STAGE_1_END_TIMESTAMP - now) / 1000));
+      const days = Math.floor(diff / (24 * 3600));
+      const hours = Math.floor((diff % (24 * 3600)) / 3600);
+      const minutes = Math.floor((diff % 3600) / 60);
+      const seconds = diff % 60;
+      setCountdown({ days, hours, minutes, seconds, totalSeconds: diff });
+    };
+
+    updateCountdown();
+    const interval = setInterval(updateCountdown, 1000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const pad = (n: number) => n.toString().padStart(2, '0');
+  const countdownStr = `${pad(countdown.days)}:${pad(countdown.hours)}:${pad(countdown.minutes)}:${pad(countdown.seconds)}`;
 
   const scroll = (direction: 'left' | 'right') => {
     sound.playClick();
@@ -255,15 +287,19 @@ export const StagesCarousel: React.FC<StagesCarouselProps> = ({
 
   return (
     <div className={`space-y-2 ${className}`}>
-      {/* Header bar with reduced typography and navigation */}
-      <div className="flex items-center justify-between px-1">
-        <div className="flex items-center gap-1.5 sm:gap-2">
+      {/* Header bar with reduced typography, badge and live countdown */}
+      <div className="flex items-center justify-between px-1 flex-wrap gap-1">
+        <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
           <h3 className="text-xs sm:text-[13px] font-black text-white flex items-center gap-1.5">
             <Trophy className="w-3.5 h-3.5 text-amber-400" />
             <span>Campaign Progression (15 Stages)</span>
           </h3>
           <span className="text-[9px] px-1.5 py-0.2 rounded-md bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 font-black">
             STAGE 1 ACTIVE
+          </span>
+          <span className="text-[8px] sm:text-[8.5px] font-mono font-bold px-1.5 py-0.2 rounded-md bg-amber-500/20 text-amber-300 border border-amber-500/30 inline-flex items-center gap-1">
+            <Timer className="w-2.5 h-2.5 text-amber-400 animate-pulse" />
+            <span>Stage 1 Ends: {countdownStr}</span>
           </span>
         </div>
 
@@ -336,12 +372,29 @@ export const StagesCarousel: React.FC<StagesCarouselProps> = ({
                 </p>
               </div>
 
-              {/* Bottom status chip */}
-              <div className="pt-1 border-t border-slate-800/80">
+              {/* Bottom status chip & Ticking Countdown on Stage 1 */}
+              <div className="pt-1 border-t border-slate-800/80 space-y-1">
                 {stage.isActive ? (
-                  <span className="w-full text-center block text-[8px] font-black text-emerald-400 bg-emerald-950/50 py-0.5 rounded border border-emerald-500/30 truncate">
-                    🟢 Games Active
-                  </span>
+                  <>
+                    <div className="bg-slate-950/90 rounded-md p-1 border border-amber-500/40 text-center space-y-0.5 shadow-sm">
+                      <div className="text-[6.5px] uppercase font-mono font-bold text-amber-400 flex items-center justify-center gap-0.5 leading-none">
+                        <Timer className="w-2 h-2 text-amber-400 shrink-0 animate-pulse" />
+                        <span>Ends 8 Sept 2026</span>
+                      </div>
+                      <div className="text-[8.5px] font-black font-mono text-amber-300 tracking-tight leading-tight">
+                        {countdownStr}
+                      </div>
+                      <div className="text-[6px] font-mono text-slate-400 flex justify-between px-0.5 leading-none">
+                        <span>D</span>
+                        <span>H</span>
+                        <span>M</span>
+                        <span>S</span>
+                      </div>
+                    </div>
+                    <span className="w-full text-center block text-[7.5px] font-black text-emerald-400 bg-emerald-950/60 py-0.5 rounded border border-emerald-500/30 truncate">
+                      🟢 Games Active
+                    </span>
+                  </>
                 ) : (
                   <span className="w-full text-center block text-[8px] font-bold text-slate-500 bg-slate-950/60 py-0.5 rounded border border-slate-800 truncate">
                     🔒 Coming Soon
@@ -383,8 +436,14 @@ export const StagesCarousel: React.FC<StagesCarouselProps> = ({
               {selectedStage.description}
             </p>
 
-            <div className="text-[10px] text-emerald-400 bg-emerald-950/40 p-2 rounded-lg border border-emerald-500/20">
-              💡 <strong>Note:</strong> We are currently in <strong>Stage 1 (Arcade Games & Minigames)</strong>. Once Stage 1 concludes, Stage 2 will unlock automatically!
+            <div className="text-[10px] text-emerald-400 bg-emerald-950/40 p-2.5 rounded-lg border border-emerald-500/20 space-y-1">
+              <div>
+                💡 <strong>Current Phase:</strong> We are currently in <strong>Stage 1 (Arcade Games & Minigames)</strong>. Once Stage 1 concludes, Stage 2 will unlock automatically!
+              </div>
+              <div className="text-amber-300 font-mono text-[9.5px] flex items-center gap-1 font-bold">
+                <Timer className="w-3 h-3 text-amber-400 animate-pulse shrink-0" />
+                <span>Stage 1 concludes on 8th Sept 2026 ({countdownStr})</span>
+              </div>
             </div>
 
             <button

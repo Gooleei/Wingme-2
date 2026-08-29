@@ -65,7 +65,10 @@ export interface PlayerStats {
     totalTaps: number;
     totalEarnedCash: number;
     highestLevelUnlocked: number;
+    availableTapCap?: number;
+    lastTapTimestamp?: number;
   };
+  completedGameIds?: string[];
 }
 
 export interface MineLevelConfig {

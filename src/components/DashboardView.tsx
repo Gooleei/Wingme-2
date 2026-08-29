@@ -6,6 +6,7 @@ import { AdPlacement, SponsorCarousel } from './AdPlacement';
 import { StagesCarousel } from './StagesCarousel';
 import { triggerSponsorAd } from '../utils/adManager';
 import { formatCurrency, formatPoints, formatCompactFigure } from '../utils/formatters';
+import { isVIPUser, isGameCompletedForUser } from '../utils/accountManager';
 import { 
   Play, 
   Sparkles, 
@@ -61,6 +62,13 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
 
   // Daily Claim Countdown
   const [timeUntilDailyClaim, setTimeUntilDailyClaim] = useState<number>(0);
+  const [completedModalInfo, setCompletedModalInfo] = useState<{
+    title: string;
+    icon: string;
+    status: string;
+    reward: string;
+    description: string;
+  } | null>(null);
 
   // Calculated ₮ Points: $15.00 = ₮1.00
   const accumulatedTPoints = convertDollarsToTPoints(stats.balance);
@@ -120,6 +128,21 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
 
   const featuredSlides = [
     {
+      title: '📢 Stage 1 Conclusion: 8th September, 2026',
+      badge: 'OFFICIAL NOTICE',
+      badgeColor: 'bg-rose-500 text-white font-black',
+      description: 'Notice to all players: Stage 1 of the Bellmont project concludes on 8th September, 2026. Maximize your gameplay earnings, mining rewards, and referral network bonuses now!',
+      buttonText: 'View Stage 1 Countdown & Info',
+      bgGradient: 'from-rose-600/35 via-slate-900 to-slate-950',
+      borderColor: 'border-rose-500/50',
+      action: () => {
+        const stageElem = document.getElementById('stages-progression-section');
+        if (stageElem) {
+          stageElem.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      }
+    },
+    {
       title: '🤝 App Download & Referral Network',
       badge: 'EARN UP TO X1,000 MULTIPLIER',
       badgeColor: 'bg-emerald-400 text-slate-950',
@@ -161,14 +184,38 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
     }
   ];
 
+  // Auto-slide Featured Tournaments & Events section every second (1000ms)
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCarouselIndex((prev) => (prev + 1) % featuredSlides.length);
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [featuredSlides.length]);
+
+  const isVip = isVIPUser(user);
+
+  // Dynamic game completion check:
+  // For the VIP user (@Op9q / qintoya@gmail.com): All games are completed and closed
+  // For all other users: Each player has their own individual account progress and games remain open until they finish
+  const isMineCompleted = isGameCompletedForUser(user, stats, 'mine');
+  const isRunnerCompleted = isGameCompletedForUser(user, stats, 'runner');
+  const isMemoryCompleted = isGameCompletedForUser(user, stats, 'memory');
+  const isTicTacToeCompleted = isGameCompletedForUser(user, stats, 'tictactoe');
+  const isNumbersCompleted = isGameCompletedForUser(user, stats, 'numbers');
+  const isSpellingCompleted = isGameCompletedForUser(user, stats, 'spelling');
+  const isScratchCompleted = isGameCompletedForUser(user, stats, 'scratch');
+  const isSpinCompleted = isGameCompletedForUser(user, stats, 'spin');
+
   const allGames = [
     {
       id: 'mine',
       title: 'Diamond Mine (Tap to Win)',
       icon: '💎',
-      tag: '$0.3 PER TAP',
-      tagColor: 'bg-cyan-500 text-slate-950 font-black',
+      tag: isMineCompleted ? '✓ COMPLETED' : '$0.3 PER TAP',
+      tagColor: isMineCompleted ? 'bg-emerald-500 text-slate-950 font-black' : 'bg-cyan-500 text-slate-950 font-black',
       reward: '+$0.30 Cash per Tap • 15 Levels',
+      completedStatus: isMineCompleted ? '✓ Level 15 GodFather Completed' : null,
+      isCompleted: isMineCompleted,
       description: 'Tap the glittering diamond to mine $0.30 USD (₮0.02) per tap. Progress across 15 levels up to GodFather!',
       action: () => setCurrentView('MINE')
     },
@@ -176,9 +223,11 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
       id: 'runner',
       title: 'Endless Runner Challenge',
       icon: '🏃',
-      tag: 'HOT',
-      tagColor: 'bg-amber-500 text-slate-950',
+      tag: isRunnerCompleted ? '✓ COMPLETED' : 'HOT',
+      tagColor: isRunnerCompleted ? 'bg-emerald-500 text-slate-950 font-black' : 'bg-amber-500 text-slate-950',
       reward: 'Up to $33.00 (₮2.20)',
+      completedStatus: isRunnerCompleted ? '✓ All 5 Worlds Completed' : null,
+      isCompleted: isRunnerCompleted,
       description: '5 Themed Worlds, $30 collect + $3 bonus, -$0.80 penalty, Hero skins & speedrun leaderboard.',
       action: () => setCurrentView('GAME_RUNNER')
     },
@@ -186,9 +235,11 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
       id: 'memory',
       title: 'Memory Match Challenge',
       icon: '🧠',
-      tag: 'CLASSIC',
-      tagColor: 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30',
+      tag: isMemoryCompleted ? '✓ COMPLETED' : 'CLASSIC',
+      tagColor: isMemoryCompleted ? 'bg-emerald-500 text-slate-950 font-black' : 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30',
       reward: '+$0.50 to $1.50',
+      completedStatus: isMemoryCompleted ? '✓ Expert 6x4 Cleared' : null,
+      isCompleted: isMemoryCompleted,
       description: 'Standard (4x4) & Expert (6x4) card memory tests with cyber, crypto, and arcade themes.',
       action: () => setCurrentView('GAME_MEMORY')
     },
@@ -196,9 +247,11 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
       id: 'tictactoe',
       title: 'Tic Tac Toe AI Arena',
       icon: '❌⭕',
-      tag: '100% SMART',
-      tagColor: 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/30',
+      tag: isTicTacToeCompleted ? '✓ COMPLETED' : '100% SMART',
+      tagColor: isTicTacToeCompleted ? 'bg-emerald-500 text-slate-950 font-black' : 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/30',
       reward: 'Up to $50.00 (₮3.33)',
+      completedStatus: isTicTacToeCompleted ? '✓ 15 AI Masters Defeated' : null,
+      isCompleted: isTicTacToeCompleted,
       description: 'Progressive AI challenge. Beat 15 smart bot masters to claim escalating cash multipliers.',
       action: () => setCurrentView('GAME_TICTACTOE')
     },
@@ -206,9 +259,11 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
       id: 'numbers',
       title: 'Catch Numbers (3s Reflex)',
       icon: '🔢',
-      tag: 'FAST RUSH',
-      tagColor: 'bg-purple-500/20 text-purple-300 border border-purple-500/30',
+      tag: isNumbersCompleted ? '✓ COMPLETED' : 'FAST RUSH',
+      tagColor: isNumbersCompleted ? 'bg-emerald-500 text-slate-950 font-black' : 'bg-purple-500/20 text-purple-300 border border-purple-500/30',
       reward: '+$0.40 Instant',
+      completedStatus: isNumbersCompleted ? '✓ 100% Reflex Cleared' : null,
+      isCompleted: isNumbersCompleted,
       description: 'Rapid reflex test. Tap falling target numbers before the 3-second clock expires.',
       action: () => setCurrentView('GAME_NUMBERS')
     },
@@ -216,9 +271,11 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
       id: 'spelling',
       title: 'Spelling Challenge (3s Rush)',
       icon: '🔤',
-      tag: 'TYPING',
-      tagColor: 'bg-blue-500/20 text-blue-300 border border-blue-500/30',
+      tag: isSpellingCompleted ? '✓ COMPLETED' : 'TYPING',
+      tagColor: isSpellingCompleted ? 'bg-emerald-500 text-slate-950 font-black' : 'bg-blue-500/20 text-blue-300 border border-blue-500/30',
       reward: '+$0.35 Instant',
+      completedStatus: isSpellingCompleted ? '✓ Master Typist Cleared' : null,
+      isCompleted: isSpellingCompleted,
       description: 'Rapid keyboard agility. Spell target cyber & crypto words under 3 seconds.',
       action: () => setCurrentView('GAME_SPELLING')
     },
@@ -226,9 +283,11 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
       id: 'scratch',
       title: 'Crack Egg Matrix',
       icon: '🥚',
-      tag: '$100 JACKPOT',
-      tagColor: 'bg-amber-500/20 text-amber-300 border border-amber-500/30',
+      tag: isScratchCompleted ? '✓ COMPLETED' : '$100 JACKPOT',
+      tagColor: isScratchCompleted ? 'bg-emerald-500 text-slate-950 font-black' : 'bg-amber-500/20 text-amber-300 border border-amber-500/30',
       reward: '+$0.50 to $100.00 (₮6.67)',
+      completedStatus: isScratchCompleted ? '✓ $100 Jackpot Completed' : null,
+      isCompleted: isScratchCompleted,
       description: '1-Hour Marathon: Double-tap 10 Levels x 100 Eggs. Crack open shells to find cash and golden egg rewards.',
       action: () => setCurrentView('GAME_SCRATCH')
     },
@@ -236,9 +295,11 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
       id: 'spin',
       title: 'Lucky Wheel Spin',
       icon: '🎡',
-      tag: 'DAILY PLAY',
-      tagColor: 'bg-teal-500/20 text-teal-300 border border-teal-500/30',
+      tag: isSpinCompleted ? '✓ COMPLETED' : 'DAILY PLAY',
+      tagColor: isSpinCompleted ? 'bg-emerald-500 text-slate-950 font-black' : 'bg-teal-500/20 text-teal-300 border border-teal-500/30',
       reward: 'Up to $25.00 (₮1.67)',
+      completedStatus: isSpinCompleted ? '✓ Daily Jackpot Claimed' : null,
+      isCompleted: isSpinCompleted,
       description: 'Spin the dynamic prize wheel daily for guaranteed instant cash prizes.',
       action: () => setCurrentView('GAME_SPIN')
     }
@@ -627,13 +688,15 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
       </div>
 
       {/* 15 STAGES PROGRESSION SIDE SLIDE CAROUSEL (Stage 1 Active, Stages 2-15 Coming Soon) */}
-      <StagesCarousel
-        onSelectActiveStage={() => {
-          if (gamesCarouselRef.current) {
-            gamesCarouselRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
-          }
-        }}
-      />
+      <div id="stages-progression-section">
+        <StagesCarousel
+          onSelectActiveStage={() => {
+            if (gamesCarouselRef.current) {
+              gamesCarouselRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+          }}
+        />
+      </div>
 
       {/* Featured Sponsor Monetization Side Slide Carousel (Tags 458074 & 458075) */}
       <SponsorCarousel
@@ -649,9 +712,16 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
               <Gamepad2 className="w-4 h-4 text-emerald-400" />
               <span>All Arcade Mini-Games</span>
             </h3>
-            <span className="text-[10px] px-2 py-0.5 rounded-full bg-slate-800 text-slate-300 border border-slate-700 hidden xs:inline-flex items-center gap-1 font-bold">
-              <span>{allGames.length} Games</span>
-            </span>
+            {isVip || allGames.every((g) => g.isCompleted) ? (
+              <span className="text-[10px] px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 hidden xs:inline-flex items-center gap-1 font-black shadow-sm">
+                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+                <span>✓ All {allGames.length} Games Completed</span>
+              </span>
+            ) : (
+              <span className="text-[10px] px-2 py-0.5 rounded-full bg-slate-800 text-slate-300 border border-slate-700 hidden xs:inline-flex items-center gap-1 font-bold">
+                <span>{allGames.length} Games Available</span>
+              </span>
+            )}
           </div>
 
           <div className="flex items-center gap-1.5">
@@ -686,24 +756,47 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
               key={game.id}
               onClick={() => {
                 sound.playClick();
-                game.action();
+                if (game.isCompleted) {
+                  setCompletedModalInfo({
+                    title: game.title,
+                    icon: game.icon,
+                    status: game.completedStatus || '✓ Completed',
+                    reward: game.reward,
+                    description: game.description
+                  });
+                } else {
+                  game.action();
+                }
               }}
-              className="group w-[175px] sm:w-[195px] shrink-0 snap-start bg-slate-900/90 hover:bg-slate-900 border border-slate-800 hover:border-emerald-500/50 rounded-xl sm:rounded-2xl p-3 transition-all duration-200 hover:shadow-xl hover:scale-[1.02] cursor-pointer flex flex-col justify-between space-y-2.5 relative overflow-hidden active:scale-98"
+              className={`group w-[185px] sm:w-[205px] shrink-0 snap-start bg-slate-900/90 hover:bg-slate-900 border ${
+                game.isCompleted
+                  ? 'border-emerald-500/30 hover:border-emerald-400/60'
+                  : 'border-slate-800 hover:border-slate-700'
+              } rounded-xl sm:rounded-2xl p-3 transition-all duration-200 hover:shadow-xl hover:scale-[1.02] cursor-pointer flex flex-col justify-between space-y-2.5 relative overflow-hidden active:scale-98 shadow-md`}
             >
               <div>
                 <div className="flex items-center justify-between gap-1.5">
                   <div className="w-8 h-8 rounded-lg bg-slate-800 group-hover:bg-slate-700 flex items-center justify-center text-lg border border-slate-700 transition-colors shadow-sm shrink-0">
                     {game.icon}
                   </div>
-                  <span className={`text-[9px] font-black px-1.5 py-0.5 rounded truncate max-w-[100px] ${game.tagColor}`}>
-                    {game.tag}
+                  <span className={`text-[9px] font-black px-1.5 py-0.5 rounded truncate max-w-[110px] flex items-center gap-1 ${game.tagColor}`}>
+                    <span>{game.tag}</span>
                   </span>
                 </div>
 
                 <h4 className="text-xs sm:text-sm font-black text-white mt-2 group-hover:text-emerald-300 transition-colors truncate">
                   {game.title}
                 </h4>
-                <p className="text-[10px] text-slate-400 mt-0.5 line-clamp-2 leading-tight">
+
+                {/* Prominent Green Completed Tick Badge only if completed */}
+                {game.isCompleted && game.completedStatus && (
+                  <div className="flex items-center gap-1 mt-1 text-[9px] text-emerald-300 font-black bg-emerald-500/20 border border-emerald-500/40 px-2 py-0.5 rounded-full w-fit">
+                    <CheckCircle2 className="w-3 h-3 text-emerald-400 shrink-0" />
+                    <span>{game.completedStatus}</span>
+                  </div>
+                )}
+
+                <p className="text-[10px] text-slate-400 mt-1 line-clamp-2 leading-tight">
                   {game.description}
                 </p>
               </div>
@@ -716,14 +809,84 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                   </strong>
                 </div>
 
-                <div className="w-6 h-6 rounded-md bg-slate-800 group-hover:bg-emerald-500 group-hover:text-slate-950 text-slate-400 flex items-center justify-center transition-all shrink-0 shadow-sm">
-                  <ChevronRight className="w-3 h-3" />
+                <div className={`w-6 h-6 rounded-md ${game.isCompleted ? 'bg-emerald-500/20 text-emerald-300' : 'bg-slate-800 group-hover:bg-emerald-500 group-hover:text-slate-950 text-slate-400'} flex items-center justify-center transition-all shrink-0 shadow-sm`}>
+                  {game.isCompleted ? <CheckCircle2 className="w-3 h-3 text-emerald-400" /> : <ChevronRight className="w-3 h-3" />}
                 </div>
               </div>
             </div>
           ))}
         </div>
       </div>
+
+      {/* COMPLETED GAME CLOSED MODAL (FOR INDIVIDUAL COMPLETED PLAYERS) */}
+      {completedModalInfo && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+          <div className="w-full max-w-md bg-slate-900 border border-emerald-500/40 rounded-2xl p-5 sm:p-6 shadow-2xl space-y-4 relative overflow-hidden">
+            <div className="flex items-start justify-between gap-3">
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 rounded-2xl bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-2xl shadow-inner shrink-0">
+                  {completedModalInfo.icon}
+                </div>
+                <div>
+                  <span className="text-[10px] font-black uppercase tracking-wider text-emerald-400 bg-emerald-500/20 border border-emerald-500/40 px-2 py-0.5 rounded-full inline-flex items-center gap-1 mb-1">
+                    <CheckCircle2 className="w-3 h-3" />
+                    <span>Conquered & Completed</span>
+                  </span>
+                  <h3 className="text-base sm:text-lg font-black text-white leading-tight">
+                    {completedModalInfo.title}
+                  </h3>
+                </div>
+              </div>
+            </div>
+
+            <div className="p-3.5 rounded-xl bg-slate-950/90 border border-slate-800 space-y-2">
+              <div className="flex justify-between items-center text-xs">
+                <span className="text-slate-400">Player Account:</span>
+                <span className="text-white font-black">@{user.username}</span>
+              </div>
+              <div className="flex justify-between items-center text-xs">
+                <span className="text-slate-400">Game Status:</span>
+                <span className="text-emerald-300 font-extrabold flex items-center gap-1">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+                  <span>{completedModalInfo.status}</span>
+                </span>
+              </div>
+              <div className="flex justify-between items-center text-xs">
+                <span className="text-slate-400">Account Balance:</span>
+                <span className="text-emerald-400 font-black font-mono">{formatCurrency(stats.balance)}</span>
+              </div>
+              <p className="text-[11px] text-slate-300 pt-1 border-t border-slate-800/80 leading-relaxed">
+                You have already finished all challenges for this game on this account. All winnings have been credited to your wallet balance. This game is now closed for @{user.username}.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-2 gap-2 pt-1">
+              <button
+                type="button"
+                onClick={() => {
+                  sound.playClick();
+                  setCompletedModalInfo(null);
+                }}
+                className="w-full py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 active:bg-slate-800 text-slate-200 font-bold text-xs transition-all cursor-pointer"
+              >
+                Back to Dashboard
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  sound.playClick();
+                  setCompletedModalInfo(null);
+                  setCurrentView('PROFILE');
+                }}
+                className="w-full py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 active:bg-emerald-600 text-slate-950 font-black text-xs transition-all shadow-md cursor-pointer flex items-center justify-center gap-1"
+              >
+                <span>View Wallet & Balance</span>
+                <ArrowRight className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

@@ -1,30 +1,24 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { PlayerStats, UserProfile, DOLLARS_PER_T_POINT, convertDollarsToTPoints } from '../types';
+import { PlayerStats, UserProfile } from '../types';
 import { MINE_LEVELS } from '../data/gameData';
 import { sound } from '../utils/audio';
 import confetti from 'canvas-confetti';
-import { AdPlacement, SponsorCarousel } from './AdPlacement';
-import { triggerSponsorAd } from '../utils/adManager';
+import { SponsorCarousel } from './AdPlacement';
+import { isVIPUser } from '../utils/accountManager';
 import { 
   Sparkles, 
   Flame, 
   Trophy, 
-  ArrowLeft, 
-  Volume2, 
-  VolumeX, 
-  Wallet, 
-  Crown, 
-  Lock, 
-  CheckCircle2, 
-  Zap, 
-  ChevronRight, 
   Award,
   TrendingUp,
-  Coins,
-  ShieldCheck,
-  Star,
-  Tv,
-  ExternalLink
+  Zap, 
+  ChevronRight, 
+  CheckCircle2, 
+  Lock, 
+  Crown,
+  BatteryCharging,
+  BatteryMedium,
+  Timer
 } from 'lucide-react';
 
 interface FloatingTapEffect {
@@ -49,19 +43,22 @@ export const MineView: React.FC<MineViewProps> = ({
   stats,
   setStats,
   user,
-  onBack,
-  soundOn,
-  setSoundOn,
-  onOpenWithdraw
+  onBack: _onBack,
+  soundOn: _soundOn,
+  setSoundOn: _setSoundOn,
+  onOpenWithdraw: _onOpenWithdraw
 }) => {
-  // Extract or initialize Mine Progress
-  const currentLevelIndex = Math.min(
-    14,
-    Math.max(0, (stats.mineProgress?.currentLevel ?? 1) - 1)
+  const isVip = isVIPUser(user);
+
+  // Determine current active level (1 to 15) securely
+  const currentLevelNum = Math.min(
+    15,
+    Math.max(1, stats.mineProgress?.currentLevel ?? 1)
   );
-  
+  const currentLevelIndex = currentLevelNum - 1;
   const currentLevelConfig = MINE_LEVELS[currentLevelIndex] || MINE_LEVELS[0];
-  
+
+  // Local Taps Progress towards Level Goal
   const [tapsInCurrentLevel, setTapsInCurrentLevel] = useState<number>(
     stats.mineProgress?.tapsInLevel ?? 0
   );
@@ -71,37 +68,137 @@ export const MineView: React.FC<MineViewProps> = ({
   const [totalMinedCash, setTotalMinedCash] = useState<number>(
     stats.mineProgress?.totalEarnedCash ?? 0
   );
-  
-  // Dynamic Tap Animation State
+
+  // Auto-refilling Tap Cap (Capacity) State
+  // Default to full capacity of current level if not initialized
+  const maxTapCap = currentLevelConfig.requiredTaps;
+  const [availableTapCap, setAvailableTapCap] = useState<number>(() => {
+    const saved = stats.mineProgress?.availableTapCap;
+    if (typeof saved === 'number' && saved >= 0 && saved <= maxTapCap) {
+      return saved;
+    }
+    return maxTapCap;
+  });
+
+  const [isRefilling, setIsRefilling] = useState<boolean>(false);
+  const [isHoldingGem, setIsHoldingGem] = useState<boolean>(false);
+
+  // Animation & Visual States
   const [isSquished, setIsSquished] = useState<boolean>(false);
   const [floatingParticles, setFloatingParticles] = useState<FloatingTapEffect[]>([]);
   const [tapCombo, setTapCombo] = useState<number>(0);
   const [tapsPerSec, setTapsPerSec] = useState<number>(0);
   const [recentTapTimestamps, setRecentTapTimestamps] = useState<number[]>([]);
-  
+
   // Shout of Appraisal Celebration Modal
   const [completedLevelData, setCompletedLevelData] = useState<{
     completedLevel: number;
     levelName: string;
     appraisalShout: string;
     bonusReward: number;
+    nextLevelNum: number;
     nextLevelName: string;
     isGodFather: boolean;
   } | null>(null);
 
-  const gemRef = useRef<HTMLDivElement>(null);
+  // Critical Refs to avoid stale closures & race conditions
+  const levelRef = useRef<number>(currentLevelNum);
+  const tapsInLevelRef = useRef<number>(tapsInCurrentLevel);
+  const totalTapsRef = useRef<number>(totalLifetimeTaps);
+  const totalCashRef = useRef<number>(totalMinedCash);
+  const availableCapRef = useRef<number>(availableTapCap);
+  const maxCapRef = useRef<number>(maxTapCap);
+  const lastTapTimeRef = useRef<number>(Date.now());
+  const isTransitioningRef = useRef<boolean>(false);
   const comboTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const holdIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Sync internal state if props change externally
+  // Keep refs synchronized with state and level changes
+  useEffect(() => {
+    levelRef.current = currentLevelNum;
+    maxCapRef.current = currentLevelConfig.requiredTaps;
+  }, [currentLevelNum, currentLevelConfig.requiredTaps]);
+
+  useEffect(() => {
+    tapsInLevelRef.current = tapsInCurrentLevel;
+  }, [tapsInCurrentLevel]);
+
+  useEffect(() => {
+    totalTapsRef.current = totalLifetimeTaps;
+  }, [totalLifetimeTaps]);
+
+  useEffect(() => {
+    totalCashRef.current = totalMinedCash;
+  }, [totalMinedCash]);
+
+  useEffect(() => {
+    availableCapRef.current = availableTapCap;
+  }, [availableTapCap]);
+
+  // Synchronize when external stats update currentLevel or initial values
   useEffect(() => {
     if (stats.mineProgress) {
+      const extLvl = Math.min(15, Math.max(1, stats.mineProgress.currentLevel));
+      levelRef.current = extLvl;
       setTapsInCurrentLevel(stats.mineProgress.tapsInLevel);
       setTotalLifetimeTaps(stats.mineProgress.totalTaps);
       setTotalMinedCash(stats.mineProgress.totalEarnedCash);
+      
+      const config = MINE_LEVELS[extLvl - 1] || MINE_LEVELS[0];
+      maxCapRef.current = config.requiredTaps;
+
+      if (typeof stats.mineProgress.availableTapCap === 'number') {
+        const clamped = Math.min(config.requiredTaps, Math.max(0, stats.mineProgress.availableTapCap));
+        setAvailableTapCap(clamped);
+        availableCapRef.current = clamped;
+      }
     }
   }, [stats.mineProgress?.currentLevel]);
 
-  // Calculate Taps Per Second for speedometer
+  // AUTO-REFILL ENGINE: Each tap is -1 and each second held / idle is +1 until cap reaches max (e.g. 5000/5000)
+  useEffect(() => {
+    const refillInterval = setInterval(() => {
+      const now = Date.now();
+      const timeSinceLastTap = now - lastTapTimeRef.current;
+      const maxCap = maxCapRef.current;
+      const currentCap = availableCapRef.current;
+
+      // If player hasn't tapped for >= 1000ms or is holding the gem
+      if (timeSinceLastTap >= 1000 || isHoldingGem) {
+        if (currentCap < maxCap) {
+          // Exactly +1 per second
+          const nextCap = Math.min(maxCap, currentCap + 1);
+          availableCapRef.current = nextCap;
+          setAvailableTapCap(nextCap);
+          setIsRefilling(true);
+
+          // Periodically save available cap to stats (throttled)
+          if (nextCap === maxCap || nextCap % 10 === 0) {
+            setStats(prev => ({
+              ...prev,
+              mineProgress: {
+                currentLevel: prev.mineProgress?.currentLevel ?? levelRef.current,
+                tapsInLevel: tapsInLevelRef.current,
+                totalTaps: totalTapsRef.current,
+                totalEarnedCash: totalCashRef.current,
+                highestLevelUnlocked: Math.max(prev.mineProgress?.highestLevelUnlocked ?? 1, levelRef.current),
+                availableTapCap: nextCap,
+                lastTapTimestamp: now
+              }
+            }));
+          }
+        } else {
+          setIsRefilling(false);
+        }
+      } else {
+        setIsRefilling(false);
+      }
+    }, 1000);
+
+    return () => clearInterval(refillInterval);
+  }, [isHoldingGem, setStats]);
+
+  // Speedometer Calculation (Taps Per Second)
   useEffect(() => {
     const interval = setInterval(() => {
       const now = Date.now();
@@ -113,73 +210,101 @@ export const MineView: React.FC<MineViewProps> = ({
     return () => clearInterval(interval);
   }, [recentTapTimestamps]);
 
-  // Progress Calculation
+  // LEVEL PROGRESSION RATIOS & PERCENTAGES
   const progressRatio = currentLevelConfig.requiredTaps > 0 
     ? Math.min(1, tapsInCurrentLevel / currentLevelConfig.requiredTaps) 
     : 0;
   const progressPercent = Math.min(100, Math.round(progressRatio * 100));
   const remainingTaps = Math.max(0, currentLevelConfig.requiredTaps - tapsInCurrentLevel);
 
-  // Dynamic Scale Factor: Gem starts at 1.0x and expands smoothly up to 1.75x as progress reaches 100%
+  // TAP CAP RATIO (Available Energy / Max Level Cap)
+  const capRatio = maxTapCap > 0 ? Math.min(1, availableTapCap / maxTapCap) : 1;
+  const capPercent = Math.min(100, Math.round(capRatio * 100));
+
+  // Dynamic Scale Factor: Gem starts at 1.0x and expands up to 1.75x as level progress reaches 100%
   const dynamicGrowthScale = 1 + progressRatio * 0.75;
   const renderedScale = isSquished ? dynamicGrowthScale * 0.92 : dynamicGrowthScale;
 
-  // Handle Level Completion and Shout of Appraisal
+  // ATOMIC LEVEL COMPLETION HANDLER: Moves player automatically to next level and awards bonus
   const triggerLevelCompletion = useCallback((finishedLevelNum: number) => {
+    if (isTransitioningRef.current) return;
+    isTransitioningRef.current = true;
+
     const finishedConfig = MINE_LEVELS[finishedLevelNum - 1] || currentLevelConfig;
     const isGodFatherLevel = finishedLevelNum >= 15;
-    const nextLevelNum = Math.min(15, finishedLevelNum + 1);
-    const nextConfig = MINE_LEVELS[nextLevelNum - 1];
+    const nextLevelNum = Math.min(15, finishedLevelNum + (isGodFatherLevel ? 0 : 1));
+    const nextConfig = MINE_LEVELS[nextLevelNum - 1] || finishedConfig;
+    const bonusAwarded = finishedConfig.bonusReward;
 
-    // Fire sound & massive confetti
+    // Victory Audio & Celebratory Confetti
     sound.playLevelUpAppraisal();
     confetti({
-      particleCount: isGodFatherLevel ? 250 : 150,
-      spread: 100,
+      particleCount: isGodFatherLevel ? 300 : 180,
+      spread: 110,
       origin: { y: 0.55 },
       colors: ['#22d3ee', '#fbbf24', '#f43f5e', '#10b981', '#a855f7', '#ffffff']
     });
 
-    // Set appraisal data modal
+    // Display Appraisal Celebration Modal
     setCompletedLevelData({
       completedLevel: finishedLevelNum,
       levelName: finishedConfig.name,
       appraisalShout: finishedConfig.appraisalShout,
-      bonusReward: finishedConfig.bonusReward,
+      bonusReward: bonusAwarded,
+      nextLevelNum,
       nextLevelName: nextConfig.name,
       isGodFather: isGodFatherLevel
     });
 
-    // Main Tap Handler: Add dynamic tapReward (starts $0.30 and scales +20% per level)
-    const tapRewardAmount = currentLevelConfig.tapReward ?? 0.30;
+    // Refill tap cap completely for the newly unlocked level
+    const newMaxCap = nextConfig.requiredTaps;
+    availableCapRef.current = newMaxCap;
+    setAvailableTapCap(newMaxCap);
 
-    // Apply completion to player stats
+    // Reset current level tap progress to 0
+    tapsInLevelRef.current = 0;
+    setTapsInCurrentLevel(0);
+    levelRef.current = nextLevelNum;
+
+    // Apply level completion to PlayerStats & persistence
+    const tapRewardAmount = finishedConfig.tapReward ?? 0.30;
     setStats(prev => {
-      const updatedBalance = +(prev.balance + finishedConfig.bonusReward).toFixed(2);
+      const updatedBalance = +(prev.balance + bonusAwarded).toFixed(2);
+      const updatedCashEarned = +(prev.totalCashEarned + bonusAwarded).toFixed(2);
+      const updatedTotalMined = +((prev.mineProgress?.totalEarnedCash ?? 0) + tapRewardAmount + bonusAwarded).toFixed(2);
+      const newHighest = Math.max(prev.mineProgress?.highestLevelUnlocked ?? 1, nextLevelNum);
+
       return {
         ...prev,
         balance: updatedBalance,
-        totalCashEarned: +(prev.totalCashEarned + finishedConfig.bonusReward).toFixed(2),
+        totalCashEarned: updatedCashEarned,
         mineProgress: {
-          currentLevel: isGodFatherLevel ? 15 : nextLevelNum,
+          currentLevel: nextLevelNum,
           tapsInLevel: 0,
-          totalTaps: (prev.mineProgress?.totalTaps ?? 0) + 1,
-          totalEarnedCash: +((prev.mineProgress?.totalEarnedCash ?? 0) + tapRewardAmount + finishedConfig.bonusReward).toFixed(2),
-          highestLevelUnlocked: Math.max(prev.mineProgress?.highestLevelUnlocked ?? 1, nextLevelNum)
+          totalTaps: (prev.mineProgress?.totalTaps ?? totalTapsRef.current) + 1,
+          totalEarnedCash: updatedTotalMined,
+          highestLevelUnlocked: newHighest,
+          availableTapCap: newMaxCap,
+          lastTapTimestamp: Date.now()
         }
       };
     });
 
-    setTapsInCurrentLevel(0);
+    // Release lock after transition
+    setTimeout(() => {
+      isTransitioningRef.current = false;
+    }, 400);
   }, [currentLevelConfig, setStats]);
 
-  // Main Tap Handler: Add tapReward ($0.30 scaled +20% each level)
+  // MAIN TAP HANDLER: Decreases tap cap, rewards cash & ₮ points, progresses level
   const handleDiamondTap = useCallback((e: React.MouseEvent<HTMLDivElement> | React.TouchEvent<HTMLDivElement>) => {
-    // Prevent zoom/scroll defaults on rapid multi-touch
-    if ('touches' in e && e.cancelable) {
-      // standard touch
+    // If cap is completely depleted, notify player to hold/rest
+    if (availableCapRef.current <= 0) {
+      sound.playWrong();
+      return;
     }
 
+    lastTapTimeRef.current = Date.now();
     sound.playDiamondTap();
 
     // Visual Squish Effect
@@ -193,7 +318,7 @@ export const MineView: React.FC<MineViewProps> = ({
       setTapCombo(0);
     }, 1200);
 
-    // Register timestamp for Taps/Sec
+    // Register timestamp for Taps/Sec speedometer
     setRecentTapTimestamps(prev => [...prev, Date.now()]);
 
     const activeTapReward = currentLevelConfig.tapReward ?? 0.30;
@@ -211,7 +336,6 @@ export const MineView: React.FC<MineViewProps> = ({
       clientY = (e as React.MouseEvent).clientY;
     }
 
-    // Add slight random jitter
     const jitterX = (Math.random() - 0.5) * 40;
     const jitterY = (Math.random() - 0.5) * 20;
 
@@ -231,11 +355,17 @@ export const MineView: React.FC<MineViewProps> = ({
       setFloatingParticles(prev => prev.filter(p => p.id !== newParticleId));
     }, 800);
 
-    const nextTapsInLevel = tapsInCurrentLevel + 1;
-    const nextTotalTaps = totalLifetimeTaps + 1;
+    // Decrement Tap Cap
+    const nextAvailableCap = Math.max(0, availableCapRef.current - 1);
+    availableCapRef.current = nextAvailableCap;
+    setAvailableTapCap(nextAvailableCap);
+
+    // Increment Taps Mined towards Level Goal
+    const nextTapsInLevel = tapsInLevelRef.current + 1;
+    const nextTotalTaps = totalTapsRef.current + 1;
     const is100TapMilestone = nextTotalTaps % 100 === 0;
-    const milestoneBonus = is100TapMilestone ? 75.00 : 0; // 5₮ = $75.00 (1₮ = $15)
-    const nextMinedCash = +(totalMinedCash + activeTapReward + milestoneBonus).toFixed(2);
+    const milestoneBonus = is100TapMilestone ? 75.00 : 0; // 5₮ = $75.00
+    const nextMinedCash = +(totalCashRef.current + activeTapReward + milestoneBonus).toFixed(2);
 
     if (is100TapMilestone) {
       sound.playWin();
@@ -244,7 +374,6 @@ export const MineView: React.FC<MineViewProps> = ({
         spread: 70,
         origin: { y: 0.5 }
       });
-      // Spawn extra milestone particle
       const milestoneParticleId = Date.now() + 0.999;
       setFloatingParticles(prev => [
         ...prev,
@@ -261,11 +390,15 @@ export const MineView: React.FC<MineViewProps> = ({
       }, 1500);
     }
 
+    tapsInLevelRef.current = nextTapsInLevel;
+    totalTapsRef.current = nextTotalTaps;
+    totalCashRef.current = nextMinedCash;
+
     setTapsInCurrentLevel(nextTapsInLevel);
     setTotalLifetimeTaps(nextTotalTaps);
     setTotalMinedCash(nextMinedCash);
 
-    // Check Level Progression
+    // Check if Level is Completed
     if (nextTapsInLevel >= currentLevelConfig.requiredTaps) {
       triggerLevelCompletion(currentLevelConfig.level);
     } else {
@@ -278,18 +411,31 @@ export const MineView: React.FC<MineViewProps> = ({
           balance: newBal,
           totalCashEarned: +(prev.totalCashEarned + addedReward).toFixed(2),
           mineProgress: {
-            currentLevel: prev.mineProgress?.currentLevel ?? 1,
+            currentLevel: levelRef.current,
             tapsInLevel: nextTapsInLevel,
             totalTaps: nextTotalTaps,
             totalEarnedCash: nextMinedCash,
-            highestLevelUnlocked: Math.max(prev.mineProgress?.highestLevelUnlocked ?? 1, prev.mineProgress?.currentLevel ?? 1)
+            highestLevelUnlocked: Math.max(prev.mineProgress?.highestLevelUnlocked ?? 1, levelRef.current),
+            availableTapCap: nextAvailableCap,
+            lastTapTimestamp: Date.now()
           }
         };
       });
     }
-  }, [tapsInCurrentLevel, totalLifetimeTaps, totalMinedCash, currentLevelConfig, setStats, triggerLevelCompletion]);
+  }, [currentLevelConfig, triggerLevelCompletion, setStats]);
 
-  // Close Appraisal Celebration Modal
+  // HOLD-TO-REFILL HANDLERS
+  const startHolding = () => {
+    setIsHoldingGem(true);
+    sound.playEnergyRecharge();
+  };
+
+  const stopHolding = () => {
+    setIsHoldingGem(false);
+    if (holdIntervalRef.current) clearInterval(holdIntervalRef.current);
+  };
+
+  // Close Celebration Modal
   const handleCloseAppraisalModal = () => {
     sound.playClick();
     setCompletedLevelData(null);
@@ -317,21 +463,21 @@ export const MineView: React.FC<MineViewProps> = ({
         ))}
       </div>
 
-      {/* MAIN MINE SECTION CONTENT */}
+      {/* TOP HEADER: LEVEL INFO & COMPLETION BONUS */}
       <div className="max-w-4xl mx-auto w-full px-3 sm:px-6 pt-3 sm:pt-4 space-y-3">
-        {/* Compact Level Title Banner */}
         <div className="flex items-center justify-between gap-2 px-1">
           <div className="flex items-center gap-2 flex-wrap">
             <span className="px-2.5 py-0.5 rounded-full bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 text-[10px] sm:text-xs font-black uppercase tracking-wider flex items-center gap-1">
-              <Award className="w-3 h-3 text-cyan-400" />
+              <Award className="w-3.5 h-3.5 text-cyan-400" />
               LVL {currentLevelConfig.level} / 15
             </span>
             <span className="text-sm sm:text-base font-black text-white">
               {currentLevelConfig.name}
             </span>
-            {currentLevelConfig.level === 15 && (
-              <span className="px-2 py-0.5 rounded-full bg-amber-500 text-slate-950 font-black text-[10px] flex items-center gap-1 animate-pulse">
-                <Crown className="w-3 h-3" /> GODFATHER
+            {currentLevelConfig.level === 15 && (isVip || tapsInCurrentLevel >= currentLevelConfig.requiredTaps) && (
+              <span className="px-2.5 py-0.5 rounded-full bg-emerald-400 text-slate-950 font-black text-[10px] sm:text-xs flex items-center gap-1 shadow-md animate-pulse">
+                <Crown className="w-3.5 h-3.5" />
+                <span>✓ 15/15 GODFATHER COMPLETED</span>
               </span>
             )}
           </div>
@@ -343,13 +489,71 @@ export const MineView: React.FC<MineViewProps> = ({
             </span>
           </div>
         </div>
+
+        {/* TAP CAP (AUTO-REFILL ENERGY GAUGE) */}
+        <div className="bg-slate-950/85 border border-cyan-500/40 rounded-2xl p-3 sm:p-3.5 shadow-lg relative overflow-hidden space-y-1.5">
+          <div className="flex justify-between items-center text-xs font-bold flex-wrap gap-1">
+            <span className="text-slate-200 flex items-center gap-1.5 font-black">
+              {isRefilling || isHoldingGem ? (
+                <BatteryCharging className="w-4 h-4 text-emerald-400 animate-pulse" />
+              ) : (
+                <BatteryMedium className="w-4 h-4 text-cyan-400" />
+              )}
+              <span>Tap Cap Energy</span>
+              {isRefilling && (
+                <span className="text-[9.5px] px-1.5 py-0.2 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 font-mono animate-pulse">
+                  ⚡ Auto-Refilling (+1/sec)
+                </span>
+              )}
+              {availableTapCap === maxTapCap && (
+                <span className="text-[9.5px] px-1.5 py-0.2 rounded bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 font-mono">
+                  ✨ Full ({maxTapCap.toLocaleString()})
+                </span>
+              )}
+            </span>
+
+            <span className="font-mono font-black text-xs sm:text-sm text-cyan-300">
+              {availableTapCap.toLocaleString()} / {maxTapCap.toLocaleString()} Taps ({capPercent}%)
+            </span>
+          </div>
+
+          {/* Energy Cap Progress Bar */}
+          <div className="w-full h-3 sm:h-3.5 bg-slate-900 rounded-full border border-cyan-900/60 overflow-hidden p-0.5 shadow-inner">
+            <div
+              className={`h-full rounded-full transition-all duration-150 relative overflow-hidden ${
+                availableTapCap === 0 
+                  ? 'bg-rose-600' 
+                  : isRefilling || isHoldingGem
+                  ? 'bg-gradient-to-r from-emerald-500 via-teal-400 to-cyan-400 animate-pulse'
+                  : 'bg-gradient-to-r from-cyan-500 via-sky-400 to-blue-500'
+              }`}
+              style={{ width: `${capPercent}%` }}
+            >
+              <div className="absolute inset-0 bg-white/20 -skew-x-12 animate-shimmer" />
+            </div>
+          </div>
+
+          {/* Helper Subtext */}
+          <div className="flex justify-between items-center text-[10px] sm:text-[11px] text-slate-400">
+            <span>
+              {availableTapCap === 0 ? (
+                <strong className="text-rose-400 font-bold">⚠️ Cap Exhausted (0/{maxTapCap.toLocaleString()})! Hold or rest to auto-refill (+1/sec).</strong>
+              ) : (
+                <span>Each tap is <strong>-1</strong> • Each second held or idle is <strong className="text-emerald-300 font-mono">+1</strong> (up to {maxTapCap.toLocaleString()})</span>
+              )}
+            </span>
+            <span className="text-emerald-400 font-mono font-bold flex items-center gap-1">
+              <Timer className="w-3 h-3" /> +1/sec refill
+            </span>
+          </div>
+        </div>
       </div>
 
-      {/* CENTER GLITTERING 💎 TAP TO WIN STAGE (EXPANDS IN REAL-TIME AS PLAYER TAPS) */}
-      <div className="max-w-xl mx-auto w-full px-4 py-3 sm:py-6 flex flex-col items-center justify-center relative my-auto">
+      {/* CENTER GLITTERING 💎 TAP TO WIN STAGE */}
+      <div className="max-w-xl mx-auto w-full px-4 py-3 sm:py-5 flex flex-col items-center justify-center relative my-auto">
         
         {/* Combo & Speedometer Floating Badges */}
-        <div className="flex items-center gap-3 mb-2 sm:mb-4">
+        <div className="flex items-center gap-2.5 mb-2 sm:mb-3 flex-wrap justify-center">
           {tapCombo > 1 && (
             <div className="px-3 py-1 rounded-full bg-amber-500/20 border border-amber-500/40 text-amber-300 font-black text-xs sm:text-sm animate-bounce flex items-center gap-1 shadow-lg">
               <Flame className="w-4 h-4 text-amber-400 fill-amber-400" />
@@ -374,7 +578,7 @@ export const MineView: React.FC<MineViewProps> = ({
         </div>
 
         {/* Pedestal Glow & Rotating Particle Ring */}
-        <div className="relative flex items-center justify-center min-h-[220px] sm:min-h-[280px] w-full">
+        <div className="relative flex items-center justify-center min-h-[220px] sm:min-h-[270px] w-full">
           
           {/* Outer Pulsing Aura (Enlarges with tapping progress) */}
           <div 
@@ -386,7 +590,7 @@ export const MineView: React.FC<MineViewProps> = ({
             }}
           />
 
-          {/* Rotating Light Rings (Expands with tapping progress) */}
+          {/* Rotating Light Rings */}
           <div 
             className="absolute rounded-full border border-dashed border-cyan-400/40 animate-spin-slow pointer-events-none transition-all duration-300"
             style={{
@@ -397,11 +601,13 @@ export const MineView: React.FC<MineViewProps> = ({
 
           {/* THE ROUND GLITTERING 💎 (DYNAMICALLY ENLARGES ON TAP) */}
           <div
-            ref={gemRef}
             id="mine-glittering-gem"
             onClick={handleDiamondTap}
+            onMouseDown={startHolding}
+            onMouseUp={stopHolding}
             onTouchStart={handleDiamondTap}
-            title="Tap the Glittering Diamond to Earn +$0.30!"
+            onTouchEnd={stopHolding}
+            title="Tap the Glittering Diamond to Earn Cash! Hold to auto-refill tap cap."
             style={{
               transform: `scale(${renderedScale})`,
               transformOrigin: 'center center'
@@ -417,7 +623,6 @@ export const MineView: React.FC<MineViewProps> = ({
                 className="w-full h-full drop-shadow-[0_10px_35px_rgba(34,211,238,0.5)] transition-all duration-300 overflow-visible"
               >
                 <defs>
-                  {/* Gem Multi-Gradients */}
                   <linearGradient id={`gemGrad-${currentLevelConfig.level}`} x1="0%" y1="0%" x2="100%" y2="100%">
                     <stop offset="0%" stopColor="#ffffff" stopOpacity="0.95" />
                     <stop offset="30%" stopColor={currentLevelConfig.accentColor} stopOpacity="0.9" />
@@ -454,28 +659,22 @@ export const MineView: React.FC<MineViewProps> = ({
                 />
 
                 {/* Sparkling Facets (Brilliant Cut Geometry) */}
-                {/* Top Crown Facets */}
                 <polygon points="100,20 135,55 65,55" fill="url(#facetHighlight)" opacity="0.6" />
                 <polygon points="65,55 135,55 100,100" fill="#ffffff" opacity="0.25" />
                 
-                {/* Side Triangular Facets */}
                 <polygon points="100,20 165,70 135,55" fill="#ffffff" opacity="0.4" />
                 <polygon points="100,20 35,70 65,55" fill="#ffffff" opacity="0.5" />
                 
-                {/* Center Star Core */}
                 <polygon points="100,60 140,100 100,140 60,100" fill="#ffffff" opacity="0.3" />
                 
-                {/* Bottom Pavilion Facets */}
                 <polygon points="140,100 100,180 100,140" fill="#0369a1" opacity="0.5" />
                 <polygon points="60,100 100,180 100,140" fill="#075985" opacity="0.6" />
                 <polygon points="35,70 60,100 100,180 20,100" fill="#0c4a6e" opacity="0.7" />
                 <polygon points="165,70 140,100 100,180 180,100" fill="#0284c7" opacity="0.6" />
 
-                {/* Central Brilliant Star Glint */}
                 <circle cx="100" cy="100" r="14" fill="#ffffff" opacity="0.75" filter="url(#glowFilter)" />
                 <polygon points="100,78 104,96 122,100 104,104 100,122 96,104 78,100 96,96" fill="#ffffff" opacity="0.9" />
 
-                {/* Shimmering Specular Sparkle Accents */}
                 <circle cx="65" cy="45" r="4" fill="#ffffff" className="animate-ping" style={{ animationDuration: '2s' }} />
                 <circle cx="145" cy="65" r="3" fill="#ffffff" className="animate-ping" style={{ animationDuration: '2.5s' }} />
                 <circle cx="125" cy="140" r="3" fill="#ffffff" className="animate-ping" style={{ animationDuration: '1.8s' }} />
@@ -497,7 +696,6 @@ export const MineView: React.FC<MineViewProps> = ({
                 )}
               </svg>
 
-              {/* Central Diamond Emoji & Level Size Shimmer */}
               <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                 <span className="text-3xl sm:text-4xl drop-shadow-[0_0_15px_rgba(255,255,255,0.8)] filter">
                   ✨
@@ -508,23 +706,24 @@ export const MineView: React.FC<MineViewProps> = ({
         </div>
 
         {/* Tap Action Helper Instructions */}
-        <div className="text-center mt-3 sm:mt-4 space-y-0.5">
+        <div className="text-center mt-2.5 sm:mt-3 space-y-0.5">
           <p className="text-xs sm:text-sm font-black text-amber-300 tracking-wide uppercase flex items-center justify-center gap-1.5 flex-wrap">
-            <span>💎 Tap the Gem to Mine (+${(currentLevelConfig.tapReward ?? 0.30).toFixed(2)} / tap)</span>
+            <span>💎 +${(currentLevelConfig.tapReward ?? 0.30).toFixed(2)} / Tap</span>
             <span className="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 text-[10px] sm:text-xs font-black">
-              +5₮ ($75.00) every 100 Taps!
+              +5₮ ($75.00) every 100 Taps
             </span>
           </p>
           <p className="text-[11px] sm:text-xs text-slate-400">
-            Earn +5₮ ($75.00) on every 100 taps milestone + level bonus rewards!
+            Hold or pause tapping to automatically refill your tap cap to {maxTapCap.toLocaleString()}!
           </p>
         </div>
       </div>
 
-      {/* SHIFTED DOWN: LEVEL STATUS & LIVE PROGRESS INDICATOR BAR */}
-      <div className="max-w-4xl mx-auto w-full px-3 sm:px-6 my-2 space-y-3">
+      {/* LEVEL STATUS & LIVE PROGRESS INDICATOR BAR */}
+      <div className="max-w-4xl mx-auto w-full px-3 sm:px-6 my-2 space-y-2.5">
+        
         {/* 100-TAP 5₮ MILESTONE CARD */}
-        <div className="bg-gradient-to-r from-emerald-950/70 via-slate-900 to-cyan-950/70 border border-emerald-500/40 rounded-2xl sm:rounded-3xl p-3.5 sm:p-4 shadow-xl space-y-2 relative overflow-hidden">
+        <div className="bg-gradient-to-r from-emerald-950/70 via-slate-900 to-cyan-950/70 border border-emerald-500/40 rounded-2xl sm:rounded-3xl p-3.5 sm:p-4 shadow-xl space-y-1.5 relative overflow-hidden">
           <div className="flex justify-between items-center text-xs font-bold flex-wrap gap-1">
             <span className="text-slate-200 flex items-center gap-1.5 font-black">
               <Sparkles className="w-4 h-4 text-emerald-400" />
@@ -550,43 +749,39 @@ export const MineView: React.FC<MineViewProps> = ({
           </div>
         </div>
 
-        <div className="bg-gradient-to-br from-slate-900 via-slate-950 to-slate-900 border border-cyan-500/30 rounded-2xl sm:rounded-3xl p-3.5 sm:p-4 shadow-xl space-y-2 sm:space-y-2.5 relative overflow-hidden">
+        {/* LEVEL COMPLETION GOAL CARD */}
+        <div className="bg-gradient-to-br from-slate-900 via-slate-950 to-slate-900 border border-cyan-500/30 rounded-2xl sm:rounded-3xl p-3.5 sm:p-4 shadow-xl space-y-2 relative overflow-hidden">
           
-          {/* Progress Header */}
           <div className="flex justify-between items-center text-xs font-bold">
             <span className="text-slate-300 flex items-center gap-1.5">
               <TrendingUp className="w-4 h-4 text-cyan-400" />
-              <span className="text-white font-black">Level {currentLevelConfig.level} Progress</span>
+              <span className="text-white font-black">Level {currentLevelConfig.level} Goal Progress</span>
             </span>
             <span className="text-cyan-300 font-mono font-black text-xs sm:text-sm">
-              {tapsInCurrentLevel.toLocaleString()} / {currentLevelConfig.requiredTaps.toLocaleString()} Taps ({progressPercent}%)
+              {tapsInCurrentLevel.toLocaleString()} / {currentLevelConfig.requiredTaps.toLocaleString()} Mined ({progressPercent}%)
             </span>
           </div>
 
-          {/* Visual Track */}
           <div className="w-full h-3 sm:h-3.5 bg-slate-950 rounded-full border border-slate-800 overflow-hidden p-0.5 shadow-inner">
             <div 
               className="h-full bg-gradient-to-r from-cyan-500 via-teal-400 to-emerald-400 rounded-full transition-all duration-200 shadow-md shadow-cyan-500/50 relative overflow-hidden"
               style={{ width: `${progressPercent}%` }}
             >
-              {/* Animated Shimmer Bar */}
               <div className="absolute inset-0 bg-white/25 -skew-x-12 animate-shimmer" />
             </div>
           </div>
 
-          {/* Subtext info */}
           <div className="flex justify-between items-center text-[10px] sm:text-[11px] text-slate-400">
             <span>Rank: <strong className="text-slate-200">{currentLevelConfig.statusTitle}</strong></span>
             <span>
               {remainingTaps === 0 ? (
-                <strong className="text-emerald-400 font-bold">✓ LEVEL COMPLETED!</strong>
+                <strong className="text-emerald-400 font-bold">✓ LEVEL COMPLETED! ADVANCING...</strong>
               ) : (
                 <span><strong className="text-amber-400 font-mono">{remainingTaps.toLocaleString()}</strong> taps remaining to unlock Level {Math.min(15, currentLevelConfig.level + 1)}</span>
               )}
             </span>
           </div>
 
-          {/* Subtle Ambient Glow */}
           <div 
             className="absolute -top-10 right-0 w-48 h-24 blur-3xl pointer-events-none rounded-full"
             style={{ backgroundColor: currentLevelConfig.glowColor }}
@@ -594,7 +789,7 @@ export const MineView: React.FC<MineViewProps> = ({
         </div>
       </div>
 
-      {/* SPONSOR MONETIZATION STATION (TAGS 458074 & 458075) */}
+      {/* SPONSOR MONETIZATION STATION */}
       <div className="max-w-4xl mx-auto w-full px-3 sm:px-6">
         <SponsorCarousel
           title="Mining Sponsor Monetization"
@@ -602,7 +797,7 @@ export const MineView: React.FC<MineViewProps> = ({
         />
       </div>
 
-      {/* 15 LEVEL MILESTONE MAP FOOTER (SCROLLABLE ROADMAP) */}
+      {/* 15 LEVEL MILESTONE MAP FOOTER */}
       <div className="max-w-4xl mx-auto w-full px-3 sm:px-6 space-y-2">
         <div className="flex items-center justify-between text-xs font-bold text-slate-300 px-1">
           <span className="flex items-center gap-1.5">
@@ -617,9 +812,9 @@ export const MineView: React.FC<MineViewProps> = ({
         {/* Horizontal Level Cards */}
         <div className="flex items-stretch gap-2 sm:gap-2.5 overflow-x-auto pb-2 scrollbar-thin snap-x">
           {MINE_LEVELS.map((lvl) => {
-            const isCompleted = currentLevelConfig.level > lvl.level;
-            const isCurrent = currentLevelConfig.level === lvl.level;
-            const isLocked = currentLevelConfig.level < lvl.level;
+            const isCompleted = isVip || currentLevelConfig.level > lvl.level || (lvl.level === 15 && tapsInCurrentLevel >= lvl.requiredTaps);
+            const isCurrent = !isVip && currentLevelConfig.level === lvl.level;
+            const isLocked = !isVip && currentLevelConfig.level < lvl.level;
 
             return (
               <div
@@ -719,9 +914,9 @@ export const MineView: React.FC<MineViewProps> = ({
 
             {/* Next Unfolded Level Preview */}
             <div className="text-xs text-slate-300">
-              <span>Next Unfolded Level: </span>
+              <span>Next Level: </span>
               <strong className="text-cyan-400 font-bold">{completedLevelData.nextLevelName}</strong>
-              <span className="block text-[11px] text-slate-400 mt-0.5">The glittering 💎 has grown larger in physical size!</span>
+              <span className="block text-[11px] text-slate-400 mt-0.5">The glittering 💎 has expanded in size and power!</span>
             </div>
 
             {/* Action Continue Button */}
@@ -729,7 +924,7 @@ export const MineView: React.FC<MineViewProps> = ({
               onClick={handleCloseAppraisalModal}
               className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-amber-400 via-emerald-400 to-cyan-400 hover:from-amber-300 hover:to-cyan-300 text-slate-950 font-black text-sm sm:text-base shadow-xl shadow-amber-500/25 transition-all cursor-pointer active:scale-95 flex items-center justify-center gap-2"
             >
-              <span>CONTINUE MINING</span>
+              <span>CONTINUE TO LEVEL {completedLevelData.nextLevelNum}</span>
               <ChevronRight className="w-5 h-5" />
             </button>
 
