@@ -3,6 +3,7 @@ import { PlayerStats } from '../../types';
 import { sound } from '../../utils/audio';
 import confetti from 'canvas-confetti';
 import { ArrowLeft, RotateCcw, Trophy, Sparkles, Bot, User, Flame, Award, ChevronRight, Brain, Zap, ShieldAlert } from 'lucide-react';
+import { AdPlacement, SponsorCarousel } from '../AdPlacement';
 
 interface TicTacToeGameProps {
   onWin: (amount: number, description: string) => void;
@@ -412,6 +413,27 @@ export const TicTacToeGame: React.FC<TicTacToeGameProps> = ({
           </button>
         </div>
       )}
+
+      {/* TicTacToe Sponsor Zones */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
+        <AdPlacement
+          zoneId={459144}
+          variant="card"
+          title="TicTacToe Sponsor (Zone 459144)"
+          subtitle="Direct link to verified sponsor offer. Boost your Mongolian Tugrik (₮) crypto conversion rates."
+          rewardLabel="RATE BOOST #459144"
+        />
+        <AdPlacement
+          zoneId={459143}
+          variant="card"
+          title="Grandmaster Sponsor (Zone 459143)"
+          subtitle="Top tier gaming sponsor. Unlock instant undo tokens and AI prediction hints."
+          rewardLabel="PERK #459143"
+        />
+      </div>
+
+      {/* Slide Carousel */}
+      <SponsorCarousel title="Strategic Gaming Sponsors" subtitle="Discover verified gaming sponsors & multiply match earnings" />
     </div>
   );
 };

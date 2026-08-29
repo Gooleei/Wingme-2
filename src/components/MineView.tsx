@@ -3,7 +3,7 @@ import { PlayerStats, UserProfile } from '../types';
 import { MINE_LEVELS } from '../data/gameData';
 import { sound } from '../utils/audio';
 import confetti from 'canvas-confetti';
-import { SponsorCarousel } from './AdPlacement';
+import { AdPlacement, SponsorCarousel } from './AdPlacement';
 import { isVIPUser } from '../utils/accountManager';
 import { 
   Sparkles, 
@@ -867,6 +867,27 @@ export const MineView: React.FC<MineViewProps> = ({
           })}
         </div>
       </div>
+
+      {/* Syndicate Mine Sponsor Zones */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+        <AdPlacement
+          zoneId={459144}
+          variant="card"
+          title="Diamond Syndicate Sponsor 459144"
+          subtitle="Direct crypto payout partner. Explore sponsor link to unlock instant battery auto-refill and tap yield boosts."
+          rewardLabel="BATTERY BOOST #459144"
+        />
+        <AdPlacement
+          zoneId={459143}
+          variant="card"
+          title="Godfather Vault Sponsor 459143"
+          subtitle="Top tier gaming sponsor network. Accelerate your climb to Level 15 GodFather with multiplier bonuses."
+          rewardLabel="ACTIVE #459143"
+        />
+      </div>
+
+      {/* Slide Carousel */}
+      <SponsorCarousel title="Syndicate Sponsor Channels" subtitle="Explore verified sponsor partners & boost mining energy yield" />
 
       {/* SHOUT OF APPRAISAL CELEBRATION MODAL */}
       {completedLevelData && (

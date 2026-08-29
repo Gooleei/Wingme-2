@@ -17,6 +17,7 @@ import {
   Award,
   Users
 } from 'lucide-react';
+import { AdPlacement, SponsorCarousel } from './AdPlacement';
 
 interface LandingViewProps {
   onOpenAuth: (mode?: 'REGISTER' | 'LOGIN') => void;
@@ -323,6 +324,26 @@ export const LandingView: React.FC<LandingViewProps> = ({ onOpenAuth }) => {
               </button>
             </div>
           </section>
+
+          {/* Landing Sponsor Section */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
+            <AdPlacement
+              zoneId={459144}
+              variant="card"
+              title="WPAdMngr Prime Sponsor (Zone 459144)"
+              subtitle="Official ecosystem sponsor partner. Explore to unlock VIP registration bonuses and gas perks."
+              rewardLabel="OFFICIAL SPONSOR #459144"
+            />
+            <AdPlacement
+              zoneId={459143}
+              variant="card"
+              title="WPAdMngr Elite Sponsor (Zone 459143)"
+              subtitle="Genesis validator partner channel. Direct reward payouts and instant credit accumulation."
+              rewardLabel="ACTIVE #459143"
+            />
+          </div>
+
+          <SponsorCarousel title="Ecosystem Sponsors & Partners" subtitle="Slide through verified sponsor networks supporting the Bellmont mainnet" />
 
         </div>
       </main>

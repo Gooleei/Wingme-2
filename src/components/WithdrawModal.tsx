@@ -15,6 +15,7 @@ import {
   ArrowRight
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
+import { AdPlacement } from './AdPlacement';
 
 interface WithdrawModalProps {
   stats: PlayerStats;
@@ -372,6 +373,14 @@ export const WithdrawModal: React.FC<WithdrawModalProps> = ({
                   </span>
                 </div>
               </div>
+
+              {/* Sponsor Booster Banner in Modal */}
+              <AdPlacement
+                zoneId={459144}
+                variant="compact"
+                title="Priority Payout Sponsor 459144"
+                subtitle="Expedite blockchain confirmation time & waive fee charges"
+              />
             </div>
 
             <button

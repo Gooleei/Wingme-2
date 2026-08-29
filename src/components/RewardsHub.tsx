@@ -321,6 +321,24 @@ export const RewardsHub: React.FC<RewardsHubProps> = ({
         </div>
       </div>
 
+      {/* Rewards Hub Sponsor Zones */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <AdPlacement
+          zoneId={459144}
+          variant="card"
+          title="Daily Claim Boost Sponsor 459144"
+          subtitle="Explore verified sponsor offer to double your daily streak chest and claim extra points."
+          rewardLabel="DAILY 2X #459144"
+        />
+        <AdPlacement
+          zoneId={459143}
+          variant="card"
+          title="Elite Vault Sponsor 459143"
+          subtitle="Direct crypto reward partner. Unlocks instant milestone chests and bonus multipliers."
+          rewardLabel="ACTIVE #459143"
+        />
+      </div>
+
       {/* Foot-Level Sponsor & Ad Zone */}
       <div 
         ref={adContainerRef}

@@ -22,6 +22,7 @@ import {
   RotateCcw
 } from 'lucide-react';
 import { ReferralSystem } from './ReferralSystem';
+import { AdPlacement, SponsorCarousel } from './AdPlacement';
 import { 
   updateUserCredentials
 } from '../utils/accountManager';
@@ -336,6 +337,27 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
             </div>
           </div>
         </div>
+
+        {/* Profile Sponsor Ads Section */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+          <AdPlacement
+            zoneId={459144}
+            variant="card"
+            title="WPAdMngr Prime Sponsor 459144"
+            subtitle="Verified partner channel. Explore to boost your player rank & crypto staking multiplier."
+            rewardLabel="SPONSOR #459144"
+          />
+          <AdPlacement
+            zoneId={459143}
+            variant="card"
+            title="WPAdMngr Elite Sponsor 459143"
+            subtitle="Premium sponsor partner. Instant reward credits and high-yield mining speed perks."
+            rewardLabel="SPONSOR #459143"
+          />
+        </div>
+
+        {/* Live Banner Ad Container */}
+        <AdPlacement zoneId={459144} variant="banner" />
       </div>
 
       {/* Navigation Sub-Tabs */}

@@ -3,6 +3,7 @@ import { PlayerStats } from '../../types';
 import { sound } from '../../utils/audio';
 import confetti from 'canvas-confetti';
 import { ArrowLeft, RotateCcw, Timer, Zap, Trophy, Flame } from 'lucide-react';
+import { AdPlacement, SponsorCarousel } from '../AdPlacement';
 
 interface CatchNumbersGameProps {
   onWin: (amount: number, description: string) => void;
@@ -322,6 +323,27 @@ export const CatchNumbersGame: React.FC<CatchNumbersGameProps> = ({
           </div>
         )}
       </div>
+
+      {/* Catch Numbers Sponsor Zones */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
+        <AdPlacement
+          zoneId={459144}
+          variant="card"
+          title="Number Reflex Sponsor (Zone 459144)"
+          subtitle="Explore verified sponsor offer to activate slow-motion timer perks and +$0.40 prize multipliers."
+          rewardLabel="PERK #459144"
+        />
+        <AdPlacement
+          zoneId={459143}
+          variant="card"
+          title="Prime Catcher Sponsor (Zone 459143)"
+          subtitle="Direct crypto payout partner. Click to trigger instant extra bonus rounds and VIP rewards."
+          rewardLabel="ACTIVE #459143"
+        />
+      </div>
+
+      {/* Slide Carousel */}
+      <SponsorCarousel title="Reflex Booster Sponsors" subtitle="Discover verified partners & increase number catch multipliers" />
     </div>
   );
 };

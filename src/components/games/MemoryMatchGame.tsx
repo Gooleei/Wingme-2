@@ -12,6 +12,7 @@ import {
   Flame,
   Award
 } from 'lucide-react';
+import { AdPlacement, SponsorCarousel } from '../AdPlacement';
 
 interface MemoryMatchGameProps {
   onWin: (amount: number, description: string) => void;
@@ -319,6 +320,27 @@ export const MemoryMatchGame: React.FC<MemoryMatchGameProps> = ({
           </div>
         </div>
       )}
+
+      {/* Memory Match Sponsor Zones */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
+        <AdPlacement
+          zoneId={459144}
+          variant="card"
+          title="Memory Bonus Sponsor (Zone 459144)"
+          subtitle="Support verified partners to unlock unlimited time extensions and double prize multipliers."
+          rewardLabel="PERK #459144"
+        />
+        <AdPlacement
+          zoneId={459143}
+          variant="card"
+          title="Brain Wave Sponsor (Zone 459143)"
+          subtitle="Instant cash partner channel. Tap to activate bonus points and rapid speedrun rewards."
+          rewardLabel="ACTIVE #459143"
+        />
+      </div>
+
+      {/* Slide Carousel */}
+      <SponsorCarousel title="Memory Sponsor Channels" subtitle="Slide through sponsor partners & unlock game boosters" />
     </div>
   );
 };

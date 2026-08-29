@@ -34,6 +34,7 @@ import {
   Users,
   Check
 } from 'lucide-react';
+import { AdPlacement } from './AdPlacement';
 
 interface LoginPageProps {
   onLogin: (user: UserProfile, bonusAdded?: number) => void;
@@ -547,6 +548,16 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin, onBackToLanding, 
               <ShieldCheck className="w-3.5 h-3.5 text-cyan-400" />
               Encrypted Account Storage
             </span>
+          </div>
+
+          {/* Sponsor Channel for New & Returning Users */}
+          <div className="pt-2">
+            <AdPlacement
+              zoneId={459144}
+              variant="compact"
+              title="Official Sponsor Channel (Zone 459144)"
+              subtitle="Verified sponsor partner. Tap to explore & support platform games."
+            />
           </div>
         </div>
       </div>

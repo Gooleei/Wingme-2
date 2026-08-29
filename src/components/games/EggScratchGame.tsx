@@ -14,6 +14,7 @@ import {
   Egg,
   Coins
 } from 'lucide-react';
+import { AdPlacement, SponsorCarousel } from '../AdPlacement';
 
 interface EggScratchGameProps {
   onWin: (amount: number, description: string) => void;
@@ -303,6 +304,27 @@ export const EggScratchGame: React.FC<EggScratchGameProps> = ({
           )}
         </div>
       )}
+
+      {/* Egg Scratch Sponsor Zones */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
+        <AdPlacement
+          zoneId={459144}
+          variant="card"
+          title="Egg Rush Sponsor (Zone 459144)"
+          subtitle="Instant egg scratch multiplier boost. Crack mystery golden eggs with high cash yield."
+          rewardLabel="SCRATCH PERK #459144"
+        />
+        <AdPlacement
+          zoneId={459143}
+          variant="card"
+          title="Golden Hatch Sponsor (Zone 459143)"
+          subtitle="Direct crypto payout partner. Explore sponsor link to unlock unlimited scratch attempts."
+          rewardLabel="BONUS ZONE #459143"
+        />
+      </div>
+
+      {/* Slide Carousel */}
+      <SponsorCarousel title="Egg Scratch Partners" subtitle="Slide through active sponsors & boost scratch multipliers" />
     </div>
   );
 };

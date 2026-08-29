@@ -3,6 +3,7 @@ import { PlayerStats } from '../../types';
 import { sound } from '../../utils/audio';
 import confetti from 'canvas-confetti';
 import { ArrowLeft, RotateCcw, Sparkles, Lock, Timer, Trophy, Flame } from 'lucide-react';
+import { AdPlacement, SponsorCarousel } from '../AdPlacement';
 
 interface LuckyWheelProps {
   onWin: (amount: number, description: string) => void;
@@ -280,6 +281,28 @@ export const LuckyWheelGame: React.FC<LuckyWheelProps> = ({
           )}
         </div>
       </div>
+
+      {/* Wheel Sponsor Zones */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
+        <AdPlacement
+          zoneId={459144}
+          variant="card"
+          title="Lucky Wheel Sponsor (Zone 459144)"
+          subtitle="Unlock instant bonus free spins & extra cash drops by visiting this sponsor channel."
+          rewardLabel="+1 FREE SPIN"
+          onRewardClaim={() => setFreeSpinsLeft(prev => prev + 1)}
+        />
+        <AdPlacement
+          zoneId={459143}
+          variant="card"
+          title="Elite Wheel Sponsor (Zone 459143)"
+          subtitle="Activate maximum payout multipliers and jackpot boost keys through our verified partner."
+          rewardLabel="MULTIPLIER BOOST"
+        />
+      </div>
+
+      {/* Slide Carousel */}
+      <SponsorCarousel title="Spin Multiplier Sponsors" subtitle="Explore sponsor partners to increase spin luck" />
     </div>
   );
 };

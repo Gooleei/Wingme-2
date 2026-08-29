@@ -3,9 +3,11 @@ import { Sparkles, ExternalLink, Play, Gift, Tv, Zap, ChevronLeft, ChevronRight 
 import { triggerSponsorAd } from '../utils/adManager';
 import { sound } from '../utils/audio';
 
+export type AdZoneId = 459144 | 459143 | 458074 | 458075 | '459144' | '459143' | '458074' | '458075' | 'all';
+
 export interface SponsorOfferItem {
   id?: string;
-  zoneId: 458074 | 458075;
+  zoneId: AdZoneId;
   zoneLabel?: string;
   title: string;
   subtitle: string;
@@ -17,34 +19,34 @@ export interface SponsorOfferItem {
 
 export const DEFAULT_SPONSOR_OFFERS: SponsorOfferItem[] = [
   {
-    id: 'sponsor-458074-z1',
-    zoneId: 458074,
-    zoneLabel: 'SPONSORED ZONE 1',
-    title: 'Sponsor Network Tag 458074',
-    subtitle: 'Explore sponsored offers & boost platform rewards. Instant credit activation.',
-    rewardLabel: 'SPONSORED ZONE 1',
+    id: 'sponsor-459144-z1',
+    zoneId: 459144,
+    zoneLabel: 'SPONSORED ZONE 459144',
+    title: 'WPAdMngr Prime Zone 459144',
+    subtitle: 'High-yield interactive sponsor partner. Instant reward credit & multiplier boost.',
+    rewardLabel: 'ACTIVE ZONE 459144',
     badgeColor: 'bg-cyan-500/20 text-cyan-300 border-cyan-500/30',
-    buttonLabel: 'Launch Sponsor Offer',
+    buttonLabel: 'Launch Prime Sponsor (459144)',
     gradient: 'from-slate-900 via-slate-900 to-indigo-950/40 border-indigo-500/30 hover:border-cyan-400/60'
   },
   {
-    id: 'sponsor-458075-z2',
-    zoneId: 458075,
-    zoneLabel: 'SPONSORED ZONE 2',
-    title: 'Sponsor Network Tag 458075',
-    subtitle: 'Discover verified sponsor partners & trigger special gaming power-ups.',
-    rewardLabel: 'SPONSORED ZONE 2',
-    badgeColor: 'bg-cyan-500/20 text-cyan-300 border-cyan-500/30',
-    buttonLabel: 'Launch Sponsor Offer',
+    id: 'sponsor-459143-z2',
+    zoneId: 459143,
+    zoneLabel: 'SPONSORED ZONE 459143',
+    title: 'WPAdMngr Elite Zone 459143',
+    subtitle: 'Verified top tier sponsor partner. Triggers special platform perks & bonus spins.',
+    rewardLabel: 'ACTIVE ZONE 459143',
+    badgeColor: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30',
+    buttonLabel: 'Launch Elite Sponsor (459143)',
     gradient: 'from-slate-900 via-slate-900 to-emerald-950/40 border-emerald-500/30 hover:border-emerald-400/60'
   },
   {
     id: 'sponsor-458074-z3',
     zoneId: 458074,
-    zoneLabel: 'SPONSORED ZONE 3',
-    title: 'Sponsor Stream Tag 458074',
-    subtitle: 'High-yield interactive sponsor link with automatic 2X reward boost multiplier.',
-    rewardLabel: 'SPONSORED ZONE 3',
+    zoneLabel: 'SPONSORED ZONE 458074',
+    title: 'Sponsor Stream 458074',
+    subtitle: 'Interactive sponsor ad channel with verified impressions & direct reward payout.',
+    rewardLabel: 'SPONSOR 458074',
     badgeColor: 'bg-purple-500/20 text-purple-300 border-purple-500/30',
     buttonLabel: 'Launch Sponsor Stream',
     gradient: 'from-slate-900 via-slate-900 to-purple-950/40 border-purple-500/30 hover:border-purple-400/60'
@@ -52,19 +54,19 @@ export const DEFAULT_SPONSOR_OFFERS: SponsorOfferItem[] = [
   {
     id: 'sponsor-458075-z4',
     zoneId: 458075,
-    zoneLabel: 'SPONSORED ZONE 4',
-    title: 'Elite Partner Tag 458075',
-    subtitle: 'Verified instant direct reward payout sponsor link with fast track crediting.',
-    rewardLabel: 'SPONSORED ZONE 4',
+    zoneLabel: 'SPONSORED ZONE 458075',
+    title: 'Partner Stream 458075',
+    subtitle: 'Instant direct reward payout sponsor link with fast track account crediting.',
+    rewardLabel: 'PARTNER 458075',
     badgeColor: 'bg-amber-500/20 text-amber-300 border-amber-500/30',
-    buttonLabel: 'Launch Elite Partner',
+    buttonLabel: 'Launch Partner Offer',
     gradient: 'from-slate-900 via-slate-900 to-amber-950/40 border-amber-500/30 hover:border-amber-400/60'
   }
 ];
 
 interface AdPlacementProps {
-  zoneId: 458074 | 458075 | 'all';
-  variant?: 'banner' | 'card' | 'compact' | 'reward-button';
+  zoneId?: AdZoneId;
+  variant?: 'banner' | 'card' | 'compact' | 'reward-button' | 'sticky-bar';
   title?: string;
   subtitle?: string;
   rewardLabel?: string;
@@ -73,7 +75,7 @@ interface AdPlacementProps {
 }
 
 export const AdPlacement: React.FC<AdPlacementProps> = ({
-  zoneId,
+  zoneId = 459144,
   variant = 'card',
   title,
   subtitle,
@@ -83,12 +85,15 @@ export const AdPlacement: React.FC<AdPlacementProps> = ({
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
 
+  const numericTag = Number(zoneId) || 459144;
+  const zoneKey = numericTag === 459143 ? 'ZONE_459143' : numericTag === 458075 ? 'ZONE_458075' : numericTag === 458074 ? 'ZONE_458074' : 'ZONE_459144';
+
   useEffect(() => {
     if (variant === 'banner' && containerRef.current) {
       const script = document.createElement('script');
       script.src = 'https://js.wpadmngr.com/static/adManager.js';
       script.async = true;
-      script.setAttribute('data-admpid', String(zoneId === 'all' ? 458074 : zoneId));
+      script.setAttribute('data-admpid', String(numericTag));
       containerRef.current.appendChild(script);
 
       return () => {
@@ -97,27 +102,52 @@ export const AdPlacement: React.FC<AdPlacementProps> = ({
         }
       };
     }
-  }, [zoneId, variant]);
+  }, [numericTag, variant]);
 
   const handleClick = (e: React.MouseEvent) => {
     e.preventDefault();
     sound.playWin();
-    const zoneKey = zoneId === 458075 ? 'ZONE_458075' : 'ZONE_458074';
     triggerSponsorAd(zoneKey, () => {
       if (onRewardClaim) onRewardClaim();
     });
   };
+
+  if (variant === 'sticky-bar') {
+    return (
+      <div className={`w-full bg-gradient-to-r from-slate-950 via-indigo-950/60 to-slate-950 border-y border-indigo-500/30 px-3 py-2 flex items-center justify-between gap-3 ${className}`}>
+        <div className="flex items-center gap-2 min-w-0">
+          <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse shrink-0" />
+          <span className="text-[10px] font-mono font-bold text-cyan-300 uppercase tracking-wide shrink-0">
+            Sponsor #{numericTag}
+          </span>
+          <span className="text-[10px] text-slate-300 truncate hidden sm:inline">
+            {subtitle || 'Explore verified sponsor link & earn bonus multiplier credits'}
+          </span>
+        </div>
+        <button
+          type="button"
+          onClick={handleClick}
+          id={`sticky-ad-btn-${numericTag}`}
+          className="px-3 py-1 rounded-lg bg-gradient-to-r from-cyan-400 to-emerald-400 hover:from-cyan-300 hover:to-emerald-300 text-slate-950 font-black text-[10px] flex items-center gap-1 shrink-0 cursor-pointer shadow-sm active:scale-95 touch-manipulation"
+        >
+          <Play className="w-2.5 h-2.5 fill-current" />
+          <span>{rewardLabel || 'Visit Sponsor'}</span>
+          <ExternalLink className="w-2.5 h-2.5 stroke-[2.5]" />
+        </button>
+      </div>
+    );
+  }
 
   if (variant === 'reward-button') {
     return (
       <button
         type="button"
         onClick={handleClick}
-        id={`ad-reward-btn-${zoneId}`}
+        id={`ad-reward-btn-${numericTag}`}
         className={`px-3.5 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-amber-400 hover:from-amber-400 hover:to-amber-300 text-slate-950 font-black text-[11px] shadow-md hover:shadow-amber-500/25 active:scale-95 transition-all flex items-center gap-1.5 cursor-pointer touch-manipulation ${className}`}
       >
         <Zap className="w-3.5 h-3.5 fill-current text-slate-950" />
-        <span>{rewardLabel || 'Watch Sponsor Ad'}</span>
+        <span>{rewardLabel || `Watch Sponsor #${numericTag}`}</span>
         <ExternalLink className="w-3 h-3 stroke-[2.5]" />
       </button>
     );
@@ -132,19 +162,19 @@ export const AdPlacement: React.FC<AdPlacementProps> = ({
           </div>
           <div className="min-w-0 flex-1">
             <p className="text-[11px] font-bold text-white flex items-center gap-1 truncate">
-              <span className="truncate">{title || `Sponsored Partner (Tag ${zoneId})`}</span>
+              <span className="truncate">{title || `WPAdMngr Sponsor (Tag ${numericTag})`}</span>
               <span className="text-[8px] px-1 py-0.2 bg-emerald-500/20 text-emerald-400 rounded font-mono shrink-0">
                 Verified
               </span>
             </p>
-            <p className="text-[9px] text-slate-400 truncate">{subtitle || 'Visit sponsor to support the platform'}</p>
+            <p className="text-[9px] text-slate-400 truncate">{subtitle || 'Visit sponsor to support platform earnings'}</p>
           </div>
         </div>
         <button
           type="button"
           onClick={handleClick}
-          id={`compact-ad-btn-${zoneId}`}
-          className="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-cyan-300 hover:text-white text-[10px] font-bold transition-colors flex items-center gap-1 cursor-pointer shrink-0"
+          id={`compact-ad-btn-${numericTag}`}
+          className="px-2.5 py-1 rounded-lg bg-gradient-to-r from-cyan-400 to-emerald-400 hover:from-cyan-300 hover:to-emerald-300 text-slate-950 text-[10px] font-black transition-all flex items-center gap-1 cursor-pointer shrink-0 shadow-sm active:scale-95"
         >
           <Play className="w-3 h-3 fill-current" />
           <span>Open</span>
@@ -158,21 +188,21 @@ export const AdPlacement: React.FC<AdPlacementProps> = ({
       <div className={`w-full bg-slate-900/90 border border-slate-800 rounded-xl p-2.5 shadow-md flex flex-col items-center justify-center ${className}`}>
         <div className="text-[9px] text-slate-500 font-mono uppercase tracking-wider mb-1.5 flex items-center gap-1">
           <Sparkles className="w-3 h-3 text-cyan-400" />
-          <span>WPAdMngr Sponsor Placement (Tag {zoneId})</span>
+          <span>WPAdMngr Sponsor Placement (Tag {numericTag})</span>
         </div>
-        <div ref={containerRef} id={`wpadmngr-container-${zoneId}`} className="w-full min-h-[50px] flex items-center justify-center overflow-hidden" />
+        <div ref={containerRef} id={`wpadmngr-container-${numericTag}`} className="w-full min-h-[50px] flex items-center justify-center overflow-hidden" />
       </div>
     );
   }
 
-  // Default: rich card (Reduced size and typography)
+  // Default: rich card
   return (
     <div className={`w-full bg-gradient-to-r from-slate-900 via-slate-900/95 to-slate-950 border border-slate-800/90 hover:border-cyan-500/40 rounded-2xl p-3.5 shadow-lg transition-all relative overflow-hidden group ${className}`}>
       <div className="flex flex-col gap-2.5 relative z-10">
         <div className="flex items-center justify-between gap-1.5 flex-wrap">
           <span className="px-2 py-0.5 rounded-full text-[8px] sm:text-[9px] font-black uppercase tracking-wider bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 flex items-center gap-1">
             <Sparkles className="w-2.5 h-2.5 text-cyan-400" />
-            <span>Sponsor Channel #{zoneId}</span>
+            <span>Sponsor Channel #{numericTag}</span>
           </span>
           {rewardLabel && (
             <span className="px-2 py-0.5 rounded-full text-[8px] sm:text-[9px] font-black uppercase tracking-wider bg-amber-500/20 text-amber-300 border border-amber-500/30">
@@ -184,21 +214,21 @@ export const AdPlacement: React.FC<AdPlacementProps> = ({
         <div>
           <h4 className="text-xs sm:text-[13px] font-black text-white flex items-center gap-1.5">
             <Gift className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
-            <span className="truncate">{title || 'Featured Partner Showcase'}</span>
+            <span className="truncate">{title || `WPAdMngr Sponsor Zone ${numericTag}`}</span>
           </h4>
           <p className="text-[10px] text-slate-300 leading-tight mt-1 line-clamp-2">
-            {subtitle || 'Click to view partner offers, support high payouts & unlock special gaming perks.'}
+            {subtitle || 'Click to view verified sponsor offers, support high payouts & unlock special gaming perks.'}
           </p>
         </div>
 
         <button
           type="button"
           onClick={handleClick}
-          id={`ad-card-btn-${zoneId}`}
+          id={`ad-card-btn-${numericTag}`}
           className="w-full py-2 px-3 rounded-xl bg-gradient-to-r from-cyan-400 to-emerald-400 hover:from-cyan-300 hover:to-emerald-300 text-slate-950 font-black text-[11px] shadow-md hover:shadow-cyan-500/20 transition-all flex items-center justify-center gap-1.5 cursor-pointer active:scale-98 touch-manipulation"
         >
           <Play className="w-3 h-3 fill-current" />
-          <span>Launch Sponsor Offer</span>
+          <span>Launch Sponsor Offer ({numericTag})</span>
           <ExternalLink className="w-3 h-3" />
         </button>
       </div>
@@ -232,9 +262,10 @@ export const SponsorCarousel: React.FC<SponsorCarouselProps> = ({
     }
   };
 
-  const handleLaunch = (zoneId: 458074 | 458075) => {
+  const handleLaunch = (zoneId: AdZoneId) => {
     sound.playWin();
-    const zoneKey = zoneId === 458075 ? 'ZONE_458075' : 'ZONE_458074';
+    const numericTag = Number(zoneId) || 459144;
+    const zoneKey = numericTag === 459143 ? 'ZONE_459143' : numericTag === 458075 ? 'ZONE_458075' : numericTag === 458074 ? 'ZONE_458074' : 'ZONE_459144';
     triggerSponsorAd(zoneKey);
   };
 
@@ -293,7 +324,7 @@ export const SponsorCarousel: React.FC<SponsorCarouselProps> = ({
                   item.badgeColor || 'bg-cyan-500/20 text-cyan-300 border-cyan-500/30'
                 }`}>
                   <Sparkles className="w-2.5 h-2.5" />
-                  <span>SPONSOR CHANNEL #{item.zoneId}</span>
+                  <span>SPONSOR #{item.zoneId}</span>
                 </span>
                 {item.rewardLabel && (
                   <span className="px-2 py-0.5 rounded-full text-[8px] sm:text-[9px] font-black uppercase tracking-wider bg-amber-500/20 text-amber-300 border border-amber-500/30">
@@ -331,4 +362,5 @@ export const SponsorCarousel: React.FC<SponsorCarouselProps> = ({
     </div>
   );
 };
+
 

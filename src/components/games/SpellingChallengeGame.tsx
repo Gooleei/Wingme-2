@@ -3,6 +3,7 @@ import { PlayerStats } from '../../types';
 import { sound } from '../../utils/audio';
 import confetti from 'canvas-confetti';
 import { ArrowLeft, RotateCcw, Timer, Sparkles, Keyboard, CheckCircle2, Zap } from 'lucide-react';
+import { AdPlacement, SponsorCarousel } from '../AdPlacement';
 
 interface SpellingChallengeProps {
   onWin: (amount: number, description: string) => void;
@@ -260,6 +261,27 @@ export const SpellingChallengeGame: React.FC<SpellingChallengeProps> = ({
           </div>
         )}
       </div>
+
+      {/* Spelling Sponsor Zones */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
+        <AdPlacement
+          zoneId={459144}
+          variant="card"
+          title="Speed Spelling Sponsor (Zone 459144)"
+          subtitle="Explore sponsor partner to earn bonus typing perks and instant reward top-ups."
+          rewardLabel="ACTIVE #459144"
+        />
+        <AdPlacement
+          zoneId={459143}
+          variant="card"
+          title="Lexicon Partner (Zone 459143)"
+          subtitle="Verified sponsor network. Unlocks auto-correct shield and double streak payouts."
+          rewardLabel="PERK #459143"
+        />
+      </div>
+
+      {/* Slide Carousel */}
+      <SponsorCarousel title="Spelling Boost Sponsors" subtitle="Discover verified partners & increase vocabulary streak bonuses" />
     </div>
   );
 };

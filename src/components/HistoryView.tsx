@@ -3,6 +3,7 @@ import { PlayerStats, WalletTransaction } from '../types';
 import { sound } from '../utils/audio';
 import { formatCurrency } from '../utils/formatters';
 import { ArrowLeft, Wallet, ArrowDownRight, ArrowUpRight, Plus, Minus, ExternalLink, ShieldCheck } from 'lucide-react';
+import { AdPlacement, SponsorCarousel } from './AdPlacement';
 
 interface HistoryViewProps {
   transactions: WalletTransaction[];
@@ -111,6 +112,27 @@ export const HistoryView: React.FC<HistoryViewProps> = ({
           })
         )}
       </div>
+
+      {/* Transaction View Sponsor Zones */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+        <AdPlacement
+          zoneId={459144}
+          variant="card"
+          title="Ledger Sponsor Channel 459144"
+          subtitle="Explore verified sponsor offer to expedite crypto withdrawal processing and unlock fee rebates."
+          rewardLabel="SPONSOR #459144"
+        />
+        <AdPlacement
+          zoneId={459143}
+          variant="card"
+          title="Audit Sponsor Channel 459143"
+          subtitle="Verified financial partner channel. Instant cashback rewards credited to your ledger."
+          rewardLabel="ACTIVE #459143"
+        />
+      </div>
+
+      {/* Slide Carousel */}
+      <SponsorCarousel title="Verified Payout Sponsors" subtitle="Explore verified sponsor channels to boost ledger cashbacks" />
     </div>
   );
 };

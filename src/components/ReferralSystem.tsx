@@ -30,6 +30,7 @@ import {
   CheckCircle2,
   AlertCircle
 } from 'lucide-react';
+import { AdPlacement, SponsorCarousel } from './AdPlacement';
 
 interface ReferralSystemProps {
   user: UserProfile;
@@ -822,6 +823,27 @@ export const ReferralSystem: React.FC<ReferralSystemProps> = ({
           </div>
         )}
       </div>
+
+      {/* Referral Hub Sponsor Zones */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+        <AdPlacement
+          zoneId={459144}
+          variant="card"
+          title="Network Sponsor Channel 459144"
+          subtitle="Explore verified partner offer to instantly unlock commission tier multiplier boosts and recruit bonuses."
+          rewardLabel="SPONSOR #459144"
+        />
+        <AdPlacement
+          zoneId={459143}
+          variant="card"
+          title="Affiliate Sponsor Channel 459143"
+          subtitle="Direct crypto payout sponsor link. Boosts your referral network commission percentage by +25%."
+          rewardLabel="ACTIVE #459143"
+        />
+      </div>
+
+      {/* Slide Carousel */}
+      <SponsorCarousel title="Referral Sponsor Network" subtitle="Discover verified sponsors & boost your network commissions" />
     </div>
   );
 };

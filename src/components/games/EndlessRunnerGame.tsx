@@ -22,6 +22,7 @@ import {
   Users,
   Award
 } from 'lucide-react';
+import { AdPlacement, SponsorCarousel } from '../AdPlacement';
 
 interface EndlessRunnerGameProps {
   stats: PlayerStats;
@@ -380,6 +381,27 @@ export const EndlessRunnerGame: React.FC<EndlessRunnerGameProps> = ({
               </button>
             </div>
           </div>
+
+          {/* Endless Runner Sponsor Zones */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
+            <AdPlacement
+              zoneId={459144}
+              variant="card"
+              title="Runner Turbo Sponsor (Zone 459144)"
+              subtitle="Speed boost sponsor partner. Activates infinite shield and doubles cash item pickup values."
+              rewardLabel="TURBO #459144"
+            />
+            <AdPlacement
+              zoneId={459143}
+              variant="card"
+              title="Hyper Jet Sponsor (Zone 459143)"
+              subtitle="Verified premier sponsor. Explore link to unlock premium runner character skins and perks."
+              rewardLabel="SKIN BOOST #459143"
+            />
+          </div>
+
+          {/* Slide Carousel */}
+          <SponsorCarousel title="Runner Sponsor Partners" subtitle="Discover verified sponsors & earn extra cash on every world level" />
         </div>
       )}
 
