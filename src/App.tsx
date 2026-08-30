@@ -35,6 +35,7 @@ import { MineView } from './components/MineView';
 import { AuthModal } from './components/AuthModal';
 import { sound } from './utils/audio';
 import { setupGlobalAdClickListener } from './utils/adManager';
+import { UniversalTopAdBanner, UniversalBottomAdBanner } from './components/AdPlacement';
 import { 
   purgeLegacyReferralMocks, 
   capturePendingReferralFromUrl, 
@@ -351,25 +352,38 @@ export default function App() {
 
   // UNREGISTERED / LOGGED OUT VISITORS:
   // Access is strictly restricted to registered users only.
+  // All visitors receive top and bottom ad monetization banners without exemption.
   if (!user) {
     if (unauthView === 'LOGIN') {
       return (
-        <LoginPage 
-          onLogin={handleUserLogin} 
-          onBackToLanding={() => setUnauthView('LANDING')} 
-          initialTab={authInitialTab}
-        />
+        <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col justify-between">
+          <UniversalTopAdBanner />
+          <div className="flex-1">
+            <LoginPage 
+              onLogin={handleUserLogin} 
+              onBackToLanding={() => setUnauthView('LANDING')} 
+              initialTab={authInitialTab}
+            />
+          </div>
+          <UniversalBottomAdBanner />
+        </div>
       );
     }
 
     return (
-      <LandingView
-        onOpenAuth={(mode) => {
-          sound.playClick();
-          setAuthInitialTab(mode || 'REGISTER');
-          setUnauthView('LOGIN');
-        }}
-      />
+      <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col justify-between">
+        <UniversalTopAdBanner />
+        <div className="flex-1">
+          <LandingView
+            onOpenAuth={(mode) => {
+              sound.playClick();
+              setAuthInitialTab(mode || 'REGISTER');
+              setUnauthView('LOGIN');
+            }}
+          />
+        </div>
+        <UniversalBottomAdBanner />
+      </div>
     );
   }
 
@@ -387,6 +401,9 @@ export default function App() {
         onOpenWithdraw={() => setShowWithdrawModal(true)}
         onSignOut={handleSignOut}
       />
+
+      {/* Universal Top Ad Network Banner (Monetizes all authenticated views) */}
+      <UniversalTopAdBanner />
 
       {/* Main App Content Router */}
       <main className="flex-1 pb-24 sm:pb-28">

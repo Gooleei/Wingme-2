@@ -13,6 +13,7 @@ import {
 } from 'lucide-react';
 import { sound } from '../utils/audio';
 import { formatCurrency, formatPoints } from '../utils/formatters';
+import { UniversalBottomAdBanner } from './AdPlacement';
 
 interface HeaderNavbarProps {
   currentView: AppView;
@@ -148,8 +149,9 @@ export const HeaderNavbar: React.FC<HeaderNavbarProps> = ({
       {/* UNIVERSAL STICKY FOOTER NAVIGATION BAR (VISIBLE ON BOTH WEB AND MOBILE) */}
       <footer 
         id="universal-footer-nav"
-        className="fixed bottom-0 left-0 right-0 z-40 bg-slate-950/95 backdrop-blur-xl border-t border-slate-800/90 shadow-2xl safe-area-bottom py-1 sm:py-1.5 px-2"
+        className="fixed bottom-0 left-0 right-0 z-40 bg-slate-950/95 backdrop-blur-xl border-t border-slate-800/90 shadow-2xl safe-area-bottom px-2 pb-1"
       >
+        <UniversalBottomAdBanner className="border-b border-slate-800/50 mb-1" />
         <div className="max-w-4xl mx-auto flex items-center justify-between gap-1 sm:gap-2">
           
           {/* 1. Games button */}

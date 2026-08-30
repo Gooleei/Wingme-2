@@ -325,7 +325,21 @@ export const CatchNumbersGame: React.FC<CatchNumbersGameProps> = ({
       </div>
 
       {/* Catch Numbers Sponsor Zones */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 pt-2">
+        <AdPlacement
+          zoneId={459382}
+          variant="card"
+          title="Hyper Reflex Sponsor (Zone 459382)"
+          subtitle="Explore verified sponsor offer to activate slow-motion timer perks and +$0.40 prize multipliers."
+          rewardLabel="PERK #459382"
+        />
+        <AdPlacement
+          zoneId={459383}
+          variant="card"
+          title="Ultra Catcher Sponsor (Zone 459383)"
+          subtitle="Direct crypto payout partner. Click to trigger instant extra bonus rounds and VIP rewards."
+          rewardLabel="ACTIVE #459383"
+        />
         <AdPlacement
           zoneId={459144}
           variant="card"

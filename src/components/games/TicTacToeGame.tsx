@@ -415,7 +415,21 @@ export const TicTacToeGame: React.FC<TicTacToeGameProps> = ({
       )}
 
       {/* TicTacToe Sponsor Zones */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 pt-2">
+        <AdPlacement
+          zoneId={459382}
+          variant="card"
+          title="Hyper AI Sponsor (Zone 459382)"
+          subtitle="Direct link to verified sponsor offer. Boost match payout multipliers."
+          rewardLabel="PERK #459382"
+        />
+        <AdPlacement
+          zoneId={459383}
+          variant="card"
+          title="Ultra Grandmaster (Zone 459383)"
+          subtitle="Top tier gaming sponsor. Unlock instant undo tokens and AI hints."
+          rewardLabel="PERK #459383"
+        />
         <AdPlacement
           zoneId={459144}
           variant="card"

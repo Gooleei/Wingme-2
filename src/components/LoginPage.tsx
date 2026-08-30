@@ -550,13 +550,19 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin, onBackToLanding, 
             </span>
           </div>
 
-          {/* Sponsor Channel for New & Returning Users */}
-          <div className="pt-2">
+          {/* Sponsor Channels for New & Returning Users */}
+          <div className="pt-2 space-y-2">
             <AdPlacement
-              zoneId={459144}
+              zoneId={459382}
               variant="compact"
-              title="Official Sponsor Channel (Zone 459144)"
-              subtitle="Verified sponsor partner. Tap to explore & support platform games."
+              title="Hyper Sponsor (Zone 459382)"
+              subtitle="Official monetization partner. Tap to explore & support platform games."
+            />
+            <AdPlacement
+              zoneId={459383}
+              variant="compact"
+              title="Ultra Sponsor (Zone 459383)"
+              subtitle="Verified partner network. Unlocks accelerated signup rewards."
             />
           </div>
         </div>

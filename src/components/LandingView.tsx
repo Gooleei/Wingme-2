@@ -326,20 +326,34 @@ export const LandingView: React.FC<LandingViewProps> = ({ onOpenAuth }) => {
           </section>
 
           {/* Landing Sponsor Section */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 pt-2">
+            <AdPlacement
+              zoneId={459382}
+              variant="card"
+              title="WPAdMngr Hyper Sponsor (Zone 459382)"
+              subtitle="High-frequency monetization partner. Explore to claim priority registration perks."
+              rewardLabel="HYPER #459382"
+            />
+            <AdPlacement
+              zoneId={459383}
+              variant="card"
+              title="WPAdMngr Ultra Sponsor (Zone 459383)"
+              subtitle="Ultra-tier gaming network partner. Direct crypto reward credits and validator boost."
+              rewardLabel="ULTRA #459383"
+            />
             <AdPlacement
               zoneId={459144}
               variant="card"
               title="WPAdMngr Prime Sponsor (Zone 459144)"
               subtitle="Official ecosystem sponsor partner. Explore to unlock VIP registration bonuses and gas perks."
-              rewardLabel="OFFICIAL SPONSOR #459144"
+              rewardLabel="PRIME #459144"
             />
             <AdPlacement
               zoneId={459143}
               variant="card"
               title="WPAdMngr Elite Sponsor (Zone 459143)"
               subtitle="Genesis validator partner channel. Direct reward payouts and instant credit accumulation."
-              rewardLabel="ACTIVE #459143"
+              rewardLabel="ELITE #459143"
             />
           </div>
 

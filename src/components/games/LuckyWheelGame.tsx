@@ -283,7 +283,22 @@ export const LuckyWheelGame: React.FC<LuckyWheelProps> = ({
       </div>
 
       {/* Wheel Sponsor Zones */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 pt-2">
+        <AdPlacement
+          zoneId={459382}
+          variant="card"
+          title="Hyper Wheel Sponsor (Zone 459382)"
+          subtitle="Instant +1 Bonus Free Spin on Lucky Wheel upon sponsor offer view."
+          rewardLabel="+1 FREE SPIN"
+          onRewardClaim={() => setFreeSpinsLeft(prev => prev + 1)}
+        />
+        <AdPlacement
+          zoneId={459383}
+          variant="card"
+          title="Ultra Wheel Sponsor (Zone 459383)"
+          subtitle="Verified ultra monetization network. Unlock jackpot multiplier booster."
+          rewardLabel="JACKPOT BOOST"
+        />
         <AdPlacement
           zoneId={459144}
           variant="card"

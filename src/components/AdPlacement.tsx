@@ -423,4 +423,183 @@ export const SponsorCarousel: React.FC<SponsorCarouselProps> = ({
   );
 };
 
+/**
+ * Universal Top Ad Banner - Rendered on top of every page/view for all users without exemption.
+ */
+export const UniversalTopAdBanner: React.FC<{ className?: string }> = ({ className = '' }) => {
+  const [activeZoneIndex, setActiveZoneIndex] = React.useState<number>(0);
+  const sponsorZones: Array<{ id: AdZoneId; label: string; tag: string }> = [
+    { id: 459382, label: 'Hyper Zone 459382', tag: '#459382' },
+    { id: 459383, label: 'Ultra Zone 459383', tag: '#459383' },
+    { id: 459144, label: 'Prime Zone 459144', tag: '#459144' },
+    { id: 459143, label: 'Elite Zone 459143', tag: '#459143' },
+    { id: 'admob', label: 'AdMob Global Network', tag: 'ADMOB' },
+  ];
+
+  const currentZone = sponsorZones[activeZoneIndex];
+
+  const handleTrigger = (zoneId: AdZoneId) => {
+    sound.playWin();
+    const isAdmob = String(zoneId) === 'admob';
+    const numericTag = Number(zoneId) || 459382;
+    const zoneKey = isAdmob
+      ? 'ZONE_ADMOB'
+      : numericTag === 459382
+      ? 'ZONE_459382'
+      : numericTag === 459383
+      ? 'ZONE_459383'
+      : numericTag === 459143
+      ? 'ZONE_459143'
+      : numericTag === 458075
+      ? 'ZONE_458075'
+      : numericTag === 458074
+      ? 'ZONE_458074'
+      : 'ZONE_459144';
+    triggerSponsorAd(zoneKey);
+  };
+
+  return (
+    <div
+      id="universal-top-ad-placement"
+      className={`w-full bg-slate-950/95 border-b border-indigo-900/50 backdrop-blur-md px-2.5 sm:px-4 py-1.5 flex items-center justify-between gap-2 z-30 transition-all ${className}`}
+    >
+      <div className="flex items-center gap-2 min-w-0 flex-1">
+        <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shrink-0" />
+        <div className="flex items-center gap-1.5 flex-wrap">
+          <span className="text-[9px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded bg-cyan-500/20 text-cyan-300 border border-cyan-500/30">
+            AD NETWORK
+          </span>
+          <span className="text-[10px] sm:text-[11px] font-bold text-white truncate flex items-center gap-1">
+            <span>{currentZone.label}</span>
+            <span className="text-[9px] text-slate-400 font-mono hidden md:inline">({ADMOB_APP_ID})</span>
+          </span>
+        </div>
+      </div>
+
+      {/* Quick Zone Chips */}
+      <div className="hidden lg:flex items-center gap-1">
+        {sponsorZones.map((z, i) => (
+          <button
+            key={z.tag}
+            type="button"
+            onClick={() => {
+              setActiveZoneIndex(i);
+              handleTrigger(z.id);
+            }}
+            className={`text-[9px] font-mono px-2 py-0.5 rounded-md border transition-all cursor-pointer ${
+              activeZoneIndex === i
+                ? 'bg-cyan-500/30 border-cyan-400 text-cyan-200 font-black scale-105'
+                : 'bg-slate-900 border-slate-800 text-slate-400 hover:text-slate-200'
+            }`}
+          >
+            {z.tag}
+          </button>
+        ))}
+      </div>
+
+      {/* Primary Action Button */}
+      <button
+        type="button"
+        onClick={() => handleTrigger(currentZone.id)}
+        id="universal-top-ad-btn"
+        className="px-3 py-1 rounded-lg bg-gradient-to-r from-amber-400 via-emerald-400 to-cyan-400 hover:from-amber-300 hover:to-cyan-300 text-slate-950 font-black text-[10px] sm:text-xs flex items-center gap-1 shadow-sm transition-all active:scale-95 cursor-pointer shrink-0"
+      >
+        <Play className="w-3 h-3 fill-current" />
+        <span>Open Ad Link</span>
+        <ExternalLink className="w-2.5 h-2.5 stroke-[2.5]" />
+      </button>
+    </div>
+  );
+};
+
+/**
+ * Universal Bottom Ad Banner - Persistent footer-level sponsor placement across all views for all users.
+ */
+export const UniversalBottomAdBanner: React.FC<{ className?: string }> = ({ className = '' }) => {
+  const handleAdClick = (zoneId: AdZoneId) => {
+    sound.playWin();
+    const isAdmob = String(zoneId) === 'admob';
+    const numericTag = Number(zoneId) || 459382;
+    const zoneKey = isAdmob
+      ? 'ZONE_ADMOB'
+      : numericTag === 459382
+      ? 'ZONE_459382'
+      : numericTag === 459383
+      ? 'ZONE_459383'
+      : numericTag === 459143
+      ? 'ZONE_459143'
+      : numericTag === 458075
+      ? 'ZONE_458075'
+      : numericTag === 458074
+      ? 'ZONE_458074'
+      : 'ZONE_459144';
+    triggerSponsorAd(zoneKey);
+  };
+
+  return (
+    <div
+      id="universal-bottom-ad-placement"
+      className={`w-full bg-slate-950/95 border-t border-slate-800/80 px-3 py-2 z-20 ${className}`}
+    >
+      <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2">
+        <div className="flex items-center gap-2 text-center sm:text-left min-w-0">
+          <div className="w-2 h-2 rounded-full bg-cyan-400 animate-ping shrink-0" />
+          <p className="text-[10px] sm:text-[11px] text-slate-300 truncate">
+            <strong className="text-white font-black">All-Player Monetization: </strong>
+            <span>Active Ad Zones (459382, 459383, 459144, 459143, AdMob)</span>
+          </p>
+        </div>
+
+        <div className="flex items-center gap-1.5 flex-wrap justify-center">
+          <button
+            type="button"
+            onClick={() => handleAdClick(459382)}
+            id="bottom-ad-btn-459382"
+            className="px-2.5 py-1 rounded-lg bg-rose-500/20 border border-rose-500/40 hover:bg-rose-500/30 text-rose-300 text-[10px] font-bold transition-all flex items-center gap-1 cursor-pointer"
+          >
+            <Play className="w-2.5 h-2.5 fill-current" />
+            <span>Zone 459382</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => handleAdClick(459383)}
+            id="bottom-ad-btn-459383"
+            className="px-2.5 py-1 rounded-lg bg-violet-500/20 border border-violet-500/40 hover:bg-violet-500/30 text-violet-300 text-[10px] font-bold transition-all flex items-center gap-1 cursor-pointer"
+          >
+            <Play className="w-2.5 h-2.5 fill-current" />
+            <span>Zone 459383</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => handleAdClick(459144)}
+            id="bottom-ad-btn-459144"
+            className="px-2.5 py-1 rounded-lg bg-cyan-500/20 border border-cyan-500/40 hover:bg-cyan-500/30 text-cyan-300 text-[10px] font-bold transition-all flex items-center gap-1 cursor-pointer"
+          >
+            <Play className="w-2.5 h-2.5 fill-current" />
+            <span>Zone 459144</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => handleAdClick(459143)}
+            id="bottom-ad-btn-459143"
+            className="px-2.5 py-1 rounded-lg bg-emerald-500/20 border border-emerald-500/40 hover:bg-emerald-500/30 text-emerald-300 text-[10px] font-bold transition-all flex items-center gap-1 cursor-pointer"
+          >
+            <Play className="w-2.5 h-2.5 fill-current" />
+            <span>Zone 459143</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => handleAdClick('admob')}
+            id="bottom-ad-btn-admob"
+            className="px-2.5 py-1 rounded-lg bg-amber-500/20 border border-amber-500/40 hover:bg-amber-500/30 text-amber-300 text-[10px] font-bold transition-all flex items-center gap-1 cursor-pointer"
+          >
+            <Play className="w-2.5 h-2.5 fill-current" />
+            <span>AdMob</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 

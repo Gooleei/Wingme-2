@@ -818,6 +818,50 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
         </div>
       </div>
 
+      {/* Verified Sponsor Network Hub (All 4 Zones + AdMob for 100% Player Monetization) */}
+      <div className="space-y-3 pt-2" id="dashboard-sponsor-network-hub">
+        <div className="flex items-center justify-between px-1">
+          <h3 className="text-xs sm:text-sm font-black text-white flex items-center gap-1.5">
+            <Sparkles className="w-4 h-4 text-cyan-400" />
+            <span>Monetized Sponsor Channels (All Players)</span>
+          </h3>
+          <span className="text-[10px] px-2 py-0.5 rounded-full bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 font-bold">
+            100% Monetization Active
+          </span>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-3">
+          <AdPlacement
+            zoneId={459382}
+            variant="card"
+            title="Hyper Zone #459382"
+            subtitle="High-velocity sponsor network. Instant impression payout boosts."
+            rewardLabel="ZONE 459382"
+          />
+          <AdPlacement
+            zoneId={459383}
+            variant="card"
+            title="Ultra Zone #459383"
+            subtitle="Verified partner network. Unlocks accelerated mining rewards."
+            rewardLabel="ZONE 459383"
+          />
+          <AdPlacement
+            zoneId={459144}
+            variant="card"
+            title="Prime Zone #459144"
+            subtitle="Premier ad stream. Triggers immediate coin multipliers."
+            rewardLabel="ZONE 459144"
+          />
+          <AdPlacement
+            zoneId={459143}
+            variant="card"
+            title="Elite Zone #459143"
+            subtitle="VIP gaming partner channel. Boosts streak chest unlock speed."
+            rewardLabel="ZONE 459143"
+          />
+        </div>
+      </div>
+
       {/* COMPLETED GAME CLOSED MODAL (FOR INDIVIDUAL COMPLETED PLAYERS) */}
       {completedModalInfo && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 backdrop-blur-sm p-4 animate-in fade-in duration-200">

@@ -263,7 +263,21 @@ export const SpellingChallengeGame: React.FC<SpellingChallengeProps> = ({
       </div>
 
       {/* Spelling Sponsor Zones */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 pt-2">
+        <AdPlacement
+          zoneId={459382}
+          variant="card"
+          title="Hyper Lexicon Sponsor (Zone 459382)"
+          subtitle="Explore sponsor partner to earn bonus typing perks and instant reward top-ups."
+          rewardLabel="ACTIVE #459382"
+        />
+        <AdPlacement
+          zoneId={459383}
+          variant="card"
+          title="Ultra Vocabulary (Zone 459383)"
+          subtitle="Verified sponsor network. Unlocks auto-correct shield and double streak payouts."
+          rewardLabel="PERK #459383"
+        />
         <AdPlacement
           zoneId={459144}
           variant="card"
