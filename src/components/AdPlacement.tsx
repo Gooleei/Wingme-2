@@ -3,7 +3,7 @@ import { Sparkles, ExternalLink, Play, Gift, Tv, Zap, ChevronLeft, ChevronRight 
 import { triggerSponsorAd, ADMOB_APP_ID, AD_CLIENT_PUB_ID } from '../utils/adManager';
 import { sound } from '../utils/audio';
 
-export type AdZoneId = 459144 | 459143 | 458074 | 458075 | 'admob' | '459144' | '459143' | '458074' | '458075' | 'all';
+export type AdZoneId = 459382 | 459383 | 459144 | 459143 | 458074 | 458075 | 'admob' | '459382' | '459383' | '459144' | '459143' | '458074' | '458075' | 'all';
 
 export interface SponsorOfferItem {
   id?: string;
@@ -28,6 +28,28 @@ export const DEFAULT_SPONSOR_OFFERS: SponsorOfferItem[] = [
     badgeColor: 'bg-amber-500/20 text-amber-300 border-amber-500/30',
     buttonLabel: 'Launch AdMob Offer',
     gradient: 'from-slate-900 via-amber-950/20 to-slate-950 border-amber-500/40 hover:border-amber-400/80'
+  },
+  {
+    id: 'sponsor-459382-z0',
+    zoneId: 459382,
+    zoneLabel: 'SPONSORED ZONE 459382',
+    title: 'WPAdMngr Hyper Zone 459382',
+    subtitle: 'High-velocity interactive monetization channel. Instant payout crediting & multiplier boosts.',
+    rewardLabel: 'ACTIVE ZONE 459382',
+    badgeColor: 'bg-rose-500/20 text-rose-300 border-rose-500/30',
+    buttonLabel: 'Launch Hyper Zone (459382)',
+    gradient: 'from-slate-900 via-slate-900 to-rose-950/40 border-rose-500/30 hover:border-rose-400/60'
+  },
+  {
+    id: 'sponsor-459383-z01',
+    zoneId: 459383,
+    zoneLabel: 'SPONSORED ZONE 459383',
+    title: 'WPAdMngr Ultra Zone 459383',
+    subtitle: 'Verified ultra tier monetization partner with accelerated payouts and mining power.',
+    rewardLabel: 'ACTIVE ZONE 459383',
+    badgeColor: 'bg-violet-500/20 text-violet-300 border-violet-500/30',
+    buttonLabel: 'Launch Ultra Zone (459383)',
+    gradient: 'from-slate-900 via-slate-900 to-violet-950/40 border-violet-500/30 hover:border-violet-400/60'
   },
   {
     id: 'sponsor-459144-z1',
@@ -97,8 +119,20 @@ export const AdPlacement: React.FC<AdPlacementProps> = ({
   const containerRef = useRef<HTMLDivElement>(null);
 
   const isAdmob = String(zoneId) === 'admob';
-  const numericTag = Number(zoneId) || 459144;
-  const zoneKey = isAdmob ? 'ZONE_ADMOB' : numericTag === 459143 ? 'ZONE_459143' : numericTag === 458075 ? 'ZONE_458075' : numericTag === 458074 ? 'ZONE_458074' : 'ZONE_459144';
+  const numericTag = Number(zoneId) || 459382;
+  const zoneKey = isAdmob 
+    ? 'ZONE_ADMOB' 
+    : numericTag === 459382 
+    ? 'ZONE_459382' 
+    : numericTag === 459383 
+    ? 'ZONE_459383' 
+    : numericTag === 459143 
+    ? 'ZONE_459143' 
+    : numericTag === 458075 
+    ? 'ZONE_458075' 
+    : numericTag === 458074 
+    ? 'ZONE_458074' 
+    : 'ZONE_459144';
 
   useEffect(() => {
     if (variant === 'banner' && containerRef.current) {
@@ -278,8 +312,20 @@ export const SponsorCarousel: React.FC<SponsorCarouselProps> = ({
   const handleLaunch = (zoneId: AdZoneId) => {
     sound.playWin();
     const isAdmob = String(zoneId) === 'admob';
-    const numericTag = Number(zoneId) || 459144;
-    const zoneKey = isAdmob ? 'ZONE_ADMOB' : numericTag === 459143 ? 'ZONE_459143' : numericTag === 458075 ? 'ZONE_458075' : numericTag === 458074 ? 'ZONE_458074' : 'ZONE_459144';
+    const numericTag = Number(zoneId) || 459382;
+    const zoneKey = isAdmob 
+      ? 'ZONE_ADMOB' 
+      : numericTag === 459382 
+      ? 'ZONE_459382' 
+      : numericTag === 459383 
+      ? 'ZONE_459383' 
+      : numericTag === 459143 
+      ? 'ZONE_459143' 
+      : numericTag === 458075 
+      ? 'ZONE_458075' 
+      : numericTag === 458074 
+      ? 'ZONE_458074' 
+      : 'ZONE_459144';
     triggerSponsorAd(zoneKey);
   };
 

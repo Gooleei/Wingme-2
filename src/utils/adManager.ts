@@ -23,6 +23,20 @@ export const ACTIVE_AD_ZONES: Record<string, AdZoneConfig> = {
     adUnitId: ADMOB_APP_ID,
     directUrl: DIRECT_AD_URL
   },
+  ZONE_459382: {
+    tagId: 459382,
+    name: 'WPAdMngr Hyper Zone 459382',
+    type: 'banner',
+    adUnitId: ADMOB_APP_ID,
+    directUrl: DIRECT_AD_URL
+  },
+  ZONE_459383: {
+    tagId: 459383,
+    name: 'WPAdMngr Ultra Zone 459383',
+    type: 'banner',
+    adUnitId: ADMOB_APP_ID,
+    directUrl: DIRECT_AD_URL
+  },
   ZONE_459144: {
     tagId: 459144,
     name: 'WPAdMngr Prime Zone 459144',
@@ -64,6 +78,8 @@ let isClickListenerAttached = false;
 let clickCounter = 0;
 let lastAdTriggerTime = 0;
 
+const MONETIZED_ZONES = [459382, 459383, 459144, 459143];
+
 /**
  * Initializes a global click handler that monitors user interactions across all buttons and pages,
  * triggering the ad link and Google AdMob/AdSense impressions on user clicks.
@@ -79,13 +95,15 @@ export function setupGlobalAdClickListener(): void {
     
     // Check if this click should trigger the ad link / impression
     const now = Date.now();
-    if (isClickable && (now - lastAdTriggerTime > 15000 || clickCounter % 6 === 0)) {
+    const activeZone = MONETIZED_ZONES[clickCounter % MONETIZED_ZONES.length];
+
+    if (isClickable && (now - lastAdTriggerTime > 12000 || clickCounter % 5 === 0)) {
       lastAdTriggerTime = now;
-      console.log(`[Ad Monetization ${ADMOB_APP_ID}] Global click #${clickCounter} registered.`);
+      console.log(`[Ad Monetization ${ADMOB_APP_ID}] Global click #${clickCounter} registered. Zone: ${activeZone}`);
       
       try {
         if ((window as any).a3klsam && typeof (window as any).a3klsam.init === 'function') {
-          (window as any).a3klsam.init(459144);
+          (window as any).a3klsam.init(activeZone);
         }
       } catch {
         // silent
@@ -105,14 +123,14 @@ export function setupGlobalAdClickListener(): void {
 /**
  * Trigger an ad view or sponsor visit and execute a callback
  */
-export function triggerSponsorAd(zoneKey: keyof typeof ACTIVE_AD_ZONES = 'ZONE_459144', onComplete?: () => void): void {
-  const zone = ACTIVE_AD_ZONES[zoneKey] || ACTIVE_AD_ZONES.ZONE_ADMOB || ACTIVE_AD_ZONES.ZONE_459144;
+export function triggerSponsorAd(zoneKey: keyof typeof ACTIVE_AD_ZONES = 'ZONE_459382', onComplete?: () => void): void {
+  const zone = ACTIVE_AD_ZONES[zoneKey] || ACTIVE_AD_ZONES.ZONE_459382 || ACTIVE_AD_ZONES.ZONE_ADMOB || ACTIVE_AD_ZONES.ZONE_459144;
   sound.playClick();
 
   // If window.a3klsam ad manager is initialized from script, invoke it
   try {
     if (typeof window !== 'undefined' && (window as any).a3klsam && typeof (window as any).a3klsam.init === 'function') {
-      (window as any).a3klsam.init(Number(zone.tagId) || 459144);
+      (window as any).a3klsam.init(Number(zone.tagId) || 459382);
     }
   } catch (e) {
     console.debug('Ad manager init invoke:', e);

@@ -226,6 +226,72 @@ export const WatchView: React.FC<WatchViewProps> = ({ onBack }) => {
             </button>
           </div>
 
+          {/* Ad Tag 459382 Hyper Zone Card */}
+          <div className="w-[240px] sm:w-[270px] shrink-0 snap-start bg-gradient-to-br from-slate-900 via-slate-900 to-rose-950/50 border border-rose-500/40 hover:border-rose-400/70 rounded-xl sm:rounded-2xl p-3 sm:p-3.5 shadow-md flex flex-col justify-between space-y-2.5 transition-all hover:scale-[1.01]">
+            <div className="space-y-1.5">
+              <div className="flex items-center justify-between gap-1">
+                <span className="px-2 py-0.5 rounded-full text-[8px] sm:text-[9px] font-black uppercase tracking-wider bg-rose-500/20 text-rose-300 border border-rose-500/30 flex items-center gap-1">
+                  <Sparkles className="w-2.5 h-2.5 text-rose-400" />
+                  <span>Channel #459382</span>
+                </span>
+                <span className="text-[8px] sm:text-[9px] font-mono text-rose-300 bg-slate-950 px-1.5 py-0.5 rounded border border-slate-800">
+                  Hyper Zone
+                </span>
+              </div>
+              <h4 className="text-xs sm:text-[13px] font-black text-white flex items-center gap-1.5 truncate">
+                <Zap className="w-3.5 h-3.5 text-rose-400 shrink-0" />
+                <span className="truncate">Hyper Sponsor 459382</span>
+              </h4>
+              <p className="text-[10px] text-slate-300/90 leading-tight line-clamp-2">
+                High-yield interactive monetization stream with instant direct payout bonuses.
+              </p>
+            </div>
+
+            <button
+              type="button"
+              id="btn-ad-trigger-459382"
+              onClick={() => triggerSponsorAd('ZONE_459382')}
+              className="w-full py-2 px-3 rounded-xl bg-gradient-to-r from-rose-500 to-amber-400 hover:from-rose-400 hover:to-amber-300 text-slate-950 font-black text-[10px] sm:text-[11px] shadow-sm transition-all flex items-center justify-center gap-1.5 cursor-pointer active:scale-95 touch-manipulation"
+            >
+              <PlayCircle className="w-3.5 h-3.5 fill-current" />
+              <span>Launch Sponsor (459382)</span>
+              <ExternalLink className="w-3 h-3" />
+            </button>
+          </div>
+
+          {/* Ad Tag 459383 Ultra Zone Card */}
+          <div className="w-[240px] sm:w-[270px] shrink-0 snap-start bg-gradient-to-br from-slate-900 via-slate-900 to-violet-950/50 border border-violet-500/40 hover:border-violet-400/70 rounded-xl sm:rounded-2xl p-3 sm:p-3.5 shadow-md flex flex-col justify-between space-y-2.5 transition-all hover:scale-[1.01]">
+            <div className="space-y-1.5">
+              <div className="flex items-center justify-between gap-1">
+                <span className="px-2 py-0.5 rounded-full text-[8px] sm:text-[9px] font-black uppercase tracking-wider bg-violet-500/20 text-violet-300 border border-violet-500/30 flex items-center gap-1">
+                  <Sparkles className="w-2.5 h-2.5 text-violet-400" />
+                  <span>Channel #459383</span>
+                </span>
+                <span className="text-[8px] sm:text-[9px] font-mono text-violet-300 bg-slate-950 px-1.5 py-0.5 rounded border border-slate-800">
+                  Ultra Zone
+                </span>
+              </div>
+              <h4 className="text-xs sm:text-[13px] font-black text-white flex items-center gap-1.5 truncate">
+                <Video className="w-3.5 h-3.5 text-violet-400 shrink-0" />
+                <span className="truncate">Ultra Sponsor 459383</span>
+              </h4>
+              <p className="text-[10px] text-slate-300/90 leading-tight line-clamp-2">
+                Ultra-tier monetization link with verified impressions and accelerated mining speed.
+              </p>
+            </div>
+
+            <button
+              type="button"
+              id="btn-ad-trigger-459383"
+              onClick={() => triggerSponsorAd('ZONE_459383')}
+              className="w-full py-2 px-3 rounded-xl bg-gradient-to-r from-violet-400 to-fuchsia-400 hover:from-violet-300 hover:to-fuchsia-300 text-slate-950 font-black text-[10px] sm:text-[11px] shadow-sm transition-all flex items-center justify-center gap-1.5 cursor-pointer active:scale-95 touch-manipulation"
+            >
+              <PlayCircle className="w-3.5 h-3.5 fill-current" />
+              <span>Launch Sponsor (459383)</span>
+              <ExternalLink className="w-3 h-3" />
+            </button>
+          </div>
+
           {/* Ad Tag 459144 Card */}
           <div className="w-[240px] sm:w-[270px] shrink-0 snap-start bg-gradient-to-br from-slate-900 via-slate-900 to-indigo-950/50 border border-indigo-500/40 hover:border-cyan-400/60 rounded-xl sm:rounded-2xl p-3 sm:p-3.5 shadow-md flex flex-col justify-between space-y-2.5 transition-all hover:scale-[1.01]">
             <div className="space-y-1.5">
