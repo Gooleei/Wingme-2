@@ -193,6 +193,39 @@ export const WatchView: React.FC<WatchViewProps> = ({ onBack }) => {
           className="flex items-stretch gap-2.5 sm:gap-3 overflow-x-auto pb-2.5 pt-1 px-1 scroll-smooth snap-x snap-mandatory select-none"
           style={{ scrollbarWidth: 'thin' }}
         >
+          {/* Google AdMob App ID Card */}
+          <div className="w-[240px] sm:w-[270px] shrink-0 snap-start bg-gradient-to-br from-slate-900 via-amber-950/20 to-slate-950 border border-amber-500/40 hover:border-amber-400/80 rounded-xl sm:rounded-2xl p-3 sm:p-3.5 shadow-md flex flex-col justify-between space-y-2.5 transition-all hover:scale-[1.01]">
+            <div className="space-y-1.5">
+              <div className="flex items-center justify-between gap-1">
+                <span className="px-2 py-0.5 rounded-full text-[8px] sm:text-[9px] font-black uppercase tracking-wider bg-amber-500/20 text-amber-300 border border-amber-500/30 flex items-center gap-1">
+                  <Sparkles className="w-2.5 h-2.5 text-amber-400" />
+                  <span>Google AdMob</span>
+                </span>
+                <span className="text-[8px] sm:text-[9px] font-mono text-amber-300 bg-slate-950 px-1.5 py-0.5 rounded border border-slate-800">
+                  Global Net
+                </span>
+              </div>
+              <h4 className="text-xs sm:text-[13px] font-black text-white flex items-center gap-1.5 truncate">
+                <Gift className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+                <span className="truncate">AdMob ca-app-pub-1639291014874354~8469220759</span>
+              </h4>
+              <p className="text-[10px] text-slate-300/90 leading-tight line-clamp-2">
+                Official Google AdMob publisher channel. High-value impressions and accelerated user payouts.
+              </p>
+            </div>
+
+            <button
+              type="button"
+              id="btn-ad-trigger-admob"
+              onClick={() => triggerSponsorAd('ZONE_ADMOB')}
+              className="w-full py-2 px-3 rounded-xl bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-slate-950 font-black text-[10px] sm:text-[11px] shadow-sm transition-all flex items-center justify-center gap-1.5 cursor-pointer active:scale-95 touch-manipulation"
+            >
+              <PlayCircle className="w-3.5 h-3.5 fill-current" />
+              <span>Launch AdMob Offer</span>
+              <ExternalLink className="w-3 h-3" />
+            </button>
+          </div>
+
           {/* Ad Tag 459144 Card */}
           <div className="w-[240px] sm:w-[270px] shrink-0 snap-start bg-gradient-to-br from-slate-900 via-slate-900 to-indigo-950/50 border border-indigo-500/40 hover:border-cyan-400/60 rounded-xl sm:rounded-2xl p-3 sm:p-3.5 shadow-md flex flex-col justify-between space-y-2.5 transition-all hover:scale-[1.01]">
             <div className="space-y-1.5">

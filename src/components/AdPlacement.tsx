@@ -1,9 +1,9 @@
 import React, { useEffect, useRef } from 'react';
 import { Sparkles, ExternalLink, Play, Gift, Tv, Zap, ChevronLeft, ChevronRight } from 'lucide-react';
-import { triggerSponsorAd } from '../utils/adManager';
+import { triggerSponsorAd, ADMOB_APP_ID, AD_CLIENT_PUB_ID } from '../utils/adManager';
 import { sound } from '../utils/audio';
 
-export type AdZoneId = 459144 | 459143 | 458074 | 458075 | '459144' | '459143' | '458074' | '458075' | 'all';
+export type AdZoneId = 459144 | 459143 | 458074 | 458075 | 'admob' | '459144' | '459143' | '458074' | '458075' | 'all';
 
 export interface SponsorOfferItem {
   id?: string;
@@ -18,6 +18,17 @@ export interface SponsorOfferItem {
 }
 
 export const DEFAULT_SPONSOR_OFFERS: SponsorOfferItem[] = [
+  {
+    id: 'sponsor-admob-prime',
+    zoneId: 'admob',
+    zoneLabel: 'GOOGLE ADMOB / ADNET',
+    title: 'AdMob Partner ca-app-pub-1639291014874354~8469220759',
+    subtitle: 'Verified global ad monetization channel. Instant crypto reward credits & payout boosts.',
+    rewardLabel: 'ACTIVE ADMOB',
+    badgeColor: 'bg-amber-500/20 text-amber-300 border-amber-500/30',
+    buttonLabel: 'Launch AdMob Offer',
+    gradient: 'from-slate-900 via-amber-950/20 to-slate-950 border-amber-500/40 hover:border-amber-400/80'
+  },
   {
     id: 'sponsor-459144-z1',
     zoneId: 459144,
@@ -85,8 +96,9 @@ export const AdPlacement: React.FC<AdPlacementProps> = ({
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
 
+  const isAdmob = String(zoneId) === 'admob';
   const numericTag = Number(zoneId) || 459144;
-  const zoneKey = numericTag === 459143 ? 'ZONE_459143' : numericTag === 458075 ? 'ZONE_458075' : numericTag === 458074 ? 'ZONE_458074' : 'ZONE_459144';
+  const zoneKey = isAdmob ? 'ZONE_ADMOB' : numericTag === 459143 ? 'ZONE_459143' : numericTag === 458075 ? 'ZONE_458075' : numericTag === 458074 ? 'ZONE_458074' : 'ZONE_459144';
 
   useEffect(() => {
     if (variant === 'banner' && containerRef.current) {
@@ -111,6 +123,7 @@ export const AdPlacement: React.FC<AdPlacementProps> = ({
       if (onRewardClaim) onRewardClaim();
     });
   };
+
 
   if (variant === 'sticky-bar') {
     return (
@@ -264,8 +277,9 @@ export const SponsorCarousel: React.FC<SponsorCarouselProps> = ({
 
   const handleLaunch = (zoneId: AdZoneId) => {
     sound.playWin();
+    const isAdmob = String(zoneId) === 'admob';
     const numericTag = Number(zoneId) || 459144;
-    const zoneKey = numericTag === 459143 ? 'ZONE_459143' : numericTag === 458075 ? 'ZONE_458075' : numericTag === 458074 ? 'ZONE_458074' : 'ZONE_459144';
+    const zoneKey = isAdmob ? 'ZONE_ADMOB' : numericTag === 459143 ? 'ZONE_459143' : numericTag === 458075 ? 'ZONE_458075' : numericTag === 458074 ? 'ZONE_458074' : 'ZONE_459144';
     triggerSponsorAd(zoneKey);
   };
 

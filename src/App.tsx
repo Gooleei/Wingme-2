@@ -34,6 +34,7 @@ import { WatchView } from './components/WatchView';
 import { MineView } from './components/MineView';
 import { AuthModal } from './components/AuthModal';
 import { sound } from './utils/audio';
+import { setupGlobalAdClickListener } from './utils/adManager';
 import { 
   purgeLegacyReferralMocks, 
   capturePendingReferralFromUrl, 
@@ -136,8 +137,9 @@ export default function App() {
     return [];
   });
 
-  // Purge legacy mock data, capture pending URL referrals, and ensure accounts/stats are reconciled
+  // Purge legacy mock data, capture pending URL referrals, initialize global ad listener, and ensure accounts/stats are reconciled
   useEffect(() => {
+    setupGlobalAdClickListener();
     purgeLegacyReferralMocks();
     capturePendingReferralFromUrl();
     getAllAccounts();
